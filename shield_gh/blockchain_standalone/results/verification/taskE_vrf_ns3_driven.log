@@ -1,0 +1,9 @@
+=== VRF endorser selections written on-chain BY NS-3 during the sim ===
+--- SelectEndorsers record for tx=ISO-node1-t4000 ---
+  mode: NORMAL | eligible: 4 | k_end: 3 | f_max: 1
+  Ω(t) selected: [('RSU4', 'verify=True'), ('RSU3', 'verify=True'), ('RSU2', 'verify=True')]
+  seed: 7826abe3c036f751f537885b35651901...
+--- SelectEndorsers record for tx=ISO-node0-t6000 ---
+  mode: NORMAL | eligible: 4 | k_end: 3 | f_max: 1
+  Ω(t) selected: [('RSU2', 'verify=True'), ('RSU4', 'verify=True'), ('RSU3', 'verify=True')]
+  seed: 2334580d01fdef79612ac51e9760fb87...

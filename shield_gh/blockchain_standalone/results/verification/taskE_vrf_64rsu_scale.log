@@ -1,0 +1,9 @@
+=== VRF ENDORSER SELECTION @ 64-RSU SCALE (k_min=10, α_end=0.34) ===
+Fix for supervisor: 'have at least 10 endorsers, otherwise no consensus'
+
+ TX-64-A -> mode=NORMAL |E|=50 k_end=17 selected=17 f_max=16  Ω(t)=['RSU1', 'RSU13', 'RSU17', 'RSU20', 'RSU27', 'RSU32', 'RSU34', 'RSU37', 'RSU43', 'RSU47', 'RSU48', 'RSU5', 'RSU51', 'RSU54', 'RSU59', 'RSU61', 'RSU9']
+ TX-64-B -> mode=NORMAL |E|=50 k_end=17 selected=17 f_max=16  Ω(t)=['RSU24', 'RSU25', 'RSU29', 'RSU32', 'RSU34', 'RSU37', 'RSU4', 'RSU40', 'RSU45', 'RSU50', 'RSU53', 'RSU54', 'RSU58', 'RSU60', 'RSU61', 'RSU62', 'RSU9']
+ TX-64-C -> mode=NORMAL |E|=50 k_end=17 selected=17 f_max=16  Ω(t)=['RSU18', 'RSU19', 'RSU2', 'RSU23', 'RSU24', 'RSU25', 'RSU27', 'RSU29', 'RSU4', 'RSU40', 'RSU43', 'RSU47', 'RSU57', 'RSU58', 'RSU59', 'RSU61', 'RSU9']
+
+  ^ k_end=17 endorsers per tx (>= 10 floor, scales as ceil(|E|*0.34));
+    tolerates f_max=16 Byzantine RSUs; different Ω(t) set per transaction.

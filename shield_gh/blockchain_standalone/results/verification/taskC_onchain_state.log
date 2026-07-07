@@ -1,0 +1,9 @@
+=== On-chain records written BY NS-3 during the live sim ===
+--- node1 (grey-hole; NS-3 isolated @ sim t=4.00) ---
+{"nodeId":"node1","nFwd":0,"nRx":3,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":false}
+
+--- node0 (grey-hole; NS-3 isolated @ sim t=6.00) ---
+{"nodeId":"node0","nFwd":0,"nRx":12,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":false}
+
+--- GetAllNodes ---
+[{"nodeId":"node0","nFwd":0,"nRx":12,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":false},{"nodeId":"node1","nFwd":0,"nRx":3,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":false},{"nodeId":"node10","nFwd":100,"nRx":100,"reputation":1,"zkpValid":true,"suspicionLevel":0,"isolated":false},{"nodeId":"node2","nFwd":3,"nRx":3,"reputation":1,"zkpValid":true,"suspicionLevel":0,"isolated":false},{"nodeId":"node20","nFwd":40,"nRx":100,"reputation":0.4,"zkpValid":false,"suspicionLevel":1,"isolated":true},{"nodeId":"node3","nFwd":3,"nRx":3,"reputation":1,"zkpValid":true,"suspicionLevel":0,"isolated":false}]

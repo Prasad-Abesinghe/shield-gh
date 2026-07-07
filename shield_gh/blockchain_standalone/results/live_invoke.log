@@ -1,0 +1,198 @@
+14:03:28  INVOKE CommitForwardingRecord   endorsers=[org2,org3] rc=0 status:200
+14:03:28  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:28  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:28  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:28  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:31  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:31.857 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:31.857 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:31  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:31.857 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:31  INVOKE SelectEndorsers          endorsers=[org3,org1] rc=0 status:200
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:34.331 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:34.331 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:34.331 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:34  INVOKE SelectEndorsers          endorsers=[org3,org1] rc=0 status:200
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:34.331 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:34  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:34.331 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:34  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:37.900 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:37.900 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:37.900 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:37  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:37.900 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:40.595 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:40.595 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:40.595 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:40.595 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:40  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:43.413 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:43.413 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:43.413 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:43  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:43.413 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:46.306 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:46.306 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:46.305 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:46  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:46.306 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:48.723 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:48.723 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:48.723 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:48.725 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:51.297 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:54.225 +0530 0002 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:54.224 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:54.224 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:54.225 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:57.008 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:57.008 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:57.009 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:57.008 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:59.865 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:59.865 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:59.865 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:03:59  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 14:03:59.865 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+14:04:09  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=0 status:200
+14:04:11  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE CommitForwardingRecord   endorsers=[org2,org3] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:45  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:45  INVOKE RegisterRSU              endorsers=[org1,org2] rc=0 status:200
+15:32:45  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:48  INVOKE SelectEndorsers          endorsers=[org3,org1] rc=1 status:500
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:48.745 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:48  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:48.747 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:48  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:48.745 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:51  INVOKE SelectEndorsers          endorsers=[org3,org1] rc=1 status:500
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:51.446 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:51.446 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:51  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:51.446 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:51.446 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:51  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:51.446 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:54.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:54.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:54.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:54  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:54.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:57.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:57.392 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:57.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:32:57.393 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:32:57  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:00.201 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:00.201 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:00.201 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:00  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:00.201 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:03.135 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:03.135 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:03.135 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:03.135 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:03  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:05.969 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:05.969 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:05.970 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:05.969 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:05  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:08  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:08  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:08  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:08  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:08  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:08.671 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:11.441 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:11.442 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:11.442 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:11  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:11.442 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:13  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:13  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:13.992 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:13  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:13.992 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:13  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:13.992 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:14  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:13.993 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:14  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:14  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:14  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:17.019 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:17.019 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:17.019 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=1 [34m2026-07-01 15:33:17.019 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWai
+15:33:17  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+15:33:26  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=0 status:200
+15:33:28  INVOKE EvaluateIsolation        endorsers=[org3,org1] rc=0 status:200

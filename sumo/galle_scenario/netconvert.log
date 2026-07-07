@@ -1,0 +1,36 @@
+Warning: Discarding unusable type 'waterway.drain' (first occurrence for edge '23418542').
+Warning: Discarding unusable type 'waterway.river' (first occurrence for edge '374247428').
+Warning: Discarding unusable type 'waterway.stream' (first occurrence for edge '543189772').
+Warning: Removed a road without junctions: -108272787.
+Warning: Removed a road without junctions: -1096963958.
+Warning: Removed a road without junctions: -11528620.
+Warning: Removed a road without junctions: -1156489156.
+Warning: Removed a road without junctions: -186429944.
+Warning: Not joining junctions 102758211,4871662697 (parallel incoming -11528612#0,-495414226).
+Warning: Reducing junction cluster 10754865919,1242571056,1364675869,13903575064,3776184795 (parallel outgoing -692240871,1525386236).
+Warning: Not joining junctions 1242571069,1242571073 (parallel incoming 1429186328,1429186329).
+Warning: Reducing junction cluster 13137774380,3776184854,3776184870 (parallel incoming -374247422,374247423#1).
+Warning: Not joining junctions 253594036,253594039 (parallel incoming -23418534#1,23417676#1).
+Warning: Reducing junction cluster 31363768,3776200478,3776248210 (parallel incoming 374249099#2,374254561).
+Warning: Not joining junctions 3726391359,3776200460 (parallel incoming -374249098,368794775#5).
+Warning: Reducing junction cluster 3726391373,3776248125,3776248134 (parallel incoming -374254549,374254547#1).
+Warning: Not joining junctions 3776184886,3776184893 (parallel incoming -374247425#0,-374247426).
+Warning: Ambiguity in turnarounds computation at junction '3726382831'.
+Warning: Ambiguity in turnarounds computation at junction '3776248065'.
+Warning: Ambiguity in turnarounds computation at junction 'cluster_3776184872_3776184873'.
+Warning: Ambiguity in turnarounds computation at junction 'cluster_3776248211_50366954'.
+Warning: Found sharp turn with radius 8.71 at the start of edge '-23417672#1'.
+Warning: Found sharp turn with radius 7.51 at the end of edge '-368796142#1'.
+Warning: Found angle of 101.98 degrees at edge '-374249101#2', segment 2.
+Warning: Found angle of 124.66 degrees at edge '-556902793', segment 1.
+Warning: Found sharp turn with radius 7.51 at the start of edge '368796142#1'.
+Warning: Found angle of 101.98 degrees at edge '374249101#2', segment 1.
+Warning: Found angle of 124.66 degrees at edge '556902793', segment 0.
+Warning: Speed of straight connection '6743656#5_0->6743656#6_0' reduced by 7.21 due to turning radius of 27.20 (length=13.50, angle=44.29).
+Warning: Speed of straight connection '-6743656#6_0->-6743656#5_0' reduced by 7.64 due to turning radius of 25.30 (length=12.52, angle=44.29).
+Warning: Speed of straight connection '-6743656#1_0->-6743656#0_0' reduced by 6.28 due to turning radius of 31.49 (length=14.50, angle=42.07).
+Warning: Intersecting left turns at junction 'cluster_13136022713_13136022714' from lane '1428967154#0_0' and lane '-1428967154#2_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_3726391373_3776248125' from lane '374254547#1_0' and lane '-8625179#1_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_4871661004_4871661006' from lane '495414197#0_0' and lane '-495414196#1_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_5174220989_5174220990' from lane '-533314374_0' and lane '-19328195#9_0' (increase junction radius to avoid this).
+Warning: 19 total messages of type: Removed a road without junctions: %.

@@ -1,0 +1,41 @@
+==========================================================================
+  SHIELD-GH Task 05 — Cryptographic Mitigation Evidence Transcript
+==========================================================================
+Backend               : liboqs
+Quantum-resistant     : True
+KEM  (Kyber)          : {512: 'Kyber512', 768: 'Kyber768', 1024: 'Kyber1024'}
+Signature (Dilithium) : ML-DSA-44
+liboqs version        : 0.15.0
+
+[SETUP] 5 RSUs, 1 controller, DKG-shared PQC-LKH root, N=8 tree
+  DKG (t=3): root authorisation secret reconstructable from 3 shares: True
+  PQC-LKH built: N=8, depth=3, group key |K_grp|=32B sha256=30b2ca8bbf8db58d
+
+--------------------------------------------------------------------------
+  ATTACKER PATH: V3 received 200 pkts, actually forwarded ~40, but
+  fabricates a commitment to 195 (to look honest).
+--------------------------------------------------------------------------
+(1) ZKP.Verify(C3, pi3)         : cryptographically VALID
+(2) RSU cross-ref |195-41|=154 > eps=5 -> INCONSISTENT
+    => Pi_ZKP(V3) = FAIL  (Eq. zkp_state / rsu_crossref)
+(3) DEBSC: (1-R)= 0.82 > theta_R=0.5  AND  Pi in {FAIL,ABSENT} -> Isolate(V3) = True  (Eq. debsc)
+(4) Threshold (3-of-5): signers=[0, 1, 4] valid=3 -> quorum b=1 (Eq. 3.31/3.32/3.33)
+(5) Dilithium FlowMod: verify->install=True ; replay-blocked=True  (Eq. 3.27/3.28)
+(6) PQC-LKH re-key: refreshed path [4, 1, 0], kyber_ops=3=ceil(log2 8)=3
+    new group key sha256=66c20ee3cbd5548f (rotated: True)
+    remaining vehicle derives K_grp'      : OK
+    ISOLATED V3 (stale sk) derives K_grp' : False (must be False -> cryptographically excluded)
+    active vehicles after re-key          : [1, 2, 4, 5, 6, 7, 8]
+    efficiency: naive=6 ops (O(N)) vs PQC-LKH=3 ops (O(log N)), speedup×2.00
+
+--------------------------------------------------------------------------
+  NEGATIVE CONTROL: V5 legitimately lost packets to mobility but kept
+  a VALID forwarding proof consistent with RSU observation.
+--------------------------------------------------------------------------
+    Pi_ZKP(V5) = PASS ; DEBSC Isolate(V5) = False -> NO false isolation (Eq. debsc)
+    forged-controller FlowMod on V5 installed = False (must be False)
+
+==========================================================================
+  RESULT: attacker V3 detected→isolated→re-keyed-out; honest V5 spared;
+          forged controller command rejected.  ALL CHECKS PASSED.
+==========================================================================

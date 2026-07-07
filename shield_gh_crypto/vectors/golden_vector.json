@@ -1,0 +1,45 @@
+{
+  "backend": {
+    "backend": "liboqs",
+    "quantum_resistant": true,
+    "dilithium_mechanism": "ML-DSA-44",
+    "kyber_mechanisms": {
+      "512": "Kyber512",
+      "768": "Kyber768",
+      "1024": "Kyber1024"
+    },
+    "liboqs_version": "0.15.0"
+  },
+  "dkg_root_pubkey": "0xc02f597014e69532035a2ffe766d54ac55d0dd81d7b62d90e30fc748e0320572",
+  "lkh": {
+    "N": 8,
+    "depth": 3,
+    "K_grp_sha16": "30b2ca8bbf8db58d",
+    "c_root_len": 1088
+  },
+  "attacker_V3": {
+    "zkp_state": "FAIL",
+    "isolated": true,
+    "quorum": true,
+    "flowmod_installed": true,
+    "replay_blocked": true,
+    "K_grp_rotated": true,
+    "V3_excluded": true,
+    "kyber_ops": 3,
+    "speedup": 2.0,
+    "active_after": [
+      1,
+      2,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "honest_V5": {
+    "zkp_state": "PASS",
+    "isolated": false
+  },
+  "forged_flowmod_rejected": true
+}

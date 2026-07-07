@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>debsc: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">debsc/debsc.go (71.6%)</option>
+				
+				<option value="file1">debsc/endorser_vrf.go (84.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// ============================================================
+// SHIELD-GH DEBSC Smart Contract — Hyperledger Fabric Chaincode
+// Implements: Eq. 3.19 (dual-evidence isolation gate)
+//             Eq. 3.18 (blockchain reputation Ri)
+//             Eq. 3.13 (suspicion level Λi)
+//             Eq. 3.29/3.30 (ZKP forwarding proof result anchoring)
+// ============================================================
+package main
+
+import (
+        "encoding/json"
+        "fmt"
+
+        "github.com/hyperledger/fabric-contract-api-go/contractapi"
+)
+
+// DEBSCContract is the Dual-Evidence Blockchain Smart Contract.
+type DEBSCContract struct {
+        contractapi.Contract
+}
+
+// NodeRecord is the on-ledger trust record for one vehicle.
+type NodeRecord struct {
+        NodeID       string  `json:"nodeId"`
+        NFwd         int     `json:"nFwd"`         // packets forwarded (nᵢᶠʷᵈ)
+        NRx          int     `json:"nRx"`          // packets received  (nᵢʳˣ)
+        Reputation   float64 `json:"reputation"`   // Ri(t) — Eq. 3.18
+        ZKPValid     bool    `json:"zkpValid"`     // Π_ZKP result — Eq. 3.30
+        SuspicionLvl int     `json:"suspicionLevel"` // Λi(t) — Eq. 3.13
+        Isolated     bool    `json:"isolated"`
+}
+
+// InitLedger seeds a few example nodes (optional, for demo evidence).
+func (c *DEBSCContract) InitLedger(ctx contractapi.TransactionContextInterface) error <span class="cov8" title="1">{
+        seed := []NodeRecord{
+                {NodeID: "node1", NFwd: 100, NRx: 100, Reputation: 1.0, ZKPValid: true, SuspicionLvl: 0, Isolated: false},
+                {NodeID: "node2", NFwd: 98, NRx: 100, Reputation: 0.98, ZKPValid: true, SuspicionLvl: 0, Isolated: false},
+        }
+        for _, n := range seed </span><span class="cov8" title="1">{
+                b, _ := json.Marshal(n)
+                if err := ctx.GetStub().PutState(n.NodeID, b); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to seed %s: %v", n.NodeID, err)
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// CommitForwardingRecord appends a vehicle's forwarding stats and recomputes
+// reputation Ri (Eq. 3.18) and ZKP validity (Eq. 3.30). The append-only ledger
+// makes this evidence tamper-proof — a grey hole cannot rewrite past records.
+func (c *DEBSCContract) CommitForwardingRecord(ctx contractapi.TransactionContextInterface,
+        nodeID string, nFwd int, nRx int) error <span class="cov8" title="1">{
+
+        rec := NodeRecord{NodeID: nodeID, NFwd: nFwd, NRx: nRx}
+
+        // Append-only trust: once DEBSC has isolated a node (Eq. 3.19), a later
+        // forwarding record must NOT silently clear that decision. Preserve any
+        // existing isolated=true flag so isolation is monotonic on the ledger.
+        if prev, err := ctx.GetStub().GetState(nodeID); err == nil &amp;&amp; prev != nil </span><span class="cov0" title="0">{
+                var old NodeRecord
+                if json.Unmarshal(prev, &amp;old) == nil &amp;&amp; old.Isolated </span><span class="cov0" title="0">{
+                        rec.Isolated = true
+                }</span>
+        }
+
+        // Eq. 3.18: reputation Ri = forwarded / received (Bayesian-style, simplified)
+        <span class="cov8" title="1">if nRx &gt; 0 </span><span class="cov8" title="1">{
+                rec.Reputation = float64(nFwd) / float64(nRx)
+        }</span> else<span class="cov8" title="1"> {
+                rec.Reputation = 1.0
+        }</span>
+
+        // Eq. 3.30: ZKP forwarding proof — an honest node's committed nFwd matches
+        // the observable received count; a grey hole that dropped packets cannot
+        // produce a valid proof (nFwd &lt; nRx).
+        <span class="cov8" title="1">rec.ZKPValid = (nFwd == nRx)
+
+        // Eq. 3.13: suspicion level increments when reputation deficit is high.
+        if (1.0 - rec.Reputation) &gt; 0.4 </span><span class="cov8" title="1">{
+                rec.SuspicionLvl = 1
+        }</span>
+
+        <span class="cov8" title="1">b, err := json.Marshal(rec)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return ctx.GetStub().PutState(nodeID, b)</span>
+}
+
+// EvaluateIsolation implements Eq. 3.19 — the DEBSC dual-evidence gate:
+//   Isolate(vi) = 1[(1 − Ri) &gt; θR  AND  Π_ZKP(vi) == FAIL]
+// BOTH the statistical gate (low reputation) and the cryptographic gate
+// (failed ZKP proof) must fire. This prevents isolating an honest but
+// mobile vehicle (statistical gate fires, but ZKP still valid).
+func (c *DEBSCContract) EvaluateIsolation(ctx contractapi.TransactionContextInterface,
+        nodeID string, thetaR float64) (string, error) <span class="cov8" title="1">{
+
+        b, err := ctx.GetStub().GetState(nodeID)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("ledger read failed: %v", err)
+        }</span>
+        <span class="cov8" title="1">if b == nil </span><span class="cov8" title="1">{
+                return fmt.Sprintf("MONITOR node %s: no record on ledger", nodeID), nil
+        }</span>
+
+        <span class="cov8" title="1">var rec NodeRecord
+        if err := json.Unmarshal(b, &amp;rec); err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">statisticalGate := (1.0 - rec.Reputation) &gt; thetaR // (1 − Ri) &gt; θR
+        cryptoGate := !rec.ZKPValid                        // Π_ZKP == FAIL
+
+        if statisticalGate &amp;&amp; cryptoGate </span><span class="cov8" title="1">{
+                rec.Isolated = true
+                updated, _ := json.Marshal(rec)
+                if err := ctx.GetStub().PutState(nodeID, updated); err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+                <span class="cov8" title="1">return fmt.Sprintf(
+                        "ISOLATE node %s | Reputation=%.3f (1-Ri=%.3f &gt; θR=%.2f) | ZKP=FAILED | Eq.3.19 dual-gate FIRED",
+                        nodeID, rec.Reputation, 1.0-rec.Reputation, thetaR), nil</span>
+        }
+
+        <span class="cov8" title="1">return fmt.Sprintf(
+                "MONITOR node %s | Reputation=%.3f | statGate=%v zkpFailed=%v | Eq.3.19 NOT satisfied",
+                nodeID, rec.Reputation, statisticalGate, cryptoGate), nil</span>
+}
+
+// ReadNode returns a node's current on-ledger record (for evidence queries).
+func (c *DEBSCContract) ReadNode(ctx contractapi.TransactionContextInterface,
+        nodeID string) (*NodeRecord, error) <span class="cov8" title="1">{
+        b, err := ctx.GetStub().GetState(nodeID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("ledger read failed: %v", err)
+        }</span>
+        <span class="cov8" title="1">if b == nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("node %s does not exist on ledger", nodeID)
+        }</span>
+        <span class="cov8" title="1">var rec NodeRecord
+        if err := json.Unmarshal(b, &amp;rec); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;rec, nil</span>
+}
+
+// GetAllNodes returns every node record (for the evidence dashboard / screenshots).
+func (c *DEBSCContract) GetAllNodes(ctx contractapi.TransactionContextInterface) ([]*NodeRecord, error) <span class="cov8" title="1">{
+        iter, err := ctx.GetStub().GetStateByRange("", "")
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer iter.Close()
+
+        var out []*NodeRecord
+        for iter.HasNext() </span><span class="cov8" title="1">{
+                kv, err := iter.Next()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">var rec NodeRecord
+                if err := json.Unmarshal(kv.Value, &amp;rec); err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov8" title="1">out = append(out, &amp;rec)</span>
+        }
+        <span class="cov8" title="1">return out, nil</span>
+}
+
+func main() <span class="cov0" title="0">{
+        cc, err := contractapi.NewChaincode(&amp;DEBSCContract{})
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error creating DEBSC chaincode: %v\n", err)
+                return
+        }</span>
+        <span class="cov0" title="0">if err := cc.Start(); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Error starting DEBSC chaincode: %v\n", err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// ============================================================
+// SHIELD-GH — VRF-Based Dynamic Endorser Selection (chaincode level)
+// Implements Supervisor Revision Block 15, Section "VRF-Based Dynamic
+// Endorser Selection":
+//   Eq.(endorser_pool)   E(t)  — trust+observation eligibility filter
+//   Eq.(vrf_seed)        s_tx  — per-tx seed bound to immutable chain state
+//   Eq.(vrf_eval)        (β_j, π_j) = VRF(sk_j, s_tx)
+//   Eq.(vrf_verify)      b = VRF.Verify(pk_j, s_tx, β_j, π_j)
+//   Eq.(endorser_select) Ω(t)  = top-k_end by β ascending, proof-verified
+//   Eq.(kend)            k_end = max(k_min, ceil(|E|·α_end))
+//   Eq.(endorser_mode)   NORMAL / RELAXED / DEFERRED / EMERGENCY bypass
+//
+// The VRF here is a SHA-256-based verifiable surrogate (no external crypto
+// libs): a keyed hash whose "proof" is recomputable from the public key, so
+// VRF.Verify is a real check yet builds offline in the vendored Fabric env.
+// Selection runs entirely at the CHAINCODE level over the on-ledger RSU pool,
+// per the supervisor's clarification ("statically allocate all RSUs as peers,
+// then apply dynamic endorser selection at the chaincode level").
+// ============================================================
+package main
+
+import (
+        "crypto/sha256"
+        "encoding/hex"
+        "encoding/json"
+        "fmt"
+        "math/big"
+        "sort"
+        "strconv"
+
+        "github.com/hyperledger/fabric-contract-api-go/contractapi"
+)
+
+// ── Selection parameters (deployment-calibrated, see Eq.(kend)) ───────────────
+const (
+        thetaRSU  = 0.5  // θ_RSU: min trust for endorser candidacy  (Eq.endorser_pool)
+        nMin      = 3    // N_min: min blockchain-recorded interactions |H_j|
+        kMin      = 3    // k_min: hard floor for endorser count       (Eq.kend)
+        alphaEnd  = 0.34 // α_end ∈ (1/3, 1]: fraction of eligible pool (Eq.kend)
+)
+
+// RSURecord is the on-ledger record for one RSU endorser. Each RSU is a static
+// network peer; its trust score is maintained on-chain by the same Bayesian
+// model applied to vehicles (Eq. trust_update).
+type RSURecord struct {
+        RSUID      string  `json:"rsuId"`
+        PubKey     string  `json:"pubKey"`     // pk_j — public key (hex); VRF.Verify uses it
+        Trust      float64 `json:"trust"`      // T_rj(t) — on-ledger trust score
+        NumInter   int     `json:"numInter"`   // |H_j| — recorded interactions
+        Probation  bool    `json:"probation"`  // true = excluded from pool
+}
+
+// EndorserSelection is the returned, auditable result of one selection round.
+type EndorserSelection struct {
+        TxID        string       `json:"txId"`
+        Seed        string       `json:"seed"`        // s_tx (Eq.vrf_seed)
+        Mode        string       `json:"mode"`        // NORMAL/RELAXED/DEFERRED/EMERGENCY
+        EligibleN   int          `json:"eligibleN"`   // |E(t)|
+        KEnd        int          `json:"kEnd"`        // k_end (Eq.kend)
+        FMax        int          `json:"fMax"`        // f_max = floor((|E|-1)/3)
+        Selected    []VRFEndorser `json:"selected"`   // Ω(t) — the chosen endorsers
+        Note        string       `json:"note"`
+}
+
+// VRFEndorser is one selected RSU with its verifiable VRF output + proof.
+type VRFEndorser struct {
+        RSUID  string `json:"rsuId"`
+        Beta   string `json:"beta"`   // β_j ∈ {0,1}^256 (hex) — VRF output (Eq.vrf_eval)
+        Proof  string `json:"proof"`  // π_j^VRF — verifiable proof
+        Verify bool   `json:"verify"` // b = VRF.Verify(...) (Eq.vrf_verify)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RegisterRSU — statically allocate an RSU as a network peer/endorser candidate.
+// (pubKey is the RSU's Dilithium public key in the full scheme; here any hex id.)
+func (c *DEBSCContract) RegisterRSU(ctx contractapi.TransactionContextInterface,
+        rsuID, pubKey string, trust float64, numInter int) error <span class="cov8" title="1">{
+        r := RSURecord{RSUID: rsuID, PubKey: pubKey, Trust: trust,
+                NumInter: numInter, Probation: false}
+        b, _ := json.Marshal(r)
+        return ctx.GetStub().PutState("RSU_"+rsuID, b)
+}</span>
+
+// ── Eq.(vrf_eval)/(vrf_verify): SHA-256 verifiable VRF surrogate ──────────────
+// β_j = H(pk_j || s_tx || "beta");  π_j = H(pk_j || s_tx || "proof").
+// VRF.Verify recomputes both from the PUBLIC key + seed, so any party can
+// confirm β_j was derived correctly without the secret key — the essential VRF
+// property. (Production: CRYSTALS-Dilithium VRF; interface identical.)
+func vrfEval(pubKey, seed string) (beta, proof string) <span class="cov8" title="1">{
+        hb := sha256.Sum256([]byte(pubKey + "|" + seed + "|beta"))
+        hp := sha256.Sum256([]byte(pubKey + "|" + seed + "|proof"))
+        return hex.EncodeToString(hb[:]), hex.EncodeToString(hp[:])
+}</span>
+
+func vrfVerify(pubKey, seed, beta, proof string) bool <span class="cov8" title="1">{
+        b, p := vrfEval(pubKey, seed)
+        return b == beta &amp;&amp; p == proof
+}</span>
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SelectEndorsers — the full 5-step VRF endorser selection at chaincode level.
+// txID identifies the transaction; the seed (Eq.vrf_seed) binds tx_id, block
+// height, timestamp and the previous-block hash so no party can predict it.
+func (c *DEBSCContract) SelectEndorsers(ctx contractapi.TransactionContextInterface,
+        txID string) (*EndorserSelection, error) <span class="cov8" title="1">{
+
+        // ── Step 1 — Eligible Endorser Pool E(t) (Eq.endorser_pool) ──────────────
+        // E(t) = { RSU_j : T_rj(t) ≥ θ_RSU  ∧  |H_j| ≥ N_min  ∧  ¬probation }
+        all, err := c.getAllRSUs(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var eligible []RSURecord
+        var bestGlobal *RSURecord // highest-trust RSU regardless of threshold (EMERGENCY)
+        for i := range all </span><span class="cov8" title="1">{
+                r := all[i]
+                if bestGlobal == nil || r.Trust &gt; bestGlobal.Trust </span><span class="cov8" title="1">{
+                        bestGlobal = &amp;all[i]
+                }</span>
+                <span class="cov8" title="1">if r.Trust &gt;= thetaRSU &amp;&amp; r.NumInter &gt;= nMin &amp;&amp; !r.Probation </span><span class="cov8" title="1">{
+                        eligible = append(eligible, r)
+                }</span>
+        }
+
+        // ── Step 2 — Per-transaction VRF seed s_tx (Eq.vrf_seed) ─────────────────
+        // s_tx = Hash(tx_id || block_height || t || C_prev)
+        // Bind to immutable chain state via the tx's own committed metadata.
+        <span class="cov8" title="1">ts, _ := ctx.GetStub().GetTxTimestamp()
+        txStamp := ctx.GetStub().GetTxID()
+        tSec := int64(0)
+        if ts != nil </span><span class="cov8" title="1">{
+                tSec = ts.Seconds
+        }</span>
+        // C_prev / block_height surrogate: the ordering-service tx id is unknown to
+        // callers ahead of time and fixed once ordered — a chain-bound nonce.
+        <span class="cov8" title="1">seedInput := txID + "|" + txStamp + "|" + strconv.FormatInt(tSec, 10)
+        sh := sha256.Sum256([]byte(seedInput))
+        seed := hex.EncodeToString(sh[:])
+
+        // ── Step 4 (compute first) — k_end and f_max (Eq.kend) ───────────────────
+        // k_end = max(k_min, ceil(|E|·α_end));  f_max = floor((|E|-1)/3)
+        eligN := len(eligible)
+        kEnd := kMin
+        if byFrac := ceilInt(float64(eligN) * alphaEnd); byFrac &gt; kEnd </span><span class="cov0" title="0">{
+                kEnd = byFrac
+        }</span>
+        <span class="cov8" title="1">fMax := 0
+        if eligN &gt; 0 </span><span class="cov8" title="1">{
+                fMax = (eligN - 1) / 3
+        }</span>
+
+        <span class="cov8" title="1">sel := &amp;EndorserSelection{TxID: txID, Seed: seed, EligibleN: eligN,
+                KEnd: kEnd, FMax: fMax}
+
+        // ── Step 5 — Bypass mode (Eq.endorser_mode) ──────────────────────────────
+        switch </span>{
+        case eligN &gt;= kEnd:<span class="cov8" title="1">
+                sel.Mode = "NORMAL"</span>
+        case eligN &gt;= kMin:<span class="cov0" title="0">
+                sel.Mode = "RELAXED"</span>
+        case eligN &gt; 0:<span class="cov8" title="1">
+                sel.Mode = "DEFERRED"</span>
+        default:<span class="cov8" title="1">
+                sel.Mode = "EMERGENCY"</span>
+        }
+
+        // ── EMERGENCY: no eligible RSU — use globally-highest-trust RSU as the
+        // single emergency endorser and flag a network-wide trust audit. ─────────
+        <span class="cov8" title="1">if sel.Mode == "EMERGENCY" </span><span class="cov8" title="1">{
+                if bestGlobal == nil </span><span class="cov0" title="0">{
+                        sel.Note = "no RSUs registered; isolation deferred"
+                        return sel, c.putSelection(ctx, sel)
+                }</span>
+                <span class="cov8" title="1">beta, proof := vrfEval(bestGlobal.PubKey, seed)
+                sel.Selected = []VRFEndorser{{RSUID: bestGlobal.RSUID, Beta: beta,
+                        Proof: proof, Verify: vrfVerify(bestGlobal.PubKey, seed, beta, proof)}}
+                sel.Note = "EMERGENCY: single highest-trust endorser; network-wide RSU trust audit triggered"
+                return sel, c.putSelection(ctx, sel)</span>
+        }
+
+        // ── Steps 3 — VRF eval + rank + verify (Eq.vrf_eval/verify/endorser_select) ─
+        // (Runs for NORMAL, RELAXED and DEFERRED — all select from the eligible pool
+        //  via the VRF; the MODE governs how the verdict is treated downstream.)
+        // Each eligible RSU evaluates the VRF on the published seed; rank by β
+        // ascending; take top-k_end with verified proofs.
+        <span class="cov8" title="1">type scored struct {
+                r     RSURecord
+                beta  string
+                proof string
+                bi    *big.Int
+        }
+        var pool []scored
+        for _, r := range eligible </span><span class="cov8" title="1">{
+                beta, proof := vrfEval(r.PubKey, seed)
+                bi := new(big.Int)
+                bi.SetString(beta, 16)
+                pool = append(pool, scored{r, beta, proof, bi})
+        }</span>
+        <span class="cov8" title="1">sort.Slice(pool, func(i, j int) bool </span><span class="cov8" title="1">{ return pool[i].bi.Cmp(pool[j].bi) &lt; 0 }</span>)
+
+        // RELAXED: all eligible RSUs endorse (reduced-confidence). NORMAL: top-k_end.
+        <span class="cov8" title="1">take := kEnd
+        if sel.Mode == "RELAXED" || take &gt; len(pool) </span><span class="cov8" title="1">{
+                take = len(pool)
+        }</span>
+        <span class="cov8" title="1">for i := 0; i &lt; take; i++ </span><span class="cov8" title="1">{
+                p := pool[i]
+                sel.Selected = append(sel.Selected, VRFEndorser{
+                        RSUID: p.r.RSUID, Beta: p.beta, Proof: p.proof,
+                        Verify: vrfVerify(p.r.PubKey, seed, p.beta, p.proof), // Eq.vrf_verify
+                })
+        }</span>
+        <span class="cov8" title="1">switch sel.Mode </span>{
+        case "RELAXED":<span class="cov0" title="0">
+                sel.Note = fmt.Sprintf("RELAXED: all %d trusted RSUs endorse (k_end=%d); reduced-confidence flag set, ε_obs tightened", take, kEnd)</span>
+        case "DEFERRED":<span class="cov8" title="1">
+                sel.Note = fmt.Sprintf("DEFERRED: only %d eligible (&lt;k_min=%d) → graduated response L2 (per-batch ZKP + rate-limit) as containment; isolation queued for next window", eligN, kMin)</span>
+        default:<span class="cov8" title="1"> // NORMAL
+                sel.Note = fmt.Sprintf("NORMAL: top-%d of %d eligible selected by VRF (f_max=%d, ≥1 honest guaranteed)", kEnd, eligN, fMax)</span>
+        }
+        <span class="cov8" title="1">return sel, c.putSelection(ctx, sel)</span>
+}
+
+// VerifyEndorser — public verifiability of one endorser's VRF (Eq.vrf_verify).
+func (c *DEBSCContract) VerifyEndorser(ctx contractapi.TransactionContextInterface,
+        rsuID, seed, beta, proof string) (bool, error) <span class="cov0" title="0">{
+        b, err := ctx.GetStub().GetState("RSU_" + rsuID)
+        if err != nil || b == nil </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("unknown RSU %s", rsuID)
+        }</span>
+        <span class="cov0" title="0">var r RSURecord
+        if err := json.Unmarshal(b, &amp;r); err != nil </span><span class="cov0" title="0">{
+                return false, err
+        }</span>
+        <span class="cov0" title="0">return vrfVerify(r.PubKey, seed, beta, proof), nil</span>
+}
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+// prefixRangeEnd returns the exclusive upper bound for a key prefix by
+// incrementing the last byte — avoids the "\xff" suffix that terminates the
+// GetStateByRange stream on real Fabric (LevelDB) instead of scanning.
+func prefixRangeEnd(prefix string) string <span class="cov8" title="1">{
+        b := []byte(prefix)
+        for i := len(b) - 1; i &gt;= 0; i-- </span><span class="cov8" title="1">{
+                if b[i] &lt; 0xff </span><span class="cov8" title="1">{
+                        b[i]++
+                        return string(b[:i+1])
+                }</span>
+        }
+        <span class="cov0" title="0">return ""</span> // all 0xff — unbounded
+}
+
+func (c *DEBSCContract) getAllRSUs(ctx contractapi.TransactionContextInterface) ([]RSURecord, error) <span class="cov8" title="1">{
+        iter, err := ctx.GetStub().GetStateByRange("RSU_", prefixRangeEnd("RSU_"))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer iter.Close()
+        var out []RSURecord
+        for iter.HasNext() </span><span class="cov8" title="1">{
+                kv, err := iter.Next()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                // Guard: only RSU_* keys (the fake stub may return all keys; real
+                // Fabric range-filters, but this keeps both paths correct).
+                <span class="cov8" title="1">if len(kv.Key) &lt; 4 || kv.Key[:4] != "RSU_" </span><span class="cov8" title="1">{
+                        continue</span>
+                }
+                <span class="cov8" title="1">var r RSURecord
+                if json.Unmarshal(kv.Value, &amp;r) == nil &amp;&amp; r.RSUID != "" </span><span class="cov8" title="1">{
+                        out = append(out, r)
+                }</span>
+        }
+        <span class="cov8" title="1">return out, nil</span>
+}
+
+func (c *DEBSCContract) putSelection(ctx contractapi.TransactionContextInterface,
+        sel *EndorserSelection) error <span class="cov8" title="1">{
+        b, _ := json.Marshal(sel)
+        return ctx.GetStub().PutState("SEL_"+sel.TxID, b)
+}</span>
+
+func ceilInt(x float64) int <span class="cov8" title="1">{
+        i := int(x)
+        if float64(i) &lt; x </span><span class="cov8" title="1">{
+                i++
+        }</span>
+        <span class="cov8" title="1">return i</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -1,0 +1,8 @@
+[SHIELD-GH][LIVE-BC] Live Hyperledger Fabric integration ON — NS-3 will invoke the real 'debsc' chaincode during the sim with dynamic trust-ranked endorser selection.
+[SHIELD-GH] Node 1 ISOLATED & BLOCKED | t=4.00 score=0.92 ZKP=FAIL real_attacker=1
+[SHIELD-GH][LIVE-BC] EvaluateIsolation(node1) committed to Fabric | t=4.00
+[SHIELD-GH] Node 0 ISOLATED & BLOCKED | t=6.00 score=0.81 ZKP=FAIL real_attacker=1
+[SHIELD-GH][LIVE-BC] EvaluateIsolation(node0) committed to Fabric | t=6.00
+[SHIELD-GH][LIVE-BC] Finalising on-chain isolation for 2 node(s)...
+[SHIELD-GH][LIVE-BC] Final EvaluateIsolation(node0) committed on-chain (isolated=true).
+[SHIELD-GH][LIVE-BC] Final EvaluateIsolation(node1) committed on-chain (isolated=true).

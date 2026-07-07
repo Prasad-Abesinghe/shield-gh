@@ -1,0 +1,11 @@
+{
+  "backend": "liboqs",
+  "quantum_resistant": true,
+  "dilithium_mechanism": "ML-DSA-44",
+  "kyber_mechanisms": {
+    "512": "Kyber512",
+    "768": "Kyber768",
+    "1024": "Kyber1024"
+  },
+  "liboqs_version": "0.15.0"
+}

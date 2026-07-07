@@ -1,0 +1,63 @@
+============================================================
+ SHIELD-GH DEBSC — Smart Contract Formal Verification
+ (unit tests with dummy data)
+============================================================
+
+>>> Running test suite (verbose)...
+=== RUN   TestCommitForwardingRecord_DummyData
+=== RUN   TestCommitForwardingRecord_DummyData/perfect_honest
+=== RUN   TestCommitForwardingRecord_DummyData/mild_loss_honest
+=== RUN   TestCommitForwardingRecord_DummyData/grey_hole_60%_drop
+=== RUN   TestCommitForwardingRecord_DummyData/total_black_hole
+=== RUN   TestCommitForwardingRecord_DummyData/no_traffic
+--- PASS: TestCommitForwardingRecord_DummyData (0.00s)
+    --- PASS: TestCommitForwardingRecord_DummyData/perfect_honest (0.00s)
+    --- PASS: TestCommitForwardingRecord_DummyData/mild_loss_honest (0.00s)
+    --- PASS: TestCommitForwardingRecord_DummyData/grey_hole_60%_drop (0.00s)
+    --- PASS: TestCommitForwardingRecord_DummyData/total_black_hole (0.00s)
+    --- PASS: TestCommitForwardingRecord_DummyData/no_traffic (0.00s)
+=== RUN   TestEvaluateIsolation_DualGateTruthTable
+=== RUN   TestEvaluateIsolation_DualGateTruthTable/honest_perfect
+=== RUN   TestEvaluateIsolation_DualGateTruthTable/mild_loss
+=== RUN   TestEvaluateIsolation_DualGateTruthTable/grey_hole
+=== RUN   TestEvaluateIsolation_DualGateTruthTable/black_hole
+--- PASS: TestEvaluateIsolation_DualGateTruthTable (0.00s)
+    --- PASS: TestEvaluateIsolation_DualGateTruthTable/honest_perfect (0.00s)
+    --- PASS: TestEvaluateIsolation_DualGateTruthTable/mild_loss (0.00s)
+    --- PASS: TestEvaluateIsolation_DualGateTruthTable/grey_hole (0.00s)
+    --- PASS: TestEvaluateIsolation_DualGateTruthTable/black_hole (0.00s)
+=== RUN   TestEvaluateIsolation_StatGateButValidZKP_NotIsolated
+--- PASS: TestEvaluateIsolation_StatGateButValidZKP_NotIsolated (0.00s)
+=== RUN   TestEvaluateIsolation_PersistsIsolatedFlag
+--- PASS: TestEvaluateIsolation_PersistsIsolatedFlag (0.00s)
+=== RUN   TestEvaluateIsolation_UnknownNode
+--- PASS: TestEvaluateIsolation_UnknownNode (0.00s)
+=== RUN   TestGetAllNodes
+--- PASS: TestGetAllNodes (0.00s)
+=== RUN   TestInitLedger
+--- PASS: TestInitLedger (0.00s)
+=== RUN   TestReadNode
+--- PASS: TestReadNode (0.00s)
+PASS
+ok  	debsc	0.007s
+
+>>> Coverage report (per function)...
+debsc/debsc.go:34:	InitLedger		83.3%
+debsc/debsc.go:51:	CommitForwardingRecord	90.9%
+debsc/debsc.go:85:	EvaluateIsolation	82.4%
+debsc/debsc.go:121:	ReadNode		77.8%
+debsc/debsc.go:138:	GetAllNodes		78.6%
+debsc/debsc.go:160:	main			0.0%
+total:			(statements)		74.6%
+
+>>> HTML coverage report -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/debsc_coverage.html
+    Open in browser:  file:///home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/debsc_coverage.html
+
+============================================================
+ VERIFICATION COMPLETE — all DEBSC functions tested:
+   • CommitForwardingRecord  (reputation/ZKP/suspicion derivation)
+   • EvaluateIsolation       (Eq. 3.19 dual-gate truth table)
+   • false-positive guard    (low-rep but valid-ZKP -> NOT isolated)
+   • ledger persistence      (isolated flag committed)
+   • ReadNode / GetAllNodes / InitLedger
+============================================================

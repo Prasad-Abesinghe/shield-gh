@@ -1,0 +1,6 @@
+=== Galle SUMO scenario — final stats (warm-up t>=30 excluded) ===
+concurrent vehicles running: min=187 max=200 mean=193.5
+steps below 190: 831/5700 (14.6%)  -> exceeds 190 for 85.4% of the run
+mean network speed: 18.0 km/h (peak 33.3 km/h)
+halting (queued at junctions) mean=72
+collisions=0 teleports=9 sim end=599.90s

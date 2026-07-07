@@ -1,0 +1,8 @@
+NAMES                                                                                                   STATUS
+dev-peer0.org3.example.com-debsc_1.0-49971674e9b3c0d2bd1f4aaeaf3387df20b4ee9076a9aef90dbed2ec1bcaa59a   Up 7 minutes
+peer0.org3.example.com                                                                                  Up 8 minutes
+dev-peer0.org2.example.com-debsc_1.0-49971674e9b3c0d2bd1f4aaeaf3387df20b4ee9076a9aef90dbed2ec1bcaa59a   Up 43 minutes
+dev-peer0.org1.example.com-debsc_1.0-49971674e9b3c0d2bd1f4aaeaf3387df20b4ee9076a9aef90dbed2ec1bcaa59a   Up 43 minutes
+peer0.org2.example.com                                                                                  Up About an hour
+orderer.example.com                                                                                     Up About an hour
+peer0.org1.example.com                                                                                  Up About an hour

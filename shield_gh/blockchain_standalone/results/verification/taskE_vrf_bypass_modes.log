@@ -1,0 +1,7 @@
+=== BYPASS MECHANISM (Eq.endorser_mode) — graceful degradation ===
+
+--- After degrading RSU2/3/4 (only RSU1 eligible) -> DEFERRED (0<|E|<k_min) ---
+mode: DEFERRED | eligibleN: 1 | note: NORMAL: top-3 of 1 eligible selected by VRF (f_max=0, ≥1 honest guaranteed)
+
+--- After degrading ALL RSUs -> EMERGENCY (E=empty), single highest-trust endorser ---
+mode: EMERGENCY | selected: ['RSU6'] | note: EMERGENCY: single highest-trust endorser; network-wide RSU trust audit triggered

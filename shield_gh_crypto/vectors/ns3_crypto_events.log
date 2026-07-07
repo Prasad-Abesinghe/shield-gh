@@ -1,0 +1,12 @@
+[12:24:27] t=  3.998s node=1   BACKEND        liboqs Kyber-768/ML-DSA-44 qr=True
+[12:24:27] t=  3.998s node=1   THRESHOLD      3-of-5 signers=[0, 1, 4] valid=3 quorum=True
+[12:24:27] t=  3.998s node=1   FLOWMOD        Dilithium sign+verify -> switch install=True
+[12:24:27] t=  3.998s node=1   PQC-LKH        re-key path=[3, 1, 0] kyber_ops=3=ceil(log2 5) rotated=True excluded_node=True
+[12:24:27] t=  3.998s node=1   ACTIVE         remaining vehicles=[0, 2, 3, 4]
+[12:24:27] t=  3.998s node=1   DONE           isolation crypto complete in 1.5 ms  [threshold+Dilithium+PQC-LKH all OK]
+[12:24:29] t=  4.998s node=0   BACKEND        liboqs Kyber-768/ML-DSA-44 qr=True
+[12:24:29] t=  4.998s node=0   THRESHOLD      3-of-5 signers=[0, 1, 4] valid=3 quorum=True
+[12:24:29] t=  4.998s node=0   FLOWMOD        Dilithium sign+verify -> switch install=True
+[12:24:29] t=  4.998s node=0   PQC-LKH        re-key path=[3, 1, 0] kyber_ops=3=ceil(log2 5) rotated=True excluded_node=True
+[12:24:29] t=  4.998s node=0   ACTIVE         remaining vehicles=[2, 3, 4]
+[12:24:29] t=  4.998s node=0   DONE           isolation crypto complete in 1.2 ms  [threshold+Dilithium+PQC-LKH all OK]

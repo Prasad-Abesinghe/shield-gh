@@ -1,0 +1,19 @@
+Warning: Removed a road without junctions: -374254543.
+Warning: Removed a road without junctions: 374254543.
+Warning: Ambiguity in turnarounds computation at junction 'cluster_3776184872_3776184873'.
+Warning: Found sharp turn with radius 8.70 at the start of edge '-23417672#1'.
+Warning: Found angle of 114.82 degrees at edge '-23592598#0', segment 22.
+Warning: Found sharp turn with radius 7.51 at the end of edge '-368796142#1'.
+Warning: Found angle of 101.96 degrees at edge '-374249101#2', segment 2.
+Warning: Found angle of 105.00 degrees at edge '-536860701', segment 1.
+Warning: Found angle of 124.66 degrees at edge '-556902793', segment 1.
+Warning: Found angle of 114.82 degrees at edge '-775561264#1', segment 3.
+Warning: Found sharp turn with radius 7.51 at the start of edge '368796142#1'.
+Warning: Speed of straight connection '6743656#5_0->6743656#6_0' reduced by 7.21 due to turning radius of 27.20 (length=13.51, angle=44.32).
+Warning: Speed of straight connection '-6743656#6_0->-6743656#5_0' reduced by 7.65 due to turning radius of 25.29 (length=12.53, angle=44.32).
+Warning: Speed of straight connection '-6743656#1_0->-6743656#0_0' reduced by 6.29 due to turning radius of 31.43 (length=14.49, angle=42.11).
+Warning: Intersecting left turns at junction 'cluster_13136022713_13136022714' from lane '1428967154#0_0' and lane '-1428967154#2_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_3726391373_3776248125' from lane '374254547#1_0' and lane '-8625179#1_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_4871661004_4871661006' from lane '495414197#0_0' and lane '-495414196#1_0' (increase junction radius to avoid this).
+Warning: Intersecting left turns at junction 'cluster_5174220989_5174220990' from lane '-533314374_0' and lane '-19328195#9_0' (increase junction radius to avoid this).
+Warning: 8 total messages of type: Found angle of % degrees at edge '%', segment %.

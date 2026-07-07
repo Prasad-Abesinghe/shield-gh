@@ -1,0 +1,20 @@
+[34m2026-07-01 12:23:47.288 +0530 0001 INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [9b809e7f424a88323adc3b56d5e8a625fc5863497be6d6a4a973bcb315fb14fb] committed with status (VALID) at localhost:7051
+[34m2026-07-01 12:23:47.291 +0530 0002 INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [9b809e7f424a88323adc3b56d5e8a625fc5863497be6d6a4a973bcb315fb14fb] committed with status (VALID) at localhost:9051
+[0;32mChaincode definition committed on channel 'mychannel'[0m
+[0;34mUsing organization 1[0m
+[0;34mQuerying chaincode definition on peer0.org1 on channel 'mychannel'...[0m
+[0;34mAttempting to Query committed status on peer0.org1, Retry after 3 seconds.[0m
++ peer lifecycle chaincode querycommitted --channelID mychannel --name debsc
++ res=0
+Committed chaincode definition for chaincode 'debsc' on channel 'mychannel':
+Version: 1.0, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [Org1MSP: true, Org2MSP: true]
+[0;32mQuery chaincode definition successful on peer0.org1 on channel 'mychannel'[0m
+[0;34mUsing organization 2[0m
+[0;34mQuerying chaincode definition on peer0.org2 on channel 'mychannel'...[0m
+[0;34mAttempting to Query committed status on peer0.org2, Retry after 3 seconds.[0m
++ peer lifecycle chaincode querycommitted --channelID mychannel --name debsc
++ res=0
+Committed chaincode definition for chaincode 'debsc' on channel 'mychannel':
+Version: 1.0, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [Org1MSP: true, Org2MSP: true]
+[0;32mQuery chaincode definition successful on peer0.org2 on channel 'mychannel'[0m
+[0;34mChaincode initialization is not required[0m

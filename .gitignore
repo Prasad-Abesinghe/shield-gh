@@ -1,0 +1,40 @@
+# ── Python build artifacts ────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+env/
+
+# ── Node ──────────────────────────────────────────────────
+node_modules/
+
+# ── Backup / scratch copies ───────────────────────────────
+*.bak
+routing-new.cc
+
+# ── Go: vendored deps and compiled chaincode binaries ─────
+# (regenerable via `go mod vendor` / `go build`)
+**/vendor/
+soa2_blockchain_scbc_vcbc/chaincode-scbcvcbc/scbcvcbc
+shield_gh/blockchain_standalone/chaincode-debsc/debsc
+
+# ── Generated SUMO traces / mobility outputs (large) ──────
+# Regenerable simulation outputs; too big for GitHub. SUMO
+# source inputs (*.net.xml, *.rou.xml, trips, *.sumocfg) are kept.
+sumo/galle_scenario/galle_netstate.xml
+sumo/galle_scenario/galle_netstate_traci.xml
+sumo/galle_scenario/galle_fcd.xml
+sumo/galle_scenario/galle_fcd_traci.xml
+sumo/galle_scenario/galle_mobility.tcl
+sumo/galle_scenario/galle_summary.xml
+sumo/galle_scenario/galle_ns2activity.tcl
+sumo/galle_scenario/*.osm.xml
+
+# ── OS / editor noise ─────────────────────────────────────
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/

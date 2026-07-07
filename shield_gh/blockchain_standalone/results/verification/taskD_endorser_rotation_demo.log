@@ -1,0 +1,6 @@
+13:40:50  INVOKE CommitForwardingRecord   endorsers=[org1,org2] rc=0 status:200
+13:40:52  INVOKE CommitForwardingRecord   endorsers=[org3,org1] rc=0 status:200
+13:40:54  INVOKE CommitForwardingRecord   endorsers=[org2,org3] rc=0 status:200
+13:40:56  INVOKE CommitForwardingRecord   endorsers=[org3,org2] rc=0 status:200
+13:40:58  INVOKE CommitForwardingRecord   endorsers=[org1,org3] rc=0 status:200
+13:41:00  INVOKE CommitForwardingRecord   endorsers=[org2,org1] rc=0 status:200

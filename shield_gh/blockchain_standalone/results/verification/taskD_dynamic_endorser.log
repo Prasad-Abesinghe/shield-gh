@@ -1,0 +1,7 @@
+=== DYNAMIC ENDORSER SELECTION — top-2 of 3 peers chosen by trust rank ===
+      1 endorsers=[org2,org3]
+     90 endorsers=[org3,org1]
+
+  ^ THREE peers (org1/org2/org3) now in the pool. Each invoke enlists the
+    TOP-2 most-trusted (MAJORITY 2-of-3 policy) and DROPS the least-trusted.
+    Different pairs appear as trust moves — genuine dynamic selection.

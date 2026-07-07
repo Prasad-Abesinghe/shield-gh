@@ -1,0 +1,3409 @@
+[SHIELD-GH] Detection mode = LIGHTWEIGHT (rule-based S1-S6 + HMAC + threshold FlowMod)
+Solution at controller cleared
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 3
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 3
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 1
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 2
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 2
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 1
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 2
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 2
+flow id 2source is 3destination is 0
+Poisson flow size is 2
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 3
+flow id 2source is 3destination is 0
+Poisson flow size is 3
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 1
+flow id 3source is 3destination is 0
+Poisson flow size is 2
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 1
+flow id 2source is 3destination is 0
+Poisson flow size is 2
+flow id 3source is 3destination is 0
+Poisson flow size is 3
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 0
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 1
+flow id 0source is 0destination is 3
+Poisson flow size is 3
+flow id 1source is 3destination is 0
+Poisson flow size is 2
+flow id 2source is 3destination is 0
+Poisson flow size is 0
+flow id 3source is 3destination is 0
+Poisson flow size is 0
+[SHIELD-GH] Initialised — 4 vehicles (lightweight mode — compile with -DUSE_LIBOQS for PQC)
+current time is 0
+Attack state: DP-IT (Intermittent) ACTIVE
+Solution at nodes cleared at 1
+sent all flow data from node 4
+current time is 1
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 1.0345
+finished writing link lifetime status at1.0345
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1121
+reading lifetime from csv at1.0346
+link lifetime conversion finished at+1.0346e+09ns
+updating flows - path finding at1.0348
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 1.0348
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 1.03481
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 1.03482
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 1.03482
+Number of connected flows 3at timestamp 1.0352
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.4
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 1.0359
+1
+1
+1
+1
+Proposed RL learning finished at 1.0359
+Transmitting delta values at1.036
+
+
+
+
+
+Initialized flow counters at 1.0995
+Forcing exactly 1 attackers out of 4 vehicles
+Node 0 forced as ATTACKER
+Attackers declared at t=1.1
+flow id 0sub flow load is 0 next hop 0packets 0
+flow id 0sub flow load is 0 next hop 2packets 0
+flow id 0sub flow load is 0 next hop 3packets 0
+flow id 0sub flow load is 0 next hop 4packets 0
+flow id 0sub flow load is 1 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0 next hop 0packets 0
+flow id 1sub flow load is 0 next hop 1packets 0
+flow id 1sub flow load is 0 next hop 2packets 0
+flow id 1sub flow load is 0 next hop 3packets 0
+flow id 1sub flow load is 0 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0 next hop 0packets 0
+flow id 2sub flow load is 0 next hop 1packets 0
+flow id 2sub flow load is 0 next hop 3packets 0
+flow id 2sub flow load is 0 next hop 4packets 0
+flow id 2sub flow load is 1 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0 next hop 0packets 0
+flow id 3sub flow load is 0 next hop 1packets 0
+flow id 3sub flow load is 0 next hop 2packets 0
+flow id 3sub flow load is 0 next hop 3packets 0
+flow id 3sub flow load is 0 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=1.1
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=1.10247
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=1.10505
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=1.10734
+Intial transmission packet dropped for flow id 0packet ID: 1
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=1.12683
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=2 t=1.12865
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=2 t=1.13085
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=0 packetID=2 t=1.13211
+Flow ID 0received  Packet ID: 2Totally received 1packets at destination 3 at 1.13266
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=3 t=1.15367
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=1.15367
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=1.1553
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=3 t=1.15682
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=1.15853
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=3 t=1.16017
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=0 packetID=3 t=1.16164
+Flow ID 0received  Packet ID: 3Totally received 2packets at destination 3 at 1.1622
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=1.16372
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 1.16427
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=1.1805
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=1.18223
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=1.18451
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 1.18507
+[NETANIM] Vehicle index=0 ActualNodeID=2 colored RED (attacker)
+[NETANIM] Vehicle index=1 ActualNodeID=3 colored GREEN (benign)
+[NETANIM] Vehicle index=2 ActualNodeID=4 colored GREEN (benign)
+[NETANIM] Vehicle index=3 ActualNodeID=5 colored GREEN (benign)
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=1.20733
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=1.20949
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=1.21109
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 1.21166
+average_latency 6.08222 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.289884
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100%
+  M1b MCC: 1
+  M2  False Positive Rate: 0%
+================================================
+average packet delivery ratio is 83.3333
+average jitter is 25.6402
+average load balance is 100
+TP=5 TN=0 FP=1 FN=0
+M1a Detection Accuracy: 83.3333%
+M1b MCC: 0
+M2 False Positive Rate: 99.9999%
+M4a Detection Latency: 0 ms
+M4b Mitigation Response Time: 0 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=28.57% (Fwd=2/Rcv=7) | E2E_PDR=66.67% (2/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=83.33% (Fwd=5/Rcv=6)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=83.33% (Fwd=5/Rcv=6)
+Node 3 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=100.00% (3/3) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 2.00
+sent all flow data from node 4
+current time is 2.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 2.03
+finished writing link lifetime status at2.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1029
+reading lifetime from csv at2.03
+link lifetime conversion finished at+2034600000.00ns
+updating flows - path finding at2.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 2.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 2.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 2.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 2.03
+Number of connected flows 3at timestamp 2.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 2.04
+1
+1
+1
+1
+Proposed RL learning finished at 2.04
+Transmitting delta values at2.04
+
+
+
+
+
+Initialized flow counters at 2.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=1 t=2.10
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=1 t=2.10
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=0 packetID=1 t=2.10
+Flow ID 0received  Packet ID: 1Totally received 1packets at destination 3 at 2.10
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=2.13
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=2.13
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=2.13
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=2.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=3 t=2.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=2.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=2.16
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=2.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=2.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=2.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 2.16
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=2.16
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=2.16
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=2.17
+Intial transmission packet dropped for flow id 0packet ID: 3
+average_latency 5.05 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.25
+[SHIELD-GH] Node 0 RATE-LIMITED | Λ=2
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 66.67
+average jitter is 12.82
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=2.00 FN=0.00
+M1a Detection Accuracy: 50.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 0.00 ms
+M4b Mitigation Response Time: 0.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=22.22% (Fwd=2/Rcv=9) | E2E_PDR=33.33% (1/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=2/Rcv=4)
+Node 2 | LocalPDR=66.67% (Fwd=2/Rcv=3) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=2/Rcv=4)
+Node 3 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=100.00% (1/1) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 3.00
+sent all flow data from node 4
+current time is 3.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 3.03
+finished writing link lifetime status at3.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1300
+reading lifetime from csv at3.03
+link lifetime conversion finished at+3034600000.00ns
+updating flows - path finding at3.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 3.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 3.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 3.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 3.03
+Number of connected flows 3at timestamp 3.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 3.04
+1
+1
+1
+1
+Proposed RL learning finished at 3.04
+Transmitting delta values at3.04
+
+
+
+
+
+Initialized flow counters at 3.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 2packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+Flow id 2 scheduled 0total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=3.10
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=1 t=3.10
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=1 t=3.10
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=0 packetID=1 t=3.11
+Flow ID 0received  Packet ID: 1Totally received 1packets at destination 3 at 3.11
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=3.13
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=3.13
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=3.13
+DP-IT FORWARD: node=0 flow=0
+ATTACK PLACE 1: packet FORWARDED node=0 flow=0 packetID=2 t=3.13
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=0 packetID=2 t=3.14
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=0 packetID=2 t=3.14
+Flow ID 0received  Packet ID: 2Totally received 2packets at destination 3 at 3.14
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=3.15
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=3.16
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=3.16
+DP-IT DROP: node=0 flow=0
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=3.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+average_latency 4.75 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.23
+[SHIELD-GH][LW-MIT] node 0 threshold FlowMod 3/3 RSU co-signed, quorum_ok=1 | t=4.00
+[SHIELD-GH] Node 0 ISOLATED & BLOCKED | t=4.00 mode=LIGHTWEIGHT score=0.89 ZKP=FAIL real_attacker=1
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 66.67
+average jitter is 29.30
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=1.00 FN=0.00
+M1a Detection Accuracy: 66.67%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=20.00% (Fwd=2/Rcv=10) | E2E_PDR=66.67% (2/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=66.67% (Fwd=2/Rcv=3)
+Node 2 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=66.67% (Fwd=2/Rcv=3)
+Node 3 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 4.00
+sent all flow data from node 4
+current time is 4.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 4.03
+finished writing link lifetime status at4.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 990
+reading lifetime from csv at4.03
+link lifetime conversion finished at+4034600000.00ns
+updating flows - path finding at4.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 4.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 4.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 4.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 4.03
+Number of connected flows 3at timestamp 4.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 4.04
+1
+1
+1
+1
+Proposed RL learning finished at 4.04
+Transmitting delta values at4.04
+
+
+
+
+
+Initialized flow counters at 4.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 3 scheduled 3total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=4.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=4.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=4.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=4.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=4.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=4.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=4.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=4.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=4.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=4.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=4.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=4.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 4.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=4.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=4.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=4.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=4.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=4.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=4.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=4.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 4.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=4.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=4.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=4.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 4.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=3 t=4.23
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=3 t=4.24
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=3 t=4.24
+Flow ID 3received  Packet ID: 3Totally received 3packets at destination 0 at 4.24
+average_latency 4.58 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.16
+[SHIELD-GH] Node 0 RATE-LIMITED | Λ=4
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 64.29
+average jitter is 36.51
+average load balance is 100.00
+TP=4.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 57.14%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 2 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 3 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=100.00% (4/4) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 5.00
+sent all flow data from node 4
+current time is 5.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 5.03
+finished writing link lifetime status at5.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 854
+reading lifetime from csv at5.03
+link lifetime conversion finished at+5034600000.00ns
+updating flows - path finding at5.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 5.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 5.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 5.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 5.03
+Number of connected flows 3at timestamp 5.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 5.04
+1
+1
+1
+1
+Proposed RL learning finished at 5.04
+Transmitting delta values at5.04
+
+
+
+
+
+Initialized flow counters at 5.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 3 scheduled 3total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=5.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=5.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=5.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=5.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=5.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=5.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=5.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=5.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=5.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=5.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=5.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=5.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=5.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=5.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 5.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=5.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=5.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=5.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=5.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=5.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 5.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=5.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=5.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=5.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 5.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=3 t=5.23
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=3 t=5.24
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=3 t=5.24
+Flow ID 3received  Packet ID: 3Totally received 3packets at destination 0 at 5.24
+average_latency 4.63 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.12
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 62.86
+average jitter is 40.79
+average load balance is 100.00
+TP=4.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 57.14%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 2 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 3 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=100.00% (4/4) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 6.00
+sent all flow data from node 4
+current time is 6.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 6.03
+finished writing link lifetime status at6.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 960
+reading lifetime from csv at6.03
+link lifetime conversion finished at+6034600000.00ns
+updating flows - path finding at6.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 6.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 6.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 6.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 6.03
+Number of connected flows 3at timestamp 6.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 6.04
+1
+1
+1
+1
+Proposed RL learning finished at 6.04
+Transmitting delta values at6.04
+
+
+
+
+
+Initialized flow counters at 6.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=6.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=6.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=6.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=6.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=6.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=6.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=6.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=6.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=6.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=6.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=6.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=6.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=6.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=6.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=6.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=6.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 6.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=6.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=6.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=6.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=6.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=6.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 6.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=6.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 6.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=6.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=6.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=6.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=6.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=6.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 6.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=6.21
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 6.21
+average_latency 5.00 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.10
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 62.80
+average jitter is 41.72
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 7.00
+sent all flow data from node 4
+current time is 7.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 7.03
+finished writing link lifetime status at7.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1050
+reading lifetime from csv at7.03
+link lifetime conversion finished at+7034600000.00ns
+updating flows - path finding at7.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 7.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 7.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 7.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 7.03
+Number of connected flows 3at timestamp 7.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 7.04
+1
+1
+1
+1
+Proposed RL learning finished at 7.04
+Transmitting delta values at7.04
+
+
+
+
+
+Initialized flow counters at 7.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 2packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+Flow id 2 scheduled 0total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 3 scheduled 1total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=7.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=7.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=7.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=7.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=7.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=7.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=7.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=7.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=7.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=7.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=7.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=7.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=7.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=7.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=7.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=7.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 7.19
+average_latency 4.98 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.09
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 57.40
+average jitter is 35.76
+average load balance is 100.00
+TP=1.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 25.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 2 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 3 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=100.00% (1/1) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 8.00
+sent all flow data from node 4
+current time is 8.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 8.03
+finished writing link lifetime status at8.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 874
+reading lifetime from csv at8.03
+link lifetime conversion finished at+8034600000.00ns
+updating flows - path finding at8.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 8.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 8.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 8.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 8.03
+Number of connected flows 3at timestamp 8.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 8.04
+1
+1
+1
+1
+Proposed RL learning finished at 8.04
+Transmitting delta values at8.04
+
+
+
+
+
+Initialized flow counters at 8.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=8.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=8.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=8.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=8.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=8.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=8.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=8.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=8.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=8.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=8.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=8.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=8.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 8.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=8.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=8.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=8.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=8.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=8.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=8.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=8.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=8.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 8.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=8.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=8.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 8.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=8.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=8.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=8.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=8.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=8.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=8.21
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 8.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=8.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 8.21
+average_latency 5.01 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.07
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 58.04
+average jitter is 37.46
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=83.33% (Fwd=5/Rcv=6) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=6/Rcv=6) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 9.00
+sent all flow data from node 4
+current time is 9.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 9.03
+finished writing link lifetime status at9.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 865
+reading lifetime from csv at9.03
+link lifetime conversion finished at+9034600000.00ns
+updating flows - path finding at9.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 9.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 9.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 9.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 9.03
+Number of connected flows 3at timestamp 9.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 9.04
+1
+1
+1
+1
+Proposed RL learning finished at 9.04
+Transmitting delta values at9.04
+
+
+
+
+
+Initialized flow counters at 9.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 2 scheduled 2total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=9.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=9.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=9.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=9.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=9.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=9.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=9.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=9.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=9.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=9.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=9.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=9.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=9.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 9.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=9.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=9.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=9.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=9.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=9.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=9.18
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 9.18
+average_latency 5.00 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.07
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 56.03
+average jitter is 43.04
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 40.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 2 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 3 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=100.00% (2/2) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 10.00
+sent all flow data from node 4
+current time is 10.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 10.03
+finished writing link lifetime status at10.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1084
+reading lifetime from csv at10.03
+link lifetime conversion finished at+10034600000.00ns
+updating flows - path finding at10.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 10.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 10.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 10.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 10.03
+Number of connected flows 3at timestamp 10.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 10.04
+1
+1
+1
+1
+Proposed RL learning finished at 10.04
+Transmitting delta values at10.04
+
+
+
+
+
+Initialized flow counters at 10.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=10.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=10.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=10.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=10.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=10.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=10.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=10.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=10.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=10.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=10.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=10.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=10.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=10.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 10.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=10.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=10.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=10.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=10.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=10.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=10.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=10.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 10.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=10.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=10.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 10.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=10.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=10.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=10.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=10.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=10.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 10.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=10.21
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 10.21
+average_latency 5.05 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.06
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 56.68
+average jitter is 43.58
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 11.00
+sent all flow data from node 4
+current time is 11.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 11.03
+finished writing link lifetime status at11.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1041
+reading lifetime from csv at11.03
+link lifetime conversion finished at+11034600000.00ns
+updating flows - path finding at11.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 11.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 11.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 11.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 11.03
+Number of connected flows 3at timestamp 11.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 11.04
+1
+1
+1
+1
+Proposed RL learning finished at 11.04
+Transmitting delta values at11.04
+
+
+
+
+
+Initialized flow counters at 11.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=11.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=11.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=11.11
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=11.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=11.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=11.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=11.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=11.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=11.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=11.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=11.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=11.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=11.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 11.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=11.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=11.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=11.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=11.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=11.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=11.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 11.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=11.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=11.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=11.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 11.21
+average_latency 5.03 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.05
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 56.07
+average jitter is 47.61
+average load balance is 100.00
+TP=3.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 50.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=3/Rcv=6)
+Node 2 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=3/Rcv=6)
+Node 3 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=100.00% (3/3) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 12.00
+sent all flow data from node 4
+current time is 12.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 12.03
+finished writing link lifetime status at12.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 947
+reading lifetime from csv at12.03
+link lifetime conversion finished at+12034600000.00ns
+updating flows - path finding at12.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 12.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 12.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 12.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 12.03
+Number of connected flows 3at timestamp 12.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 12.04
+1
+1
+1
+1
+Proposed RL learning finished at 12.04
+Transmitting delta values at12.04
+
+
+
+
+
+Initialized flow counters at 12.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 2 scheduled 2total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=12.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=12.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=12.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=12.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=12.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=12.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=12.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=12.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=12.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=12.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=12.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=12.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 12.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=12.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=12.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=12.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=12.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=12.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=12.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=12.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=12.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 12.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=12.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=12.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 12.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=12.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=12.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=12.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 12.21
+average_latency 4.99 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.04
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 56.16
+average jitter is 48.66
+average load balance is 100.00
+TP=4.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 57.14%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 2 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 3 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=100.00% (4/4) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 13.00
+sent all flow data from node 4
+current time is 13.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 13.03
+finished writing link lifetime status at13.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 918
+reading lifetime from csv at13.03
+link lifetime conversion finished at+13034600000.00ns
+updating flows - path finding at13.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 13.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 13.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 13.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 13.03
+Number of connected flows 3at timestamp 13.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 13.04
+1
+1
+1
+1
+Proposed RL learning finished at 13.04
+Transmitting delta values at13.04
+
+
+
+
+
+Initialized flow counters at 13.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=13.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=13.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=13.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=13.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=13.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=13.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=13.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=13.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=13.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=13.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=13.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=13.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=13.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 13.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=13.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=13.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=13.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+average_latency 5.00 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.02
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 53.76
+average jitter is 44.92
+average load balance is 100.00
+TP=1.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 25.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 2 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 3 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=100.00% (1/1) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 14.00
+sent all flow data from node 4
+current time is 14.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 14.03
+finished writing link lifetime status at14.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1053
+reading lifetime from csv at14.03
+link lifetime conversion finished at+14034600000.00ns
+updating flows - path finding at14.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 14.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 14.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 14.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 14.03
+Number of connected flows 3at timestamp 14.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 14.04
+1
+1
+1
+1
+Proposed RL learning finished at 14.04
+Transmitting delta values at14.04
+
+
+
+
+
+Initialized flow counters at 14.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 3 scheduled 1total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=14.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=14.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=14.11
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=14.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=14.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=14.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=14.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=14.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=14.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=14.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=14.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=14.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=14.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=14.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=14.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=14.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 14.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=14.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=14.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=14.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 14.19
+average_latency 5.16 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 52.78
+average jitter is 41.71
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 40.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 2 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 3 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=100.00% (2/2) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 15.00
+sent all flow data from node 4
+current time is 15.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 15.03
+finished writing link lifetime status at15.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 966
+reading lifetime from csv at15.03
+link lifetime conversion finished at+15034600000.00ns
+updating flows - path finding at15.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 15.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 15.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 15.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 15.03
+Number of connected flows 3at timestamp 15.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 15.04
+1
+1
+1
+1
+Proposed RL learning finished at 15.04
+Transmitting delta values at15.04
+
+
+
+
+
+Initialized flow counters at 15.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 2 scheduled 2total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=15.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=15.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=15.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=15.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=15.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=15.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=15.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=15.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=15.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=15.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=15.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=15.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=15.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=15.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=15.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=15.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 15.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=15.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=15.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=15.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=15.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=15.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 15.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=15.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 15.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=15.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=15.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=15.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 15.21
+average_latency 5.25 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 53.07
+average jitter is 42.59
+average load balance is 100.00
+TP=4.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 57.14%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 2 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=0.00% (0/0) | RelayPDR=57.14% (Fwd=4/Rcv=7)
+Node 3 | LocalPDR=100.00% (Fwd=4/Rcv=4) | E2E_PDR=100.00% (4/4) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 16.00
+sent all flow data from node 4
+current time is 16.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 16.03
+finished writing link lifetime status at16.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 816
+reading lifetime from csv at16.03
+link lifetime conversion finished at+16034600000.00ns
+updating flows - path finding at16.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 16.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 16.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 16.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 16.03
+Number of connected flows 3at timestamp 16.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 16.04
+1
+1
+1
+1
+Proposed RL learning finished at 16.04
+Transmitting delta values at16.04
+
+
+
+
+
+Initialized flow counters at 16.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 2packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+Flow id 2 scheduled 0total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=16.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=16.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=16.11
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=16.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=16.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=16.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=16.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=16.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=16.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=16.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=16.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=16.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=16.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+average_latency 4.92 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 49.75
+average jitter is 39.92
+average load balance is 100.00
+TP=0.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 0.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=3)
+Node 2 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=3)
+Node 3 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 17.00
+sent all flow data from node 4
+current time is 17.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 17.03
+finished writing link lifetime status at17.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 982
+reading lifetime from csv at17.03
+link lifetime conversion finished at+17034600000.00ns
+updating flows - path finding at17.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 17.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 17.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 17.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 17.03
+Number of connected flows 3at timestamp 17.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 17.04
+1
+1
+1
+1
+Proposed RL learning finished at 17.04
+Transmitting delta values at17.04
+
+
+
+
+
+Initialized flow counters at 17.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=17.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=17.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=17.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=17.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=17.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=17.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=17.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=17.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=17.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=17.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=17.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=17.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 17.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=17.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=17.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=17.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=17.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=17.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=17.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=17.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=17.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 17.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=17.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=17.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 17.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=17.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=17.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=17.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=17.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=17.21
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 17.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=17.22
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 17.22
+average_latency 4.97 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 50.50
+average jitter is 40.52
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 18.00
+sent all flow data from node 4
+current time is 18.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 18.03
+finished writing link lifetime status at18.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 890
+reading lifetime from csv at18.03
+link lifetime conversion finished at+18034600000.00ns
+updating flows - path finding at18.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 18.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 18.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 18.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 18.03
+Number of connected flows 3at timestamp 18.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 18.04
+1
+1
+1
+1
+Proposed RL learning finished at 18.04
+Transmitting delta values at18.04
+
+
+
+
+
+Initialized flow counters at 18.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 2 scheduled 2total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 2packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+Flow id 3 scheduled 0total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=18.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=18.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=18.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=18.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=18.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=18.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=18.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=18.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=18.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=18.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=18.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=18.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=18.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=18.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 18.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=18.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=18.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=18.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=18.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=18.18
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 18.18
+average_latency 4.98 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 49.92
+average jitter is 43.06
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 40.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 2 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 3 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=100.00% (2/2) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 19.00
+sent all flow data from node 4
+current time is 19.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 19.03
+finished writing link lifetime status at19.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 987
+reading lifetime from csv at19.03
+link lifetime conversion finished at+19034600000.00ns
+updating flows - path finding at19.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 19.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 19.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 19.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 19.03
+Number of connected flows 3at timestamp 19.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 19.04
+1
+1
+1
+1
+Proposed RL learning finished at 19.04
+Transmitting delta values at19.04
+
+
+
+
+
+Initialized flow counters at 19.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 2packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+Flow id 2 scheduled 0total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=19.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=19.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=19.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=19.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=19.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=19.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=19.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=19.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=19.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=19.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=19.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=19.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=19.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=19.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=19.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=19.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 19.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=19.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=19.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=19.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 19.21
+average_latency 4.96 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 49.40
+average jitter is 45.48
+average load balance is 100.00
+TP=2.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 40.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 2 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=0.00% (0/0) | RelayPDR=40.00% (Fwd=2/Rcv=5)
+Node 3 | LocalPDR=100.00% (Fwd=2/Rcv=2) | E2E_PDR=100.00% (2/2) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 20.00
+sent all flow data from node 4
+current time is 20.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 20.03
+finished writing link lifetime status at20.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 912
+reading lifetime from csv at20.03
+link lifetime conversion finished at+20034600000.00ns
+updating flows - path finding at20.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 20.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 20.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 20.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 20.03
+Number of connected flows 3at timestamp 20.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 20.04
+1
+1
+1
+1
+Proposed RL learning finished at 20.04
+Transmitting delta values at20.04
+
+
+
+
+
+Initialized flow counters at 20.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 2 scheduled 3total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=20.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=20.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=20.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=20.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=20.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=20.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=20.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=20.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=20.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=20.15
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=20.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=20.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=20.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=20.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 20.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=20.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=20.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=20.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=20.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=20.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=20.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=20.18
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 20.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=20.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 20.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=3 t=20.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=20.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=20.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=3 t=20.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=3 t=20.21
+Flow ID 2received  Packet ID: 3Totally received 3packets at destination 0 at 20.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=20.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 20.21
+average_latency 5.01 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 50.05
+average jitter is 45.55
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 21.00
+sent all flow data from node 4
+current time is 21.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 21.03
+finished writing link lifetime status at21.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 952
+reading lifetime from csv at21.03
+link lifetime conversion finished at+21034600000.00ns
+updating flows - path finding at21.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 21.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 21.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 21.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 21.03
+Number of connected flows 3at timestamp 21.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 21.04
+1
+1
+1
+1
+Proposed RL learning finished at 21.04
+Transmitting delta values at21.04
+
+
+
+
+
+Initialized flow counters at 21.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 2 scheduled 1total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 3 scheduled 2total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=21.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=21.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=21.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=21.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=21.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=21.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=21.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=21.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=21.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=21.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=21.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=21.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=21.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=21.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 21.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=21.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=21.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=21.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=21.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=21.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 21.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=21.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=21.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=21.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 21.21
+average_latency 5.02 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 50.05
+average jitter is 47.60
+average load balance is 100.00
+TP=3.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 50.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=3/Rcv=6)
+Node 2 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=0.00% (0/0) | RelayPDR=50.00% (Fwd=3/Rcv=6)
+Node 3 | LocalPDR=100.00% (Fwd=3/Rcv=3) | E2E_PDR=100.00% (3/3) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 22.00
+sent all flow data from node 4
+current time is 22.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 22.03
+finished writing link lifetime status at22.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 1074
+reading lifetime from csv at22.03
+link lifetime conversion finished at+22034600000.00ns
+updating flows - path finding at22.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 22.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 22.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 22.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 22.03
+Number of connected flows 3at timestamp 22.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 22.04
+1
+1
+1
+1
+Proposed RL learning finished at 22.04
+Transmitting delta values at22.04
+
+
+
+
+
+Initialized flow counters at 22.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+flow id 2sub flow load is 1.00 next hop 2packets 2
+scheduled in channel 1
+Flow id 2 scheduled 2total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 3
+scheduled in channel 1
+Flow id 3 scheduled 3total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=22.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=22.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=22.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=22.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=22.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=22.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=22.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=22.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=22.15
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=1 t=22.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=22.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=22.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=22.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=22.16
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=1 t=22.16
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=1 t=22.16
+Flow ID 2received  Packet ID: 1Totally received 1packets at destination 0 at 22.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=2 packetID=2 t=22.18
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=22.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=2 packetID=2 t=22.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=22.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=2 packetID=2 t=22.19
+Flow ID 2received  Packet ID: 2Totally received 2packets at destination 0 at 22.19
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=22.19
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 22.19
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=2 t=22.21
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=2 t=22.21
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=2 t=22.21
+Flow ID 3received  Packet ID: 2Totally received 2packets at destination 0 at 22.21
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=3 t=22.23
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=3 t=22.24
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=3 t=22.24
+Flow ID 3received  Packet ID: 3Totally received 3packets at destination 0 at 22.24
+average_latency 5.05 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 50.62
+average jitter is 47.52
+average load balance is 100.00
+TP=5.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 62.50%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 2 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=0.00% (0/0) | RelayPDR=62.50% (Fwd=5/Rcv=8)
+Node 3 | LocalPDR=100.00% (Fwd=5/Rcv=5) | E2E_PDR=100.00% (5/5) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+Solution at nodes cleared at 23.00
+sent all flow data from node 4
+current time is 23.00
+
+
+At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+
+
+
+
+link lifetime optimization beginning at 23.03
+finished writing link lifetime status at23.03
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+delay is 900
+reading lifetime from csv at23.03
+link lifetime conversion finished at+23034600000.00ns
+updating flows - path finding at23.03
+Routing stable: Number of stable paths from source: 0to destination 3is 1 at timestamp 23.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 23.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 23.03
+Routing stable: Number of stable paths from source: 3to destination 0is 1 at timestamp 23.03
+Number of connected flows 3at timestamp 23.04
+DEBUG matrix values:
+  [0][1] = 634.96
+  [1][0] = 634.96
+  [1][2] = 634.96
+  [2][1] = 634.96
+  [2][3] = 634.96
+  [3][2] = 634.96
+DEBUG threshold: 0.40
+DEBUG max lifetime in matrix: 634.96
+DEBUG matrix size: 5
+Proposed RL started at 23.04
+1
+1
+1
+1
+Proposed RL learning finished at 23.04
+Transmitting delta values at23.04
+
+
+
+
+
+Initialized flow counters at 23.10
+flow id 0sub flow load is 0.00 next hop 0packets 0
+flow id 0sub flow load is 0.00 next hop 2packets 0
+flow id 0sub flow load is 0.00 next hop 3packets 0
+flow id 0sub flow load is 0.00 next hop 4packets 0
+flow id 0sub flow load is 1.00 next hop 1packets 3
+scheduled in channel 1
+Flow id 0 scheduled 3total packets from 0
+flow id 1sub flow load is 0.00 next hop 0packets 0
+flow id 1sub flow load is 0.00 next hop 1packets 0
+flow id 1sub flow load is 0.00 next hop 2packets 0
+flow id 1sub flow load is 0.00 next hop 3packets 0
+flow id 1sub flow load is 0.00 next hop 4packets 0
+Flow id 1 scheduled 0total packets from 3
+flow id 2sub flow load is 0.00 next hop 0packets 0
+flow id 2sub flow load is 0.00 next hop 1packets 0
+flow id 2sub flow load is 0.00 next hop 2packets 0
+flow id 2sub flow load is 0.00 next hop 3packets 0
+flow id 2sub flow load is 0.00 next hop 4packets 0
+Flow id 2 scheduled 0total packets from 3
+flow id 3sub flow load is 0.00 next hop 0packets 0
+flow id 3sub flow load is 0.00 next hop 1packets 0
+flow id 3sub flow load is 0.00 next hop 3packets 0
+flow id 3sub flow load is 0.00 next hop 4packets 0
+flow id 3sub flow load is 1.00 next hop 2packets 1
+scheduled in channel 1
+Flow id 3 scheduled 1total packets from 3
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=23.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.10
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=23.10
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=23.11
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.11
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=1 t=23.11
+Intial transmission packet dropped for flow id 0packet ID: 1
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=23.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=23.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=23.13
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.13
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=2 t=23.13
+Intial transmission packet dropped for flow id 0packet ID: 2
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.15
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=23.15
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=23.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=23.16
+[SHIELD-GH-ISOLATE] Node 0 blocked, dropping flow 0 t=23.16
+ATTACK PLACE 1: packet DROPPED node=0 flow=0 packetID=3 t=23.16
+Intial transmission packet dropped for flow id 0packet ID: 3
+ATTACK PLACE 1: packet FORWARDED node=3 flow=3 packetID=1 t=23.18
+ATTACK PLACE 2: retransmit FORWARDED node=2 flow=3 packetID=1 t=23.18
+ATTACK PLACE 2: retransmit FORWARDED node=1 flow=3 packetID=1 t=23.18
+Flow ID 3received  Packet ID: 1Totally received 1packets at destination 0 at 23.18
+average_latency 4.99 ms
+[LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.00
+=== SHIELD-GH DETECTION METRICS (node-level) ===
+  Node TP=1 TN=3 FP=0 FN=0
+  M1a Detection Accuracy: 100.00%
+  M1b MCC: 1.00
+  M2  False Positive Rate: 0.00%
+================================================
+average packet delivery ratio is 49.50
+average jitter is 45.45
+average load balance is 100.00
+TP=1.00 TN=0.00 FP=3.00 FN=0.00
+M1a Detection Accuracy: 25.00%
+M1b MCC: 0.00
+M2 False Positive Rate: 100.00%
+M4a Detection Latency: 2898.01 ms
+M4b Mitigation Response Time: 2948.00 ms
+=== Per Node PDR ===
+Node 0 | LocalPDR=0.00% (Fwd=0/Rcv=12) | E2E_PDR=0.00% (0/3) | RelayPDR=0.00% (Fwd=0/Rcv=0) [DP-ATTACKER]
+Node 1 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 2 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=0.00% (0/0) | RelayPDR=25.00% (Fwd=1/Rcv=4)
+Node 3 | LocalPDR=100.00% (Fwd=1/Rcv=1) | E2E_PDR=100.00% (1/1) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+Node 4 | LocalPDR=0.00% (Fwd=0/Rcv=0) | E2E_PDR=0.00% (0/0) | RelayPDR=0.00% (Fwd=0/Rcv=0)
+====================
+written to file successfully
+=== GREY HOLE DROP SUMMARY ===
+Node 0 [ATTACKER] Dropped=26 Forwarded=0
+Node 1 [BENIGN]   Dropped=0 Forwarded=0
+Node 2 [BENIGN]   Dropped=0 Forwarded=0
+Node 3 [BENIGN]   Dropped=0 Forwarded=0
+==============================

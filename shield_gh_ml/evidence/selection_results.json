@@ -1,0 +1,115 @@
+{
+  "task": "SHIELD-GH LLM model selection (Task 06.01/06.02)",
+  "dataset": {
+    "n_total": 2800,
+    "n_test": 700,
+    "classes": [
+      "BENIGN",
+      "DP-FR",
+      "DP-IT",
+      "DP-TS",
+      "CP-FR",
+      "CP-IT",
+      "CP-TS"
+    ],
+    "window_W": 10
+  },
+  "host": {
+    "python": "3.10.14",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "transformer_note": "transformers unavailable (ModuleNotFoundError); transformer candidates measured via profile only",
+  "measured_baselines": [
+    {
+      "name": "TF-IDF+LogReg",
+      "accuracy": 0.7929,
+      "macro_f1": 0.791,
+      "mcc": 0.7586,
+      "latency_ms": 0.0069,
+      "train_s": 0.036,
+      "backend": "sklearn",
+      "edge_suitability": 0.667,
+      "footprint_score": 1.0,
+      "selection_score": 0.7672,
+      "profile": {
+        "quantisable": 1.0,
+        "seqfit": 0.4,
+        "ecosystem": 0.6,
+        "params_m": 0.05,
+        "note": "Classical bag-of-tokens; not a sequence model, no LLM semantics; used as the dependency-free fallback / lower-bound baseline."
+      }
+    },
+    {
+      "name": "CharNGram+LogReg",
+      "accuracy": 0.7471,
+      "macro_f1": 0.7425,
+      "mcc": 0.7054,
+      "latency_ms": 0.0363,
+      "train_s": 0.36,
+      "backend": "sklearn",
+      "edge_suitability": 0.7,
+      "footprint_score": 0.999,
+      "selection_score": 0.7478,
+      "profile": {
+        "quantisable": 1.0,
+        "seqfit": 0.5,
+        "ecosystem": 0.6,
+        "params_m": 0.1,
+        "note": "n-gram baseline; captures short local patterns only."
+      }
+    },
+    {
+      "name": "Majority",
+      "accuracy": 0.1429,
+      "macro_f1": 0.0357,
+      "mcc": 0.0,
+      "latency_ms": 0.0001,
+      "train_s": 0.0,
+      "backend": "sklearn",
+      "edge_suitability": 0.333,
+      "footprint_score": 1.0,
+      "selection_score": 0.25,
+      "profile": {
+        "quantisable": 1.0,
+        "seqfit": 0.0,
+        "ecosystem": 0.0,
+        "params_m": 0.0,
+        "note": "Trivial floor; sanity lower bound."
+      }
+    }
+  ],
+  "ranking": [
+    {
+      "name": "TF-IDF+LogReg",
+      "selection_score": 0.7672,
+      "mcc": 0.7586,
+      "accuracy": 0.7929,
+      "macro_f1": 0.791,
+      "latency_ms": 0.0069,
+      "edge_suitability": 0.667,
+      "footprint_score": 1.0
+    },
+    {
+      "name": "CharNGram+LogReg",
+      "selection_score": 0.7478,
+      "mcc": 0.7054,
+      "accuracy": 0.7471,
+      "macro_f1": 0.7425,
+      "latency_ms": 0.0363,
+      "edge_suitability": 0.7,
+      "footprint_score": 0.999
+    },
+    {
+      "name": "Majority",
+      "selection_score": 0.25,
+      "mcc": 0.0,
+      "accuracy": 0.1429,
+      "macro_f1": 0.0357,
+      "latency_ms": 0.0001,
+      "edge_suitability": 0.333,
+      "footprint_score": 1.0
+    }
+  ],
+  "best_baseline_per_class_report": "              precision    recall  f1-score   support\n\n      BENIGN      0.704     0.810     0.753       100\n       DP-FR      0.708     0.680     0.694       100\n       DP-IT      0.527     0.490     0.508       100\n       DP-TS      0.594     0.570     0.582       100\n       CP-FR      1.000     1.000     1.000       100\n       CP-IT      1.000     1.000     1.000       100\n       CP-TS      1.000     1.000     1.000       100\n\n    accuracy                          0.793       700\n   macro avg      0.790     0.793     0.791       700\nweighted avg      0.790     0.793     0.791       700\n"
+}

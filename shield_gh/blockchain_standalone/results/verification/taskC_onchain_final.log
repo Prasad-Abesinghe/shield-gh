@@ -1,0 +1,4 @@
+=== FINAL on-chain state (3-peer network) ===
+{"nodeId":"node0","nFwd":0,"nRx":12,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":true}
+{"nodeId":"node1","nFwd":0,"nRx":1,"reputation":0,"zkpValid":false,"suspicionLevel":1,"isolated":true}
+{"nodeId":"node2","nFwd":1,"nRx":1,"reputation":1,"zkpValid":true,"suspicionLevel":0,"isolated":false}

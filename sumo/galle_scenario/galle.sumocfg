@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SHIELD-GH  Galle real-world SUMO scenario -->
+<!-- 2km x 2km dense urban area of Galle, Sri Lanka (OSM-derived) -->
+<!-- 200 vehicles: 100 car, 25 bus, 25 lorry, 25 van, 25 truck; vmax 150 km/h -->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="galle.net.xml"/>
+        <route-files value="galle.rou.xml"/>
+        <!-- rerouters.add.xml keeps ~200 vehicles looping around the city for
+             the full run so >=190 are concurrently present (NetAnim shows 200) -->
+        <additional-files value="rerouters.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="600"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <!-- Dense 2 km x 2 km urban run with 200 looping vehicles: allow SUMO's
+             standard anti-gridlock so genuine deadlocks self-clear and traffic
+             keeps flowing (supervisor: vehicles must not be stuck/congested).
+             time-to-teleport clears a vehicle jammed > 100 s; junction-blocking
+             and impatience keep intersections from locking up. -->
+        <time-to-teleport value="300"/>
+        <ignore-junction-blocker value="10"/>
+        <collision.action value="warn"/>
+        <collision.mingap-factor value="0"/>
+        <ignore-route-errors value="true"/>
+        <default.action-step-length value="0.5"/>
+    </processing>
+
+    <routing>
+        <!-- Auto-rerouting device on EVERY vehicle: each vehicle is periodically
+             given a new random destination while it drives, so no vehicle ever
+             permanently arrives/leaves. Combined with rerouters.add.xml this
+             keeps ~200 vehicles concurrently present for the whole 600 s run. -->
+        <device.rerouting.probability value="1.0"/>
+        <device.rerouting.period value="30"/>
+        <device.rerouting.pre-period value="30"/>
+        <device.rerouting.adaptation-interval value="10"/>
+        <device.rerouting.with-taz value="false"/>
+    </routing>
+
+    <output>
+        <fcd-output value="galle_fcd.xml"/>
+        <netstate-dump value="galle_netstate.xml"/>
+        <summary-output value="galle_summary.xml"/>
+    </output>
+
+    <!-- No traci_server block: traci.start() in the ns-3 bridge picks its
+         own port. A hard-coded port here breaks standalone `sumo -c` runs. -->
+
+    <report>
+        <verbose value="false"/>
+        <no-step-log value="true"/>
+        <no-warnings value="true"/>
+    </report>
+
+</configuration>

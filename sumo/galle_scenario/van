@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-07-01T15:09:04.235751+05:30 by Eclipse SUMO duarouter 1.27.0
+<duarouterConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="galle.net.xml"/>
+        <additional-files value="vtypes.add.xml,van"/>
+        <route-files value="trips_van.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="trips_van.rou.xml"/>
+        <vtype-output value="van"/>
+        <alternatives-output value="NUL"/>
+    </output>
+
+    <processing>
+        <routing-threads value="16"/>
+    </processing>
+
+    <time>
+        <begin value="0.0"/>
+        <end value="30.0"/>
+    </time>
+
+    <report>
+        <no-warnings value="true"/>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</duarouterConfiguration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="van__delivery" vClass="delivery"/>
+</routes>

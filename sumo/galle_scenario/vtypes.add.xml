@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============================================================
+     SHIELD-GH  Galle real-world scenario : vehicle type fleet
+     Max velocity = 150 km/h (41.67 m/s) for every type, per supervisor.
+     Fleet mix (200 vehicles): 100 car, 25 bus, 25 lorry, 25 van, 25 truck
+     vClass drives which OSM edges each type may use (netconvert typemap).
+     ============================================================ -->
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+    <!-- 100 cars : passenger class -->
+    <vType id="car"   vClass="passenger" maxSpeed="41.67" accel="2.6" decel="4.5"
+           sigma="0.5" length="4.5"  minGap="2.5" width="1.8"  guiShape="passenger"
+           color="0.2,0.6,1.0"  speedFactor="normc(1.0,0.10,0.5,1.5)" impatience="0.7" jmIgnoreFoeProb="0.15" jmIgnoreFoeSpeed="3.0" jmTimegapMinor="1.0" tau="1.0"/>
+
+    <!-- 25 buses : bus class (larger, slower accel) -->
+    <vType id="bus"   vClass="bus"       maxSpeed="41.67" accel="1.2" decel="4.0"
+           sigma="0.5" length="12.0" minGap="3.0" width="2.5"  guiShape="bus"
+           color="1.0,0.6,0.0"  speedFactor="normc(0.95,0.08,0.5,1.3)" impatience="0.7" jmIgnoreFoeProb="0.15" jmIgnoreFoeSpeed="3.0" jmTimegapMinor="1.0" tau="1.0"/>
+
+    <!-- 25 lorries : truck class (rigid lorry) -->
+    <vType id="lorry" vClass="truck"     maxSpeed="41.67" accel="1.0" decel="4.0"
+           sigma="0.5" length="9.0"  minGap="3.0" width="2.4"  guiShape="truck"
+           color="0.5,0.3,0.1"  speedFactor="normc(0.92,0.08,0.5,1.3)" impatience="0.7" jmIgnoreFoeProb="0.15" jmIgnoreFoeSpeed="3.0" jmTimegapMinor="1.0" tau="1.0"/>
+
+    <!-- 25 vans : delivery class (light commercial) -->
+    <vType id="van"   vClass="delivery"  maxSpeed="41.67" accel="2.0" decel="4.5"
+           sigma="0.5" length="5.5"  minGap="2.5" width="2.0"  guiShape="delivery"
+           color="0.7,0.7,0.7"  speedFactor="normc(1.0,0.10,0.5,1.5)" impatience="0.7" jmIgnoreFoeProb="0.15" jmIgnoreFoeSpeed="3.0" jmTimegapMinor="1.0" tau="1.0"/>
+
+    <!-- 25 trucks : truck/semi-trailer class (heavy articulated) -->
+    <vType id="truck" vClass="truck"     maxSpeed="41.67" accel="0.8" decel="3.5"
+           sigma="0.5" length="16.5" minGap="3.5" width="2.5"  guiShape="truck/semitrailer"
+           color="0.3,0.3,0.3"  speedFactor="normc(0.90,0.08,0.5,1.2)" impatience="0.7" jmIgnoreFoeProb="0.15" jmIgnoreFoeSpeed="3.0" jmTimegapMinor="1.0" tau="1.0"/>
+
+</additional>

@@ -1,0 +1,64 @@
+=== VRF-BASED DYNAMIC ENDORSER SELECTION (chaincode level, real Fabric) ===
+6 RSUs registered; RSU5 (low trust) + RSU6 (under-observed) filtered by Eq.(endorser_pool)
+
+--- SelectEndorsers(txID=TX-1001) ---
+{
+    "txId": "TX-1001",
+    "seed": "f771bfae124984456ab9d50faf49aa7bcdeb1797de1add30e5a903d3911805f9",
+    "mode": "NORMAL",
+    "eligibleN": 4,
+    "kEnd": 3,
+    "fMax": 1,
+    "selected": [
+        {
+            "rsuId": "RSU4",
+            "beta": "2db098391d979fd919cb29bf3ef5a8ceb41c968573c475fa903eff975119bc75",
+            "proof": "295351b09685e6f26609a108190068e4782e6d4edb29418775018be038c82fac",
+            "verify": true
+        },
+        {
+            "rsuId": "RSU1",
+            "beta": "91f79d4d5537f12bda9aaf488c5ae1c810339287d91c96d19b375439ff58bbef",
+            "proof": "e04e961780cc481226934ce5a49082ee7eea6c94652a668e2999a2070f52bf95",
+            "verify": true
+        },
+        {
+            "rsuId": "RSU2",
+            "beta": "d38f7e4cbf1d1ed0126772c263cd55cfa26a3b4a8cd0f83aec855495654dfbb8",
+            "proof": "28fcab119283b170628ec012c58d81f774b00dd24076767ef7ecde119ee357d6",
+            "verify": true
+        }
+    ],
+    "note": "NORMAL: top-3 of 4 eligible selected by VRF (f_max=1, \u22651 honest guaranteed)"
+}
+
+--- SelectEndorsers(txID=TX-2002) — different tx => different seed => different Ω(t) ---
+{
+    "txId": "TX-2002",
+    "seed": "706ebec81fcaffffeec0737e4768fe2e97c2326a45545032cf2f26438f6c4330",
+    "mode": "NORMAL",
+    "eligibleN": 4,
+    "kEnd": 3,
+    "fMax": 1,
+    "selected": [
+        {
+            "rsuId": "RSU4",
+            "beta": "1f6e57ffe18182fe249b2b2a0ee0093a2324ff90fec42f90d1ad629af80e1624",
+            "proof": "5094f69c6f9feded9af66fef17f73195d750af09ed2dc6068b1578f3edc0077b",
+            "verify": true
+        },
+        {
+            "rsuId": "RSU3",
+            "beta": "821a53fa8bc13e8e4f5fb531956563c816bd8b070812e5e1b07d093394b954da",
+            "proof": "ac9abdfec6f8f6641454b4f0ec92909a43a597a2c2711e5cab20df3f71ddf54b",
+            "verify": true
+        },
+        {
+            "rsuId": "RSU1",
+            "beta": "93bedce8d1450c5c7b888b04c9745dac9cc5ab5a85e0c4d70efdd6108cfc168d",
+            "proof": "cdc73fbad2385c9fb36d33f0ab5307eb12e432b70c9dccb47da2e3b3b74ed8eb",
+            "verify": true
+        }
+    ],
+    "note": "NORMAL: top-3 of 4 eligible selected by VRF (f_max=1, \u22651 honest guaranteed)"
+}

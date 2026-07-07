@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SHIELD-GH Urban SUMO Scenario Configuration -->
+<!-- Low-speed vehicles (20-50 km/h) for MATD handoff frequency validation -->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="urban.net.xml"/>
+        <route-files value="urban.rou.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="300"/>
+        <step-length value="0.1"/>
+    </time>
+
+    <processing>
+        <time-to-teleport value="-1"/>
+        <ignore-route-errors value="true"/>
+    </processing>
+
+    <output>
+        <fcd-output value="urban_fcd.xml"/>
+        <netstate-dump value="urban_netstate.xml"/>
+    </output>
+
+    <traci_server>
+        <remote-port value="8814"/>
+    </traci_server>
+
+    <report>
+        <verbose value="false"/>
+        <no-step-log value="true"/>
+    </report>
+
+</configuration>
