@@ -1,0 +1,72 @@
+{
+  "task": "SHIELD-GH 06.03 LLM+FL+Fusion",
+  "selected_llm": "Qwen2.5-7B-Instruct",
+  "backend": "fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)",
+  "seed": 42,
+  "part1_llm": {
+    "mcc": 0.7121,
+    "macro_f1": 0.7192,
+    "q_benign": 0.3702,
+    "q_attack": 0.9271
+  },
+  "part2_fl": {
+    "mcc_integrity_on": 0.7473,
+    "mcc_integrity_off": 0.409,
+    "poisoning_blocked": true
+  },
+  "part3_fusion": {
+    "weights": {
+      "mu1": 0.2,
+      "mu2": 0.8,
+      "mu3": 0.0,
+      "theta_det": 0.3
+    },
+    "per_variant": {
+      "DP-FR": {
+        "rule": 1.0,
+        "llm": 0.974,
+        "fused": 1.0
+      },
+      "DP-IT": {
+        "rule": 0.0,
+        "llm": 0.794,
+        "fused": 0.794
+      },
+      "DP-TS": {
+        "rule": 0.0,
+        "llm": 0.788,
+        "fused": 0.788
+      },
+      "CP-FR": {
+        "rule": 1.0,
+        "llm": 1.0,
+        "fused": 1.0
+      },
+      "CP-IT": {
+        "rule": 1.0,
+        "llm": 1.0,
+        "fused": 1.0
+      },
+      "CP-TS": {
+        "rule": 1.0,
+        "llm": 1.0,
+        "fused": 1.0
+      }
+    },
+    "fpr": {
+      "rule": 0.0,
+      "llm": 0.133,
+      "fused": 0.156
+    },
+    "all_variants_covered": true,
+    "worked_example": {
+      "score": 0.725,
+      "verdict": 1,
+      "s_total": 0.0,
+      "q_i": 0.9062,
+      "rep_deficit": 0.15,
+      "tier2_escalate": false,
+      "llm_pred": "DP-FR"
+    }
+  }
+}

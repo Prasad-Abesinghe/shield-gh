@@ -1,0 +1,40 @@
+SHIELD-GH — Task 06.03 evidence transcript (LLM + Federated Learning + Fusion)
+host: python 3.10.14 / x86_64
+selected LLM: Qwen2.5-7B-Instruct (see LLM_MODEL_SELECTION_REPORT.md)
+
+dataset: train=2240 val=280 test=280 (7 classes)
+
+======================================================================
+PART 1 — LLM semantic threat scorer (Eq. 3.28)
+======================================================================
+backend: fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)
+7-class detection: accuracy=0.750  MCC=0.712  macro-F1=0.719
+mean Q_i (Eq 3.28): benign=0.370  attacker=0.927  -> separation +0.557
+
+======================================================================
+PART 2 — Federated Learning + blockchain gradient integrity (Eq. 3.16/3.26/3.27)
+======================================================================
+integrity ON : rounds=5  poison rejections=5  global-model detection MCC=0.747
+   round 1 -> accepted=[0, 1, 2, 3] rejected=[9]  (V9 = poisoner, blocked)
+integrity OFF: rounds=5  poison rejections=0  global-model detection MCC=0.409
+PASS: integrity check preserved the model (MCC 0.7473 vs poisoned 0.409)
+
+======================================================================
+PART 3 — Fusion verdict (Eq. 3.29): per-variant coverage
+======================================================================
+fusion weights tuned on validation (Eq 3.29): mu1=0.2 mu2=0.8 mu3=0.0  theta_det=0.3  (val MCC=0.8182)
+
+  variant      rule    LLM   fused   (attacker detection rate)
+  DP-FR        1.00   0.97    1.00
+  DP-IT        0.00   0.79    0.79
+  DP-TS        0.00   0.79    0.79
+  CP-FR        1.00   1.00    1.00
+  CP-IT        1.00   1.00    1.00
+  CP-TS        1.00   1.00    1.00
+  BENIGN-FPR   0.00   0.13    0.16
+
+worked example — intermittent attacker the rule-based mode MISSES:
+   S_total=0.0 (rules silent), Q_i=0.9062 (LLM), rep_deficit=0.15 -> fused score=0.725 -> VERDICT=ATTACK
+
+coverage: fusion recovers the variants rule-based misses (DP-IT/DP-TS: rule=0.00 -> fused=0.79) : YES
+note: absolute IT/TS rate (0.79) is the fallback proxy ceiling; genuine Qwen2.5-7B raises it (selection report).
