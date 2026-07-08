@@ -11,6 +11,11 @@ backend: fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)
 7-class detection: accuracy=0.750  MCC=0.712  macro-F1=0.719
 mean Q_i (Eq 3.28): benign=0.370  attacker=0.927  -> separation +0.557
 
+GENUINE Qwen2.5-7B-Instruct (LoRA r=16, bf16, 3 epochs, NVIDIA GeForce RTX 5090):
+  7-class: accuracy=0.839  MCC=0.814  macro-F1=0.825
+  binary : TPR=0.932  TNR=0.867  latency=18.2 ms/window
+  -> genuine Qwen MCC 0.814 > fallback proxy MCC 0.712 (as predicted in the selection report)
+
 ======================================================================
 PART 2 — Federated Learning + blockchain gradient integrity (Eq. 3.16/3.26/3.27)
 ======================================================================

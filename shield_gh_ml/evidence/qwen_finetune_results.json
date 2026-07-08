@@ -1,0 +1,57 @@
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "train_precision": "bf16",
+  "deploy_precision": "4bit-nf4",
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ]
+  },
+  "epochs": 3,
+  "lr": 0.0002,
+  "batch_size": 16,
+  "max_len": 96,
+  "host": "blackbox-Z790-EAGLE-AX-02",
+  "python": "3.10.14",
+  "n_train": 2240,
+  "n_test": 280,
+  "classes": [
+    "BENIGN",
+    "DP-FR",
+    "DP-IT",
+    "DP-TS",
+    "CP-FR",
+    "CP-IT",
+    "CP-TS"
+  ],
+  "accuracy": 0.8393,
+  "mcc": 0.8137,
+  "macro_f1": 0.8245,
+  "binary": {
+    "tpr": 0.9319,
+    "tnr": 0.8667,
+    "tp": 219,
+    "tn": 39,
+    "fp": 6,
+    "fn": 16
+  },
+  "latency_s_per_window": 0.0182,
+  "train_seconds": 59.3,
+  "per_class_f1": {
+    "BENIGN": 0.78,
+    "DP-FR": 0.8,
+    "DP-IT": 0.5152,
+    "DP-TS": 0.6761,
+    "CP-FR": 1.0,
+    "CP-IT": 1.0,
+    "CP-TS": 1.0
+  }
+}

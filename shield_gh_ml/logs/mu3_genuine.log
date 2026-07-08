@@ -1,0 +1,35 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:00<00:44,  7.56it/s]Loading weights:  12%|█▏        | 40/338 [00:00<00:01, 196.76it/s]Loading weights:  22%|██▏       | 75/338 [00:00<00:01, 237.17it/s]Loading weights:  30%|██▉       | 100/338 [00:00<00:01, 237.86it/s]Loading weights:  40%|███▉      | 134/338 [00:00<00:00, 266.32it/s]Loading weights:  48%|████▊     | 162/338 [00:00<00:00, 241.21it/s]Loading weights:  58%|█████▊    | 195/338 [00:00<00:00, 242.65it/s]Loading weights:  68%|██████▊   | 231/338 [00:00<00:00, 263.98it/s]Loading weights:  76%|███████▋  | 258/338 [00:01<00:00, 257.45it/s]Loading weights:  86%|████████▌ | 291/338 [00:01<00:00, 263.36it/s]Loading weights:  94%|█████████▍| 318/338 [00:01<00:00, 255.67it/s]Loading weights: 100%|██████████| 338/338 [00:01<00:00, 248.44it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-7B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/scipy/stats/_wilcoxon.py:172: RuntimeWarning: invalid value encountered in scalar divide
+  z = (r_plus - mn) / se
+backend: genuine:Qwen2.5-7B-Instruct + LoRA
+
+correlation Q_i vs reputation-deficit: +nan  (high => redundant => explains mu3=0)
+correlation Q_i vs label            : +nan
+correlation rep-deficit vs label    : +0.440
+
+CV MCC by mu3 (repeated stratified 5-fold x6 = 30 folds):
+    mu3  MCC mean  MCC std   sig vs mu3=0
+    0.0    0.0000   0.0000
+    0.1    0.0000   0.0000  dMCC=+0.0000 p=nan ns
+    0.2    0.0000   0.0000  dMCC=+0.0000 p=nan ns
+    0.3    0.0000   0.0000  dMCC=+0.0000 p=nan ns
+    0.4    0.0000   0.0000  dMCC=+0.0000 p=nan ns
+    0.5    0.0000   0.0000  dMCC=+0.0000 p=nan ns
+
+best mu3 by CV mean: 0.0
+
+VERDICT: mu3=0 is NOT significantly better than mu3=0.1/0.2 across folds (no paired test p<0.05). mu3=0 is within noise: the reputation term neither helps nor hurts DETECTION on this dataset. It must NOT be stated as a result; keep the three-way fusion general and re-tune per deployment.
+
+evidence -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/evidence/mu3_validation.json

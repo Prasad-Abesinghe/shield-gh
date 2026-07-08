@@ -64,9 +64,13 @@ main (int argc, char *argv[])
   rsus.Create (nRsu);
   MobilityHelper rsuMob;
   Ptr<ListPositionAllocator> pos = CreateObject<ListPositionAllocator> ();
+  std::vector<std::string> rsuLabels;   // RSU_row_col label per node (grid order)
   for (uint32_t r = 0; r < rsuRows; ++r)
     for (uint32_t c = 0; c < rsuCols; ++c)
-      pos->Add (Vector (gridX0 + c * rsuSpacing, gridY0 + r * rsuSpacing, 0.0));
+      {
+        pos->Add (Vector (gridX0 + c * rsuSpacing, gridY0 + r * rsuSpacing, 0.0));
+        rsuLabels.push_back ("RSU_" + std::to_string (r) + "_" + std::to_string (c));
+      }
   rsuMob.SetPositionAllocator (pos);
   rsuMob.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   rsuMob.Install (rsus);
@@ -84,8 +88,8 @@ main (int argc, char *argv[])
     }
   for (uint32_t i = 0; i < rsus.GetN (); ++i)
     {
-      anim.UpdateNodeDescription (rsus.Get (i), "RSU" + std::to_string (i));
-      anim.UpdateNodeColor (rsus.Get (i), 230, 30, 30);       // red RSUs
+      anim.UpdateNodeDescription (rsus.Get (i), rsuLabels[i]);  // RSU_row_col
+      anim.UpdateNodeColor (rsus.Get (i), 30, 170, 30);        // green RSUs
       anim.UpdateNodeSize (rsus.Get (i)->GetId (), 40, 40);
     }
 

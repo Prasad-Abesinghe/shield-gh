@@ -1,0 +1,80 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+device=cuda  gpu=NVIDIA GeForce RTX 5090
+loading Qwen/Qwen2.5-7B-Instruct (train quantise=False) ...
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 4728.51it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-7B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+trainable params: 10,117,632 || all params: 7,080,761,856 || trainable%: 0.1429
+fine-tuning LoRA adapter (Eq. 3.25 local objective) ...
+  epoch 1/3  loss=0.9781
+  epoch 2/3  loss=0.5236
+  epoch 3/3  loss=0.4363
+evaluating ...
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "train_precision": "bf16",
+  "deploy_precision": "4bit-nf4",
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ]
+  },
+  "epochs": 3,
+  "lr": 0.0002,
+  "batch_size": 16,
+  "max_len": 96,
+  "host": "blackbox-Z790-EAGLE-AX-02",
+  "python": "3.10.14",
+  "n_train": 2240,
+  "n_test": 280,
+  "classes": [
+    "BENIGN",
+    "DP-FR",
+    "DP-IT",
+    "DP-TS",
+    "CP-FR",
+    "CP-IT",
+    "CP-TS"
+  ],
+  "accuracy": 0.8393,
+  "mcc": 0.8137,
+  "macro_f1": 0.8245,
+  "binary": {
+    "tpr": 0.9319,
+    "tnr": 0.8667,
+    "tp": 219,
+    "tn": 39,
+    "fp": 6,
+    "fn": 16
+  },
+  "latency_s_per_window": 0.0182,
+  "train_seconds": 59.3,
+  "per_class_f1": {
+    "BENIGN": 0.78,
+    "DP-FR": 0.8,
+    "DP-IT": 0.5152,
+    "DP-TS": 0.6761,
+    "CP-FR": 1.0,
+    "CP-IT": 1.0,
+    "CP-TS": 1.0
+  }
+}
+
+adapter saved -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/models/qwen2.5-7b-shieldgh-lora
+evidence -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/evidence/qwen_finetune_results.json

@@ -209,6 +209,7 @@ class _GenuineBackend:
         self.model = AutoModelForSequenceClassification.from_pretrained(
             self.hf_id, num_labels=n_classes,
             torch_dtype=torch.float16, device_map="auto")
+        self.model.config.pad_token_id = self.tok.pad_token_id
         try:
             from peft import LoraConfig, get_peft_model, TaskType
             cfg = LoraConfig(task_type=TaskType.SEQ_CLS, r=8, lora_alpha=16,
@@ -220,27 +221,47 @@ class _GenuineBackend:
             self.kind = "genuine:Qwen2.5-7B-Instruct (full fine-tune)"
         self.torch = torch
 
-    def fit(self, texts, labels, epochs=3, lr=2e-5):
+    def _dev(self):
         import torch
+        return next(self.model.parameters()).device
+
+    def fit(self, texts, labels, epochs=3, lr=2e-4, bs=16):
+        import torch
+        # a 7B model needs only a few epochs; callers passing the fallback's
+        # large epoch count (e.g. 300) are clamped so genuine runs stay tractable
+        epochs = min(int(epochs), 3)
+        dev = self._dev()
         opt = torch.optim.AdamW(
             (p for p in self.model.parameters() if p.requires_grad), lr=lr)
         self.model.train()
-        y = torch.tensor(labels)
+        texts, labels = list(texts), list(labels)
+        idx = np.arange(len(texts))
         for _ in range(epochs):
-            enc = self.tok(list(texts), return_tensors="pt", padding=True,
-                           truncation=True, max_length=64)
-            out = self.model(**enc, labels=y)
-            out.loss.backward()
-            opt.step(); opt.zero_grad()
+            np.random.shuffle(idx)
+            for b in range(0, len(idx), bs):
+                bi = idx[b:b + bs]
+                enc = self.tok([texts[i] for i in bi], return_tensors="pt",
+                               padding=True, truncation=True, max_length=64)
+                enc = {k: v.to(dev) for k, v in enc.items()}
+                y = torch.tensor([labels[i] for i in bi]).to(dev)
+                out = self.model(**enc, labels=y)
+                out.loss.backward()
+                opt.step(); opt.zero_grad()
 
     def proba(self, texts):
         import torch
+        dev = self._dev()
         self.model.eval()
+        texts = list(texts)
+        probs = []
         with torch.no_grad():
-            enc = self.tok(list(texts), return_tensors="pt", padding=True,
-                           truncation=True, max_length=64)
-            logits = self.model(**enc).logits.float()
-            return torch.softmax(logits, dim=-1).cpu().numpy()
+            for b in range(0, len(texts), 32):
+                enc = self.tok(texts[b:b + 32], return_tensors="pt",
+                               padding=True, truncation=True, max_length=64)
+                enc = {k: v.to(dev) for k, v in enc.items()}
+                logits = self.model(**enc).logits.float()
+                probs.append(torch.softmax(logits, dim=-1).cpu().numpy())
+        return np.concatenate(probs)
 
     def get_weights(self):
         import torch

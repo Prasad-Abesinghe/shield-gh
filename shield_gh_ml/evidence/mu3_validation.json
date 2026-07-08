@@ -1,0 +1,87 @@
+{
+  "task": "mu3 cross-validation significance test (supervisor-requested)",
+  "backend": "fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)",
+  "seed": 42,
+  "dataset": {
+    "n_total": 2800,
+    "n_classes": 7,
+    "note": "P4: 2800 samples is small; treat as controlled study"
+  },
+  "cv": {
+    "scheme": "repeated stratified 5-fold x6 = 30 folds",
+    "theta_tuned_on": "train fold only (no test leakage)",
+    "mu1_mu2_ratio": "0.2:0.8 renormalised by (1-mu3)"
+  },
+  "correlations": {
+    "corr_Qi_repdeficit": 0.5147,
+    "corr_Qi_label": 0.7828,
+    "corr_repdeficit_label": 0.4402,
+    "note": "high corr_Qi_repdeficit => the two signals are redundant on this dataset, which is WHY the grid prefers mu3=0"
+  },
+  "mcc_by_mu3": {
+    "0.0": {
+      "mcc_mean": 0.7914,
+      "mcc_std": 0.0298,
+      "n_folds": 30
+    },
+    "0.1": {
+      "mcc_mean": 0.7931,
+      "mcc_std": 0.0289,
+      "n_folds": 30
+    },
+    "0.2": {
+      "mcc_mean": 0.7927,
+      "mcc_std": 0.0289,
+      "n_folds": 30
+    },
+    "0.3": {
+      "mcc_mean": 0.7911,
+      "mcc_std": 0.0288,
+      "n_folds": 30
+    },
+    "0.4": {
+      "mcc_mean": 0.7914,
+      "mcc_std": 0.0291,
+      "n_folds": 30
+    },
+    "0.5": {
+      "mcc_mean": 0.7911,
+      "mcc_std": 0.0288,
+      "n_folds": 30
+    }
+  },
+  "significance_vs_mu3_0": {
+    "0.1": {
+      "mcc_diff_vs_mu3_0": -0.0017,
+      "ttest_p": 0.0475,
+      "wilcoxon_p": 0.0679,
+      "significant_at_0p05": true
+    },
+    "0.2": {
+      "mcc_diff_vs_mu3_0": -0.0013,
+      "ttest_p": 0.3131,
+      "wilcoxon_p": 0.4955,
+      "significant_at_0p05": false
+    },
+    "0.3": {
+      "mcc_diff_vs_mu3_0": 0.0003,
+      "ttest_p": 0.8228,
+      "wilcoxon_p": 0.5277,
+      "significant_at_0p05": false
+    },
+    "0.4": {
+      "mcc_diff_vs_mu3_0": 0.0,
+      "ttest_p": 0.9889,
+      "wilcoxon_p": 0.8757,
+      "significant_at_0p05": false
+    },
+    "0.5": {
+      "mcc_diff_vs_mu3_0": 0.0003,
+      "ttest_p": 0.8228,
+      "wilcoxon_p": 0.5277,
+      "significant_at_0p05": false
+    }
+  },
+  "best_mu3_by_cv_mean": 0.1,
+  "verdict": "best mu3 by CV mean is 0.1, not 0 -> the single-split mu3=0 was a small-grid artifact; use the CV-selected value."
+}

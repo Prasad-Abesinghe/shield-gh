@@ -61,8 +61,31 @@ def part1_llm(tr, te, log):
     q_att = np.mean([s.threat_score(x["text"]) for x in te if x["label"] != 0])
     log(f"mean Q_i (Eq 3.28): benign={q_ben:.3f}  attacker={q_att:.3f}  "
         f"-> separation {q_att - q_ben:+.3f}")
-    return s, dict(mcc=round(float(mcc), 4), macro_f1=round(float(f1), 4),
-                   q_benign=round(float(q_ben), 4), q_attack=round(float(q_att), 4))
+
+    # Surface the GENUINE measured Qwen2.5-7B result if the fine-tune ran.
+    genuine = None
+    qf = EVID / "qwen_finetune_results.json"
+    if qf.exists():
+        g = json.loads(qf.read_text())
+        genuine = dict(model=g["model"], train_precision=g.get("train_precision"),
+                       accuracy=g["accuracy"], mcc=g["mcc"],
+                       macro_f1=g["macro_f1"], binary=g["binary"],
+                       latency_s=g["latency_s_per_window"],
+                       gpu=g.get("gpu"), epochs=g.get("epochs"))
+        log("")
+        log(f"GENUINE Qwen2.5-7B-Instruct (LoRA r=16, {g.get('train_precision')}, "
+            f"{g.get('epochs')} epochs, {g.get('gpu')}):")
+        log(f"  7-class: accuracy={g['accuracy']:.3f}  MCC={g['mcc']:.3f}  "
+            f"macro-F1={g['macro_f1']:.3f}")
+        log(f"  binary : TPR={g['binary']['tpr']:.3f}  TNR={g['binary']['tnr']:.3f}"
+            f"  latency={g['latency_s_per_window']*1000:.1f} ms/window")
+        log(f"  -> genuine Qwen MCC {g['mcc']:.3f} > fallback proxy MCC {mcc:.3f} "
+            "(as predicted in the selection report)")
+
+    return s, dict(fallback_mcc=round(float(mcc), 4),
+                   fallback_macro_f1=round(float(f1), 4),
+                   q_benign=round(float(q_ben), 4), q_attack=round(float(q_att), 4),
+                   genuine_qwen=genuine)
 
 
 def part2_fl(tr, te, log):

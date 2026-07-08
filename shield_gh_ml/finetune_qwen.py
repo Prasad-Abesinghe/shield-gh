@@ -17,6 +17,7 @@ top of 4-bit Qwen2.5-7B (the federated-friendly small update, §2.4.2) as a
 7-class sequence classifier over tokenised forwarding-log windows.
 """
 from __future__ import annotations
+import os
 import json
 import time
 import platform
@@ -50,6 +51,14 @@ def batched(seq, bs):
 
 
 def build_model(quantise=True):
+    """Build a LoRA-adapted Qwen2.5-7B sequence classifier.
+
+    quantise=True  -> 4-bit NF4 (deployment / OBU footprint).
+    quantise=False -> bf16 LoRA. Preferred for TRAINING on Blackwell (RTX 5090,
+      sm_120), where the bitsandbytes 4-bit *backward* kernel currently raises a
+      CUDA launch failure. The 7B bf16 weights (~15 GB) + LoRA fit the 32 GB
+      card, so we train in bf16 and the reported inference config remains 4-bit.
+    """
     tok = AutoTokenizer.from_pretrained(HF_ID)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
@@ -59,9 +68,11 @@ def build_model(quantise=True):
             load_in_4bit=True, bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.bfloat16,
             bnb_4bit_use_double_quant=True)
-        kw["torch_dtype"] = torch.bfloat16
+        kw["dtype"] = torch.bfloat16
+    elif DEVICE == "cuda":
+        kw["dtype"] = torch.bfloat16          # bf16 full-precision-weight LoRA
     else:
-        kw["torch_dtype"] = torch.float32
+        kw["dtype"] = torch.float32
     model = AutoModelForSequenceClassification.from_pretrained(HF_ID, **kw)
     model.config.pad_token_id = tok.pad_token_id
     if quantise and DEVICE == "cuda":
@@ -130,8 +141,12 @@ def latency(tok, model, texts, n=64):
 def main():
     print(f"device={DEVICE}  gpu={torch.cuda.get_device_name(0) if DEVICE=='cuda' else '-'}")
     tr, va, te = load()
-    print(f"loading + quantising {HF_ID} ...")
-    tok, model = build_model(quantise=True)
+    # Train in bf16 (quantise=False): the 4-bit bnb *backward* kernel raises a
+    # CUDA launch failure on Blackwell (RTX 5090). bf16 7B+LoRA fits the 32 GB
+    # card; the deployment/inference config stays 4-bit (recorded below).
+    train_quantise = os.environ.get("SHIELD_QUANTISE_TRAIN", "0") == "1"
+    print(f"loading {HF_ID} (train quantise={train_quantise}) ...")
+    tok, model = build_model(quantise=train_quantise)
     model.print_trainable_parameters()
 
     print("fine-tuning LoRA adapter (Eq. 3.25 local objective) ...")
@@ -156,6 +171,11 @@ def main():
     res = dict(
         model=HF_ID, device=DEVICE,
         gpu=torch.cuda.get_device_name(0) if DEVICE == "cuda" else None,
+        train_precision="4bit-nf4" if train_quantise else "bf16",
+        deploy_precision="4bit-nf4",
+        lora=dict(r=16, alpha=32, dropout=0.05,
+                  target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]),
+        epochs=3, lr=2e-4, batch_size=16, max_len=MAXLEN,
         host=platform.node(), python=platform.python_version(),
         n_train=len(tr), n_test=len(te), classes=CLASSES,
         accuracy=round(float(acc), 4), mcc=round(float(mcc), 4),

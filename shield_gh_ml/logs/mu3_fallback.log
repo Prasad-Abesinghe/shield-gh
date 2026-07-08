@@ -1,0 +1,20 @@
+backend: fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)
+
+correlation Q_i vs reputation-deficit: +0.515  (high => redundant => explains mu3=0)
+correlation Q_i vs label            : +0.783
+correlation rep-deficit vs label    : +0.440
+
+CV MCC by mu3 (repeated stratified 5-fold x6 = 30 folds):
+    mu3  MCC mean  MCC std   sig vs mu3=0
+    0.0    0.7914   0.0298
+    0.1    0.7931   0.0289  dMCC=-0.0017 p=0.048 SIG
+    0.2    0.7927   0.0289  dMCC=-0.0013 p=0.313 ns
+    0.3    0.7911   0.0288  dMCC=+0.0003 p=0.823 ns
+    0.4    0.7914   0.0291  dMCC=+0.0000 p=0.989 ns
+    0.5    0.7911   0.0288  dMCC=+0.0003 p=0.823 ns
+
+best mu3 by CV mean: 0.1
+
+VERDICT: best mu3 by CV mean is 0.1, not 0 -> the single-split mu3=0 was a small-grid artifact; use the CV-selected value.
+
+evidence -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/evidence/mu3_validation.json

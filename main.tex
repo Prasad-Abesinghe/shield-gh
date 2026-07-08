@@ -187,8 +187,21 @@ deployability required for real-world vehicular deployment. This paper presents
 SHIELD-GH, a dual-mode detection and mitigation framework that formalizes six
 distinct grey hole attack signatures across two network planes and provides
 both a rule-based lightweight mode and a full AI-cryptographic mode. The
-lightweight mode employs mobility-corrected sliding-window signature detection
-(covering fixed-rate, intermittent, and target-specific variants) with HMAC-based packet authentication for low-overhead deployment on resource-constrained vehicular nodes. The full mode integrates a fine-tuned Large Language Model (LLM) with an RSU-maintained, blockchain-verified Federated Learning (FL) aggregator for semantic anomaly detection, combined with post-quantum cryptographic mitigation employing a controller-independent PQC Logical Key Hierarchy (PQC-LKH) with Distributed Key Generation, CRYSTALS-Dilithium signatures, zk-SNARK-based packet forwarding proofs, and $(k,n)$-threshold signatures for collectively authorized node isolation without controller key monopoly. A novel Mobility-Aware Trust Decay (MATD) mechanism and a Dual-Evidence Blockchain Smart Contract (DEBSC) ensure that RSU handoff ambiguity does not inflate false positive rates. 
+lightweight mode employs mobility-corrected sliding-window
+signature detection covering fixed-rate, intermittent, and
+target-specific variants across both the data plane and
+controller plane for low-overhead deployment. The full mode integrates a fine-tuned Large Language Model (LLM) with an RSU-maintained, blockchain-verified Federated Learning (FL) aggregator for semantic anomaly detection, combined with post-quantum cryptographic mitigation employing
+a controller-independent PQC Logical Key Hierarchy (PQC-LKH)
+with Distributed Key Generation, ML-DSA-87 signatures,
+VRF-based dynamic endorser selection, zk-SNARK-based packet
+forwarding proofs, and $(k,n)$-threshold signatures for
+collectively authorized node isolation without controller
+key monopoly. A novel Mobility-Aware Trust Decay (MATD) mechanism,
+Dual-Evidence Blockchain Smart Contract (DEBSC), and
+multi-controller flat architecture with blockchain-backed
+trust scoring and ordered failover ensure that RSU handoff
+ambiguity and controller compromise do not undermine
+detection integrity.
 
 % Comment out this line as you don't have results yet.
 
@@ -503,12 +516,16 @@ static SDN or conventional VANET. In the solution, SHIELD-GH introduces a
 dual-mode framework that uniquely combines formal attack signature-driven
 rule-based detection (deployable with minimal compute) and LLM-FL full-mode
 detection (providing semantic reasoning over temporal behavioral patterns),
-unified under a mobility-aware trust mechanism and enforced by a post-quantum
-cryptographic mitigation layer that employs zero-knowledge forwarding proofs,
-threshold signatures, PQC-LKH group re-keying with DKG-based
-controller-independent key generation, and CRYSTALS-family PQC — the first
-such integrated framework providing controller-independent mitigation enforcement
-for grey hole attack detection in SDVN.
+unified under a mobility-aware trust mechanism and
+multi-controller flat architecture with blockchain trust
+scoring, ordered failover, and VRF-based dynamic endorser
+selection, and enforced by a post-quantum cryptographic
+mitigation layer that employs zero-knowledge forwarding
+proofs, threshold signatures, and PQC-LKH group re-keying
+with DKG-based controller-independent key generation and
+CRYSTALS-family PQC — the first such integrated framework
+providing controller-independent, trust-governed mitigation
+enforcement for grey hole attack detection in SDVN.
 
 
 
@@ -916,10 +933,10 @@ In August 2024, NIST finalised the first post-quantum cryptographic
 encapsulation, and FIPS~204 (ML-DSA, based on CRYSTALS-Dilithium) for
 digital signatures~\cite{nist2024fips203,nist2024fips204}. Both
 algorithms are lattice-based, offering conjectured security against both
-classical and quantum adversaries. CRYSTALS-Dilithium (security
-level~2) produces signatures of 2,420~bytes and public keys of
-1,312~bytes, compared to 64~bytes for an ECDSA signature over
-P-256 — a 38$\times$ increase in signature size with significant
+classical and quantum adversaries. CRYSTALS-Dilithium at security
+level~5 (ML-DSA-87) produces signatures of 4,595~bytes and public
+keys of 2,592~bytes, compared to 64~bytes for an ECDSA signature
+over P-256 — a 72$\times$ increase in signature size with significant
 implications for bandwidth-constrained V2X broadcast channels where
 Basic Safety Messages (BSMs) and Cooperative Awareness Messages (CAMs)
 are transmitted at 10~Hz per vehicle.
@@ -2068,15 +2085,24 @@ unacceptable latency for real-time safety-critical decisions. Motivated
 by the edge-cloud design of MistralBSM~\cite{hamhoum2024mistralbsm},
 the proposed framework employs a two-tier LLM deployment. They are,
 
-\textbf{Tier 1 (Edge LLM at RSU):} A quantised, fine-tuned lightweight
-LLM (e.g., a 4-bit quantised Mistral-7B or BERT-based model) processes
-short blockchain log windows $\mathbf{x}_i^{(t)}$ of length $n_e$ at the
-RSU in real time. It produces a binary preliminary verdict
-$\hat{y}_i^{\mathrm{edge}} \in \{0,1\}$.
+\textbf{Tier 1 (Edge LLM at RSU):} A 4-bit NF4 quantised,
+LoRA-adapted Qwen2.5-7B-Instruct model (7.6\,B parameters,
+LoRA rank $r_{\text{edge}}=8$) processes short blockchain log
+windows $\mathbf{x}_i^{(t)}$ of $n_e = 96$ tokens at the RSU
+in real time. Each token encodes one forwarding event per slot
+(\texttt{FWD}/\texttt{DRP}/\texttt{HOF}); controller-plane
+variants prepend a \texttt{RULE} prefix token. The model
+produces a seven-class probability vector (BENIGN $+$ S1--S6)
+from which the binary preliminary verdict
+$\hat{y}_i^{\mathrm{edge}} \in \{0,1\}$ is derived.
 
-\textbf{Tier 2 (Cloud LLM):} For cases where the edge LLM uncertainty
-exceeds threshold $\varepsilon_u$, a full-size LLM processes a longer
-historical window of length $n_c \gg n_e$ for a definitive verdict.
+\textbf{Tier 2 (Cloud LLM):} For cases where the edge LLM
+confidence falls below threshold $\varepsilon_u = 0.15$, the
+same Qwen2.5-7B-Instruct base model operating under a
+higher-rank LoRA configuration ($r_{\text{cloud}}=16$) processes
+a longer historical window $n_c \gg n_e$ for a definitive
+verdict, providing greater representational capacity without
+maintaining a separate model family.
 
 The routing decision is shown in Equation~\eqref{eq:llm_routing}.
 
@@ -2342,17 +2368,23 @@ parameters $\boldsymbol{\theta}$ is shown in Equation~\eqref{eq:llm_score}.
 \begin{equation}
 \label{eq:llm_score}
 \mathcal{Q}_i(t) =
+\sum_{k \in \{S1,\ldots,S6\}}
 \mathrm{softmax}\!\Bigl(
 \mathrm{LLM}\!\left(\mathbf{x}_i^{(t)};\boldsymbol{\theta}\right)
-\Bigr)_{\!\mathrm{malicious}}
+\Bigr)_{k}
 \end{equation}
 
-As shown in Eq.~\eqref{eq:llm_score}, $\mathbf{x}_i^{(t)}$ is the 
-tokenised blockchain forwarding log of vehicle $v_i$ at time $t$, 
-$\boldsymbol{\theta}$ are the fine-tuned LLM parameters, and the 
-malicious class probability is extracted from the softmax output. 
-A higher $\mathcal{Q}_i(t)$ indicates greater likelihood of grey 
-hole behaviour.
+As shown in Eq.~\eqref{eq:llm_score}, $\mathbf{x}_i^{(t)}$ is the
+tokenised blockchain forwarding log of vehicle $v_i$ at time $t$,
+$\boldsymbol{\theta}$ are the fine-tuned Qwen2.5-7B-Instruct LoRA
+parameters, and $\mathcal{Q}_i(t)$ is the total softmax probability
+mass assigned to the six malicious variant classes S1--S6 by a
+seven-class classifier (BENIGN $+$ S1--S6). This equals $1 -
+P(\mathrm{BENIGN}\mid\mathbf{x}_i^{(t)})$ and lies in $[0,1]$. The
+seven-class formulation additionally yields per-variant class
+probabilities that directly support per-variant MCC (M1,
+Eq.~\eqref{eq:m1_mcc}) and AVCR (M3, Eq.~\eqref{eq:m3_avcr})
+evaluation without requiring a separate classification head.
 
 Because no single evidence source is individually sufficient for reliable
 detection under all six attack variants, the final detection decision fuses
@@ -2870,7 +2902,7 @@ cost to $O(\log N)$.
 % --- SUPERVISOR REVISION BLOCK 10: dynamic PQC-LKH membership (lazy policy) ---
 Vehicles are organised into a binary tree $\mathcal{T}$ of depth
 $\lceil \log_2 N \rceil$. Each internal node $u \in \mathcal{T}$
-holds a Kyber-768 key pair $(\mathbf{pk}_u, \mathbf{sk}_u)$. The
+holds a Kyber-1024 key pair $(\mathbf{pk}_u, \mathbf{sk}_u)$. The
 original design assumed a static group of $N$ vehicles, which is
 unrealistic in a high-mobility SDVN. SHIELD-GH adopts a
 \emph{lazy membership policy} that preserves the $O(\log N)$
@@ -2976,7 +3008,7 @@ contacting it directly.
 	\label{fig:pqc-lkh}
 \end{figure}
 
-As shown in figure~\ref{fig:pqc-lkh} illustrates the PQC-LKH binary tree structure for post-quantum group re-keying. As shown in Figure~\ref{fig:pqc-lkh}, the PQC-LKH scheme adopts a binary tree structure for an example network of $N=8$ vehicles. Each vehicle occupies a leaf node (V1--V8) and each internal node holds a Kyber-768 key pair. Vehicle V3 has been identified as a grey hole attacker and isolated. The re-keying procedure refreshes only the nodes along the path from V3's leaf to the root — the K\_sub parent node, the K\_left subtree node, and K\_root — totalling $\lceil\log_2 8\rceil = 3$ Kyber operations. For each refreshed node, the updated key is encrypted under the sibling subtree's existing public key and broadcast, so only vehicles on the unaffected side of each split (e.g., V1 and V2 receive an encrypted update via their K\_sub) can decrypt and derive the new group session key. V3, lacking the private keys for any refreshed node on the path, is permanently and cryptographically excluded from the new group session without the RSU needing to contact it directly. The embedded efficiency comparison table in the figure quantifies the benefit: naïve unicast re-keying requires $N-1 = 7$ messages and $7$ KEM operations at $O(N)$ complexity, while PQC-LKH achieves the same exclusion guarantee with $\log_2 N = 3$ messages and operations at $O(\log N)$ — a factor of 2.33$\times$ reduction for $N=8$ that grows logarithmically with network size.
+As shown in figure~\ref{fig:pqc-lkh} illustrates the PQC-LKH binary tree structure for post-quantum group re-keying. As shown in Figure~\ref{fig:pqc-lkh}, the PQC-LKH scheme adopts a binary tree structure for an example network of $N=8$ vehicles. Each vehicle occupies a leaf node (V1--V8) and each internal node holds a Kyber-1024 key pair. Vehicle V3 has been identified as a grey hole attacker and isolated. The re-keying procedure refreshes only the nodes along the path from V3's leaf to the root — the K\_sub parent node, the K\_left subtree node, and K\_root — totalling $\lceil\log_2 8\rceil = 3$ Kyber operations. For each refreshed node, the updated key is encrypted under the sibling subtree's existing public key and broadcast, so only vehicles on the unaffected side of each split (e.g., V1 and V2 receive an encrypted update via their K\_sub) can decrypt and derive the new group session key. V3, lacking the private keys for any refreshed node on the path, is permanently and cryptographically excluded from the new group session without the RSU needing to contact it directly. The embedded efficiency comparison table in the figure quantifies the benefit: naïve unicast re-keying requires $N-1 = 7$ messages and $7$ KEM operations at $O(N)$ complexity, while PQC-LKH achieves the same exclusion guarantee with $\log_2 N = 3$ messages and operations at $O(\log N)$ — a factor of 2.33$\times$ reduction for $N=8$ that grows logarithmically with network size.
 
 % ============================================================
 % INSERT AS SECTION 3.5 — ALGORITHMS
@@ -3175,10 +3207,17 @@ maintenance.
 \small
 \Procedure{\texttt{FV-Det}}{$v_i, t, \mathbf{w}^{(r)}, \boldsymbol{\theta}$}
   \State $\mathbf{x}_i \gets \texttt{TOKENIZE\_LOG}(\texttt{GET\_BLOCKCHAIN\_LOG}(v_i, t, W))$
-  \State $\mathcal{Q}_i \gets \text{softmax}(\text{LLM}(\mathbf{x}_i; \boldsymbol{\theta}))_{\text{mal}}$
-  \Comment{Eq.~\eqref{eq:llm_score}}
+  \State $\mathcal{Q}_i \gets
+    \sum_{k \in \{S1,\ldots,S6\}}
+    \mathrm{softmax}\!\bigl(
+    \mathrm{LLM}(\mathbf{x}_i;\boldsymbol{\theta})
+    \bigr)_{k}$
+  \Comment{Eq.~\eqref{eq:llm_score}; 7-class,
+           see \S\ref{sec:ai_pipeline_impl}}
   \State $\hat{y}_i^{\text{FL}} \gets f(\mathbf{x}_i^{\text{feat}}; \mathbf{w}^{(r)})$
-  \Comment{Local FL model inference}
+  \Comment{FL inference: same Qwen2.5-7B base,
+           collaborative training role ---
+           see \S\ref{sec:ai_pipeline_impl}}
   \State $\mathcal{R}_i \gets \texttt{GET\_REPUTATION}(v_i)$
   \Comment{Eq.~\eqref{eq:reputation}}
   \State $\hat{y}_i \gets \mathbf{1}[\mu_1 \mathcal{S}_{\text{total}} + \mu_2 \mathcal{Q}_i + \mu_3(1-\mathcal{R}_i) > \theta_{\text{det}}]$
@@ -3648,8 +3687,10 @@ in Section~\ref{sec:mobility_analysis}.
 Kyber (IND-CCA2 secure under Module-LWE) encapsulates new group session keys after
 isolation (Eqs.~\eqref{eq:kyber_enc}--\eqref{eq:kyber_dec}). The PQC-LKH tree
 structure (Section~\ref{sec:pqc_lkh}) reduces re-keying cost from $O(N)$ to
-$O(\log N)$ KEM operations. Kyber-512 is used in lightweight mode;
-Kyber-768 in full mode.
+$O(\log N)$ KEM operations. ML-KEM-1024 (Kyber-1024, NIST
+security level~5) is used in both lightweight and full modes,
+satisfying the mandatory post-quantum security requirement
+throughout the SHIELD-GH framework.
 
 \mypar
 \textbf{Techniques not selected:} Homomorphic encryption and MPC impose
@@ -3909,7 +3950,63 @@ Consensus & rPBFT / BFT endorser set (Eq.~\eqref{eq:kend}) & Byzantine fault tol
 \hline
 Post-quantum crypto & ML-KEM (FIPS~203), ML-DSA (FIPS~204), SHA-256 & NIST-standardized Level-5 PQC primitives, so the long-lived vehicular PKI resists future quantum adversaries~\cite{nist2024fips203,nist2024fips204}. \\
 \hline
-Attack model & Grey hole; drop rate $50\%$ default; attacker \% swept $20$--$80\%$ & Sweeps the adversary range; $50\%$ drop is the canonical grey hole operating point. \\
+LLM base model & Qwen2.5-7B-Instruct (7.6\,B parameters) &
+Satisfies the $>$4\,B, $<$15\,B moderately-large model requirement;
+selected per model evaluation report. \\
+\hline
+LLM task head & 7-class sequence classification: BENIGN $+$ S1--S6 &
+Aligns directly with the six-variant attack taxonomy; per-variant class
+probabilities support M1 (MCC) and M3 (AVCR) evaluation without a
+separate classification head. \\
+\hline
+LLM fine-tune method & LoRA/PEFT; target modules:
+\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj},
+\texttt{o\_proj}; dropout 0.05 &
+Federated-friendly: small $\Delta\mathbf{w}$ reduces gradient
+commitment size and communication overhead
+(Eq.~\eqref{eq:gradient_commit}). \\
+\hline
+LoRA rank & $r_{\text{edge}}=8$ (RSU inference),
+$r_{\text{cloud}}=16$ (training / cloud tier) &
+Lower rank for real-time OBU-class inference; higher rank for
+training benchmark and cloud-tier re-evaluation. \\
+\hline
+LLM quantisation & 4-bit NF4, double quantisation, bf16 compute &
+Fits RSU hardware memory footprint; consistent with OBU feasibility
+discussion in Section~\ref{sec:lit_pqc_cav}. \\
+\hline
+LLM optimiser & AdamW, lr $= 2\times10^{-4}$, 3 local epochs
+per FL round &
+Standard LoRA training configuration; 3 epochs matches the FL
+round budget. \\
+\hline
+LLM max token length ($n_e$) & 96 tokens &
+Covers $W=10$ observation window at approximately 9 tokens per slot
+(\texttt{FWD}/\texttt{DRP}/\texttt{HOF}) with one
+\texttt{RULE} prefix token for controller-plane variants. \\
+\hline
+Edge escalation threshold $\varepsilon_u$ & 0.15 &
+Validated on held-out split; below this maximum class confidence
+the input is escalated to the cloud LLM tier
+(Eq.~\eqref{eq:llm_routing}). \\
+\hline
+FL rounds & 5 &
+Configurable; 5 rounds $\times$ 3 local LoRA epochs per round
+produces the reported validation MCC. \\
+\hline
+Training hardware & NVIDIA RTX 5090 (32\,GB), CUDA 12.8,
+PyTorch 2.11 &
+Global LoRA training environment; RSU-side inference uses the
+quantised $r=8$ edge configuration. \\
+\hline
+Attack model & Grey hole; default drop rate $\rho_a = 40\%$,
+default attacker penetration $p = 40\%$; both swept
+in Experiment~E1 (Eq.~\eqref{eq:e1_grid}) &
+Default values match the fixed parameters of Experiments
+E2--E5; $\rho_a = 40\%$ sits above the MATD noise floor
+(Eq.~\eqref{eq:handoff_loss}) and below the S1 saturation
+point, making it the canonical grey hole operating point
+for controlled comparison. \\
 \hline
 Observation window $W$ & $10$ slots ($10$\,s) & Long enough to estimate per-flow PDR statistics, short enough for responsive detection (sweep, Table~\ref{tab:gh_sensitivity}). \\
 \hline
@@ -3993,6 +4090,79 @@ early simulation results obtained from the ns-3.35 prototype, demonstrating
 the framework's behaviour under a fixed-rate grey hole attack.
 Section~\ref{sec:expected_results} then presents the full set of expected
 performance results based on analytical modelling of the six attack variants.
+
+%% ============================================================
+\section{Implemented AI Pipeline and Training Configuration}
+\label{sec:ai_pipeline_impl}
+%% ============================================================
+
+This section describes the concrete AI pipeline as implemented and its end-to-end
+data flow, realising the abstract full-mode detection logic of
+Algorithm~\ref{alg:fv_det}, so that the reported results can be reproduced
+exactly. The pipeline transforms raw blockchain forwarding records into a fused
+detection verdict through five stages, all sharing the single selected language
+model.
+
+\mypar
+\textbf{Stage~1 --- Blockchain log tokenisation.} Each vehicle's forwarding
+record over the observation window $W = 10$ slots (Table~\ref{tab:sim_settings})
+is rendered as a token sequence. Every slot emits one \texttt{ACTION:src} token,
+where the action is \texttt{FWD} (forwarded), \texttt{DRP} (dropped), or
+\texttt{HOF} (handoff slot, topologically-expected benign loss), and \texttt{src}
+is the coarse source bucket of the packet batch. Controller-plane variants
+prepend a \texttt{RULE} token describing the installed flow rule. This yields the
+tokenised window $\mathbf{x}_i^{(t)}$ of Eq.~\eqref{eq:llm_score}, capped at
+$n_e = 96$ tokens.
+
+\mypar
+\textbf{Stage~2 --- LLM semantic scoring.} The tokenised window is classified by
+a \textbf{Qwen2.5-7B-Instruct} model fine-tuned with a LoRA adapter
+(per the Edge-LLM architecture of Chapter~\ref{sec:methodology}) into the seven
+classes $\{\mathrm{BENIGN}, \mathrm{S1}, \ldots, \mathrm{S6}\}$. The semantic
+threat score $\mathcal{Q}_i(t)$ is the total softmax mass on the six malicious
+classes (Eq.~\eqref{eq:llm_score}). When the maximum class confidence falls below
+$\varepsilon_u = 0.15$, the input is escalated from the edge configuration
+($r_{\text{edge}}=8$) to the higher-capacity cloud configuration
+($r_{\text{cloud}}=16$) per the routing rule of Eq.~\eqref{eq:llm_routing}.
+
+\mypar
+\textbf{Stage~3 --- Federated training of the LLM.} The same Qwen2.5-7B model is
+the federated learning model: each vehicle $v_i$ locally fine-tunes its LoRA
+adapter on its private dataset $\mathcal{D}_i$ by minimising the cross-entropy
+objective of Eq.~\eqref{eq:local_loss}, and transmits only the small adapter
+update $\Delta\mathbf{w}_i$. Before transmission it commits the hash
+$\mathcal{C}_i = \mathtt{Hash}(\Delta\mathbf{w}_i \Vert t \Vert \mathrm{id}_i)$ to
+the blockchain (Eq.~\eqref{eq:gradient_commit}); the aggregator accepts an update
+only if the received gradient's hash matches the on-chain commitment
+(Eq.~\eqref{eq:gradient_verify}), and forms the new global model by dataset-size
+weighted FedAvg (Eq.~\eqref{eq:fedavg}). The LLM and the FL model are therefore a
+\emph{single} Qwen2.5-7B model, differentiated only by role: semantic scoring
+(inference) versus collaborative training (federated fine-tuning).
+
+\mypar
+\textbf{Stage~4 --- Evidence fusion.} The LLM score $\mathcal{Q}_i(t)$ is combined
+with the rule-based aggregate signature score $\mathcal{S}_{\mathrm{total}}(v_i)$
+and the blockchain reputation deficit $(1 - \mathcal{R}_i(t))$ through the
+validation-tuned linear rule of Eq.~\eqref{eq:fusion}, producing the binary
+verdict $\hat{y}_i(t)$.
+
+\mypar
+\textbf{Stage~5 --- Verdict handoff.} A positive verdict is passed to the DEBSC
+isolation gate (Eq.~\eqref{eq:debsc}); detection never triggers isolation on
+statistical evidence alone.
+
+\mypar
+\textbf{Training configuration.} The LoRA adapter targets the attention
+projections \texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj},
+\texttt{o\_proj} with dropout $0.05$, optimised by AdamW at learning rate
+$2\times10^{-4}$ for three local epochs per federated round over
+five global FL rounds, batch size $16$, and
+maximum sequence length $96$ tokens; every setting appears with its justification
+in Table~\ref{tab:sim_settings}. The base model is loaded in 4-bit NF4
+quantisation for deployment-footprint parity with resource-constrained road-side
+units, consistent with the OBU feasibility discussion of
+Section~\ref{sec:lit_pqc_cav}. All settings were fixed prior to the reported runs
+and are held constant across the evaluation.
 
 %% ============================================================
 \section{Performance Evaluation}
@@ -5372,8 +5542,7 @@ $^{\ddagger}$~M2, M4, M5 not available without active mitigation pipeline.}
 Comparing Run~1 and Run~2 shows the sensitivity of network performance to the
 attacker's drop rate under the fixed-rate variant (S1). As the drop rate increases
 from Run~1 to Run~2, network-wide PDR falls by 17.83 percentage points (86.54\%
-to 68.71\%), jitter rises from 27.46 to 38.09, and detection accuracy degrades
-from 92.39\% to 71.74\%. These preliminary results confirm that the ns-3.35
+to 68.71\%) and detection accuracy degrades from 92.39\% to 71.74\%. These preliminary results confirm that the ns-3.35
 prototype correctly reproduces the expected grey hole attack degradation and
 establish a baseline against which the full SHIELD-GH detection and mitigation
 framework will be evaluated in Milestone~14.
@@ -5385,8 +5554,8 @@ framework will be evaluated in Milestone~14.
 
 The following sections present the expected performance results of the SHIELD-GH
 framework based on analytical modelling of the six attack variants and comparison
-with the three external baselines (B1--B3) and five ablations (A1--A5) defined in
-Section~\ref{sec:evaluation}. Since full simulation experiments are scheduled for
+with the three external baselines (B1--B3) and ablations A1--A17 defined in
+Section~\ref{sec:ablation}. Since full simulation experiments are scheduled for
 Milestone~14 (see Chapter~5), the values reported here are
 derived from the formal attack models in Sections~\ref{sec:signatures}
 and~\ref{sec:detection_methodology}, calibrated against the parameter ranges

@@ -4,10 +4,28 @@
   "backend": "fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)",
   "seed": 42,
   "part1_llm": {
-    "mcc": 0.7121,
-    "macro_f1": 0.7192,
+    "fallback_mcc": 0.7121,
+    "fallback_macro_f1": 0.7192,
     "q_benign": 0.3702,
-    "q_attack": 0.9271
+    "q_attack": 0.9271,
+    "genuine_qwen": {
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "train_precision": "bf16",
+      "accuracy": 0.8393,
+      "mcc": 0.8137,
+      "macro_f1": 0.8245,
+      "binary": {
+        "tpr": 0.9319,
+        "tnr": 0.8667,
+        "tp": 219,
+        "tn": 39,
+        "fp": 6,
+        "fn": 16
+      },
+      "latency_s": 0.0182,
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "epochs": 3
+    }
   },
   "part2_fl": {
     "mcc_integrity_on": 0.7473,
