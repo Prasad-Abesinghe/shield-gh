@@ -1,43 +1,62 @@
-01. Identify all design flows and send me a list of flows with suggestions to overcome them. (07/06/2026)
+Task 1 : Identify design flaws (done)
 
-02. Complete the revisions sent by the supervisor and updating the report including the figures (09/06/2026)
+Task 2 : Correct flaws (done)
 
-03. Get a real world map for your simulation writing as M and SUMO. Get a dense urban map with many intersections and crosses.
-State of the art implementation must be finished. You should verify that implemented state of the art  is connected to the simulation variables properly and your plots are correctly plotted.
-(Scenarios group - Finish information slicing for my routing algorithm) (16/06/2026)
+Task 3 : State of the art simulation with SUMO (done)
 
-04. Attack detection groups should finish full blockchain implementation (and it's related all algorithms, equations) for the revised paper with full smart contract verification. Connect ns3 to blockchain and verify also by sending appropriate data from the real simulation (17/06/2026)
+Task 4 : Blockchain implementation (done)
 
-05. Implement all cryptographic content including key sharing (logical key hierarchy), authentication , etc. and send me evidence.  (23/06/2026)
-    -- DONE (2026-07-03): scratch/shield_gh_crypto/ (standalone Python, GENUINE PQC via
-       liboqs 0.15.0 Kyber-512/768 + ML-DSA-44/Dilithium-2; classical X25519/Ed25519 fallback).
-       PQC-LKH logical key hierarchy (O(log N) re-key, Eq 3.34-3.36), Dilithium FlowMod auth +
-       key revocation/failover (Alg 5), Pedersen+ZKP 3-state gate + DEBSC (Eq 3.29/3.30/debsc,
-       Alg 6), (k,n) threshold blacklisting + Pedersen DKG + threshold re-key (Eq 3.31-3.33).
-       Evidence: 31 pytest pass (27 PQC + 4 fallback, 85% core cov) + vectors/evidence_transcript.txt
-       (attacker V3 detected->isolated->re-keyed-out, honest V5 spared, forged cmd rejected) +
-       golden_vector.json. Run: bash scratch/shield_gh_crypto/verify_all.sh
+Task 5 : Cryptographic method implementation (done)
 
-06.01  LLM selection evidence, ML and LLM component implementation
-06.02  AI/LLM model model selection results and pipeline settings to report
-06.03  Implement all ML and or LLM content and send me evidence of all information (30/06/2026)
+Task 6 : AI/LLM model model selection results and pipeline settings to report (done)
 
-07. Integrate the full system and verify fine tuning and plot graphs for t=10 s completing with state of the arts (06/07/2026)
+Task 6.5 : LLM selection evidence, ML and LLM component implementation (done)
 
-08. Run full simulations in HPC lab and collect results (13/07/2026)
+Task 7 : Upgrading research questions and performance evaluation metrics, Designing research experiments to match research questions (done)
 
-09. Analyzing the results and writing results part of your paper as per supervisor's instructions (20/07/2026)
+Task 7.5 : Application of all AI patches already sent by the supervisor up to this moment. (done)
 
-10. Writing discussion part of your paper supervisor's instructions (24/07/2026)
+Task 7.75: Report if design changes are required if the performance of the implementation is very poor. Report the superior way you implemented so that design can be updated and apply the patch. If no changes, let me know.  (done — see TASK7_75_DESIGN_REVIEW.md: no algorithm design change needed, one topology/metric issue flagged for Task 8.5/10)
 
-11. Writing the appendix of your paper as per supervisor's instructions (26/07/2026)
+Task 8 : Full system implementation evidence with correct timing and correct coding without bypassing modeling - 1 data point of PEMs needed (in progress - need to do)
 
-12. Submitting final report for supervisor's review (28/07/2026)
+Task 8.5 : Sensitivity analysis for full system
 
-13. Addressing all supervisor's comments and resubmit for revise (04/08/2026)
+Task 9 : Confirm to me whether proposed method is superior than all 3 state of the art by running a test run for t=10 s
 
-14. Addressing all supervisor's comments and resubmit for revise (06/08/2026)
+Task 9.5 : Conduct Ablation study and plot graphs
 
-15. Creating graphical improvements for your demo. .... A GUI for the demo (10/08/2026)
+Task 10 : Run Full research experiments and plot graphs
 
-16. Create final presentation (12/08/2026)
+Task 11 : Writing Result analysis
+	
+Task 12 : Writing Discussion
+
+Task 13 : Writing conclusion and appendix
+
+Task 14 : Submit final report to supervisor
+
+Task 15 : Technical review round 1: Address comments and resubmit
+
+Task 16 : Technical review round 2: Address comments and resubmit
+
+Special Task 1 : Creating a demo GUI for simulation
+
+Special Task 2 : Creating a toy/real test bed for demo
+
+Special Task 3 : Creating a demo video
+
+Special Task 4 : Sending final presentation to the supervisor
+
+Special Task 5 : Presenting demo and presentation to the supervisor
+
+Task 17 : Making report concise/summarize: Eliminate redundancies
+
+Task 18 : Copy the report to Elsevier template
+
+Task 19 : Condense/summarize if needed, improve phrasing and reference issues. 
+
+Task 20 : Improving acceptance rate
+
+
+

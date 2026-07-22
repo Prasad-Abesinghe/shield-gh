@@ -1,0 +1,51 @@
+{
+  "backend": {
+    "backend": "liboqs",
+    "quantum_resistant": true,
+    "dilithium_mechanism": "ML-DSA-44",
+    "kyber_mechanisms": {
+      "512": "Kyber512",
+      "768": "Kyber768",
+      "1024": "Kyber1024"
+    },
+    "liboqs_version": "0.15.0"
+  },
+  "ops_ms": {
+    "kyber_keygen": 0.018471500000790307,
+    "kyber_enc": 0.018467999999908596,
+    "kyber_dec": 0.01588799999960126,
+    "dilithium_keygen": 0.02057663333516757,
+    "dilithium_sign": 0.03712973333449554,
+    "dilithium_verify": 0.019758633334276965,
+    "zkp_prove": 24.92160540000062,
+    "zkp_verify": 27.212110266664997,
+    "dkg_share": 0.9098354000002473
+  },
+  "sizes_bytes": {
+    "b_fwd": 47,
+    "b_zkp": 2466,
+    "b_grad": 32
+  },
+  "isolation_rate_per_veh_per_window": 0.038461538461538464,
+  "W": 10.0,
+  "results": [
+    {
+      "N": 50,
+      "omega_comp": 0.260861093673072,
+      "omega_comm": 251.42307692307693,
+      "omega_store": 381750.0
+    },
+    {
+      "N": 100,
+      "omega_comp": 0.521722187346144,
+      "omega_comm": 251.42307692307693,
+      "omega_store": 763500.0
+    },
+    {
+      "N": 200,
+      "omega_comp": 1.043444374692288,
+      "omega_comm": 251.42307692307693,
+      "omega_store": 1527000.0
+    }
+  ]
+}

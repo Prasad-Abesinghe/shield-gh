@@ -144,6 +144,22 @@ bool shield_gh_isolated_nodes[100] = {false};
 //             0 = OFF (attacker keeps attacking — for NetAnim attack videos)
 int enable_shield_gh = 1;
 
+// ── Task 8: full-mode AI (LLM+FL) NS-3 integration ───────────────────────────
+// CLI --enable_full_mode_ai=1 drives the full-mode detection pipeline
+// (Algorithm 3, FV-Det) end-to-end from the running simulation: NS-3 dumps the
+// per-node forwarding window, calls shield_gh_ml/ns3_infer.py (LLM Q_i + rule
+// S_total + reputation -> fused verdict, Eq. 3.29), reads the verdict back, and
+// the fused ŷ_i drives the sg_node_TP/TN/FP/FN confusion matrix (the M1 MCC PEM).
+// Off by default so existing lightweight runs are unaffected. Uses the CPU
+// fallback scorer by default (no GPU crash risk); genuine Qwen numbers are
+// reported separately from the standalone benchmark (Table 4.1).
+int enable_full_mode_ai = 0;
+// Bridge file paths and the python that has numpy+sklearn (fallback, no torch).
+std::string sg_ai_python = "/home/sdvn_ssh/.pyenv/versions/3.10.14/bin/python3";
+std::string sg_ai_window_file  = "/tmp/shieldgh_window.jsonl";
+std::string sg_ai_verdict_file = "/tmp/shieldgh_verdict.json";
+double sg_ai_last_infer_ms = 0.0;   // per-window inference latency (evidence)
+
 // CLI: video_mode=1 caps each flow to 'video_flow_packets' packets so the
 // grey-hole drop/forward behaviour is individually visible in NetAnim.
 int video_mode         = 0;
@@ -140017,6 +140033,7 @@ int main(int argc, char *argv[])
     cmd.AddValue ("cp_attack_number", "4=CP-FR, 5=CP-IT, 6=CP-TS", cp_attack_number);
     cmd.AddValue ("enable_shield_gh", "1=SHIELD-GH detection/isolation ON (default), 0=OFF for NetAnim attack video", enable_shield_gh);
     cmd.AddValue ("detection_mode", "SHIELD-GH detection mode: 'lightweight' (rule-based S1-S6 + HMAC + threshold FlowMod, default) or 'full' (adds LLM+FL fusion)", sg_detection_mode);
+    cmd.AddValue ("enable_full_mode_ai", "1=Task 8 full-mode AI: NS-3 calls shield_gh_ml/ns3_infer.py (LLM+FL fusion, Eq. 3.29) each window; fused verdict drives the MCC PEM (off by default)", enable_full_mode_ai);
     cmd.AddValue ("live_blockchain", "1=NS-3 invokes the REAL debsc Fabric chaincode during the sim (needs test-network up)", sg_live_blockchain);
     cmd.AddValue ("enable_crypto_hook", "1=NS-3 runs the REAL PQC crypto (Kyber/Dilithium/PQC-LKH) on each isolated node during the sim (Task 05)", sg_crypto_hook);
     cmd.AddValue ("video_mode", "1=cap packets per flow for a clear NetAnim attack video", video_mode);

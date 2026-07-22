@@ -1,0 +1,54 @@
+{
+  "backend": "fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)",
+  "theta_det": 0.5,
+  "weights": [
+    0.34,
+    0.33,
+    0.33
+  ],
+  "n_nodes": 4,
+  "model_load_ms": 290.64,
+  "inference_ms": 0.55,
+  "verdicts": [
+    {
+      "node": 0,
+      "y_hat": 1,
+      "q_i": 0.9991,
+      "s_total": 1.0,
+      "rep_deficit": 0.8956,
+      "score": 0.9653,
+      "llm_pred": "DP-FR",
+      "tier2": false
+    },
+    {
+      "node": 1,
+      "y_hat": 1,
+      "q_i": 0.9998,
+      "s_total": 1.0,
+      "rep_deficit": 0.781,
+      "score": 0.9277,
+      "llm_pred": "DP-FR",
+      "tier2": false
+    },
+    {
+      "node": 2,
+      "y_hat": 0,
+      "q_i": 0.4154,
+      "s_total": 0.0,
+      "rep_deficit": 0.2238,
+      "score": 0.211,
+      "llm_pred": "BENIGN",
+      "tier2": false
+    },
+    {
+      "node": 3,
+      "y_hat": 0,
+      "q_i": 0.4081,
+      "s_total": 0.0,
+      "rep_deficit": 0.2134,
+      "score": 0.2051,
+      "llm_pred": "BENIGN",
+      "tier2": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+=== DYNAMIC ENDORSER SELECTION written on-chain BY NS-3 during the sim ===
+(NS-3 registered 64 RSUs, then fired VRF SelectEndorsers for each isolation)
+
+--- VRF endorser set for isolation tx=ISO-node1-t4000 ---
+  mode=NORMAL | eligible|E|=50 | k_end=17 endorsers | f_max=16 Byzantine tolerated | proofs_verify=True
+  Omega(t) = ['RSU1', 'RSU3', 'RSU4', 'RSU5', 'RSU9', 'RSU10', 'RSU15', 'RSU17', 'RSU23', 'RSU27', 'RSU30', 'RSU37', 'RSU39', 'RSU45', 'RSU51', 'RSU57', 'RSU62']
+--- VRF endorser set for isolation tx=ISO-node0-t6000 ---
+  mode=NORMAL | eligible|E|=50 | k_end=17 endorsers | f_max=16 Byzantine tolerated | proofs_verify=True
+  Omega(t) = ['RSU1', 'RSU6', 'RSU8', 'RSU13', 'RSU15', 'RSU23', 'RSU24', 'RSU26', 'RSU29', 'RSU30', 'RSU32', 'RSU36', 'RSU39', 'RSU40', 'RSU52', 'RSU60', 'RSU62']

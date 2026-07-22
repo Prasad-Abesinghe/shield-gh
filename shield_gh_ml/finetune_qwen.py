@@ -77,10 +77,17 @@ def build_model(quantise=True):
     model.config.pad_token_id = tok.pad_token_id
     if quantise and DEVICE == "cuda":
         model = prepare_model_for_kbit_training(model)
-    cfg = LoraConfig(task_type=TaskType.SEQ_CLS, r=16, lora_alpha=32,
-                     lora_dropout=0.05,
-                     target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
-    model = get_peft_model(model, cfg)
+    # If a crash-recovery checkpoint exists, resume from it; else fresh adapter.
+    ckpt = HERE / "models" / "qwen_ckpt"
+    if (ckpt / "adapter_config.json").exists():
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, str(ckpt), is_trainable=True)
+        print(f"  [resume] loaded LoRA checkpoint from {ckpt}", flush=True)
+    else:
+        cfg = LoraConfig(task_type=TaskType.SEQ_CLS, r=16, lora_alpha=32,
+                         lora_dropout=0.05,
+                         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
+        model = get_peft_model(model, cfg)
     if DEVICE == "cuda":
         model = model.to(DEVICE)
     return tok, model
@@ -91,42 +98,109 @@ def encode(tok, texts):
                truncation=True, max_length=MAXLEN)
 
 
-def train(tok, model, tr, epochs=3, bs=16, lr=2e-4):
+# --------------------------------------------------------------------------- #
+#  Crash-resilient training for the RTX 5090 (Blackwell sm_120).               #
+#  The Blackwell + torch-cu128 stack raises intermittent                       #
+#  `cudaErrorLaunchFailure` under sustained load, which can wedge the display. #
+#  Mitigations: small batch, per-epoch LoRA checkpoint, auto-resume, retry on  #
+#  a caught CUDA error with cache flush, and guarded (batched) eval.           #
+# --------------------------------------------------------------------------- #
+CKPT_DIR = HERE / "models" / "qwen_ckpt"
+BS = int(os.environ.get("SHIELD_BS", "4"))          # small per-step batch = less kernel pressure
+ACCUM = int(os.environ.get("SHIELD_ACCUM", "4"))    # grad-accum -> effective batch = BS*ACCUM = 16
+MAX_RETRY = int(os.environ.get("SHIELD_MAX_RETRY", "3"))
+
+
+def _is_cuda_launch_err(e):
+    s = str(e).lower()
+    return "cuda" in s and ("launch failure" in s or "unspecified" in s
+                            or "illegal" in s or "device-side" in s)
+
+
+def _save_ckpt(model, ep):
+    CKPT_DIR.mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(str(CKPT_DIR))
+    (CKPT_DIR / "epoch.txt").write_text(str(ep))
+    print(f"  [ckpt] saved after epoch {ep} -> {CKPT_DIR}", flush=True)
+
+
+def _done_epochs():
+    f = CKPT_DIR / "epoch.txt"
+    return int(f.read_text().strip()) if f.exists() else 0
+
+
+def train(tok, model, tr, epochs=3, bs=None, lr=2e-4):
+    bs = bs or BS
     opt = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad),
                             lr=lr)
-    model.train()
     texts = [d["text"] for d in tr]
     labels = [d["label"] for d in tr]
     idx = np.arange(len(texts))
-    for ep in range(epochs):
+    start_ep = _done_epochs()          # auto-resume from last checkpoint
+    if start_ep:
+        print(f"  [resume] {start_ep} epoch(s) already done; continuing",
+              flush=True)
+    for ep in range(start_ep, epochs):
+        model.train()
         np.random.RandomState(ep).shuffle(idx)
-        tot = 0.0
-        for b in batched(idx, bs):
-            enc = encode(tok, [texts[i] for i in b]).to(DEVICE)
-            y = torch.tensor([labels[i] for i in b]).to(DEVICE)
-            out = model(**enc, labels=y)
-            out.loss.backward()
-            opt.step(); opt.zero_grad()
-            tot += out.loss.item()
-        print(f"  epoch {ep+1}/{epochs}  loss={tot/max(1,len(idx)//bs):.4f}")
+        tot = 0.0; nb = 0
+        opt.zero_grad()
+        micro_batches = list(batched(idx, bs))
+        for mi, b in enumerate(micro_batches):
+            for attempt in range(MAX_RETRY):
+                try:
+                    enc = encode(tok, [texts[i] for i in b]).to(DEVICE)
+                    y = torch.tensor([labels[i] for i in b]).to(DEVICE)
+                    out = model(**enc, labels=y)
+                    # grad-accum: scale so effective batch = BS*ACCUM
+                    (out.loss / ACCUM).backward()
+                    tot += out.loss.item(); nb += 1
+                    # step optimiser every ACCUM micro-batches (or at end)
+                    if (mi + 1) % ACCUM == 0 or (mi + 1) == len(micro_batches):
+                        opt.step(); opt.zero_grad()
+                    break
+                except RuntimeError as e:
+                    if _is_cuda_launch_err(e) and attempt < MAX_RETRY - 1:
+                        print(f"  [warn] CUDA launch fault, retry "
+                              f"{attempt+1}/{MAX_RETRY} after cache flush",
+                              flush=True)
+                        opt.zero_grad(set_to_none=True)
+                        try:
+                            torch.cuda.synchronize(); torch.cuda.empty_cache()
+                        except Exception:
+                            pass
+                        continue
+                    raise
+        print(f"  epoch {ep+1}/{epochs}  loss={tot/max(1,nb):.4f}", flush=True)
+        _save_ckpt(model, ep + 1)      # checkpoint => a later crash resumes here
 
 
 @torch.no_grad()
-def predict(tok, model, texts, bs=32):
+def predict(tok, model, texts, bs=8):
     model.eval()
     probs = []
     for b in batched(list(texts), bs):
-        enc = encode(tok, b).to(DEVICE)
-        logits = model(**enc).logits.float()
-        probs.append(torch.softmax(logits, -1).cpu().numpy())
+        for attempt in range(MAX_RETRY):
+            try:
+                enc = encode(tok, b).to(DEVICE)
+                logits = model(**enc).logits.float()
+                probs.append(torch.softmax(logits, -1).cpu().numpy())
+                break
+            except RuntimeError as e:
+                if _is_cuda_launch_err(e) and attempt < MAX_RETRY - 1:
+                    try:
+                        torch.cuda.synchronize(); torch.cuda.empty_cache()
+                    except Exception:
+                        pass
+                    continue
+                raise
     return np.concatenate(probs)
 
 
 @torch.no_grad()
 def latency(tok, model, texts, n=64):
     model.eval()
-    # warmup
-    for x in texts[:4]:
+    for x in texts[:4]:                # warmup
         model(**encode(tok, [x]).to(DEVICE))
     if DEVICE == "cuda":
         torch.cuda.synchronize()
@@ -151,7 +225,7 @@ def main():
 
     print("fine-tuning LoRA adapter (Eq. 3.25 local objective) ...")
     t0 = time.time()
-    train(tok, model, tr, epochs=3, bs=16)
+    train(tok, model, tr, epochs=3)          # bs from SHIELD_BS (default 4)
     train_s = time.time() - t0
 
     print("evaluating ...")
@@ -175,7 +249,8 @@ def main():
         deploy_precision="4bit-nf4",
         lora=dict(r=16, alpha=32, dropout=0.05,
                   target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]),
-        epochs=3, lr=2e-4, batch_size=16, max_len=MAXLEN,
+        epochs=3, lr=2e-4, batch_size=BS * ACCUM,
+        micro_batch=BS, grad_accum=ACCUM, max_len=MAXLEN,
         host=platform.node(), python=platform.python_version(),
         n_train=len(tr), n_test=len(te), classes=CLASSES,
         accuracy=round(float(acc), 4), mcc=round(float(mcc), 4),

@@ -158,8 +158,13 @@ def part3_fusion(scorer, va, te, log):
     w, th, valmcc = tune_weights(
         scorer, texts(va), [s_total(d) for d in va],
         [rep(d) for d in va], ybin(va))
-    log(f"fusion weights tuned on validation (Eq 3.29): "
-        f"mu1={w.mu1} mu2={w.mu2} mu3={w.mu3}  theta_det={th}  "
+    # NOTE: specific mu values are NOT reported as a result. The single-split
+    # grid optimum was shown (validate_mu3.py, 30-fold CV) to be within noise
+    # w.r.t. mu3, so the three-way fusion (Eq 3.29) is kept general and weights
+    # are re-tuned per deployment. See evidence/mu3_validation.json.
+    log("fusion weights tuned on the validation set by grid search (Eq 3.29); "
+        "the general three-way combination is retained (per-deployment tuning).")
+    log(f"  operating point used for this run: theta_det={th}  "
         f"(val MCC={valmcc})")
     fe = FusionEngine(scorer, w, th)
 

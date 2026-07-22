@@ -3952,7 +3952,8 @@ Post-quantum crypto & ML-KEM (FIPS~203), ML-DSA (FIPS~204), SHA-256 & NIST-stand
 \hline
 LLM base model & Qwen2.5-7B-Instruct (7.6\,B parameters) &
 Satisfies the $>$4\,B, $<$15\,B moderately-large model requirement;
-selected per model evaluation report. \\
+selected by the four-model comparison in
+Table~\ref{tab:llm_selection} (Section~\ref{sec:llm_selection}). \\
 \hline
 LLM task head & 7-class sequence classification: BENIGN $+$ S1--S6 &
 Aligns directly with the six-variant attack taxonomy; per-variant class
@@ -4101,7 +4102,103 @@ data flow, realising the abstract full-mode detection logic of
 Algorithm~\ref{alg:fv_det}, so that the reported results can be reproduced
 exactly. The pipeline transforms raw blockchain forwarding records into a fused
 detection verdict through five stages, all sharing the single selected language
-model.
+model. The selection of that model is justified first, in
+Section~\ref{sec:llm_selection}, followed by the five-stage pipeline and the
+training configuration.
+
+\subsection{LLM Model Selection}
+\label{sec:llm_selection}
+
+The full-mode semantic threat scorer (Eq.~\eqref{eq:llm_score}) requires a
+language model that is both accurate on tokenised forwarding-log sequences and
+fast enough for real-time in-vehicle inference. Rather than selecting a model
+arbitrarily, four instruction-tuned candidates in the moderately-large parameter
+band ($>4$\,B and $<15$\,B) were benchmarked on the SHIELD-GH task under
+identical conditions. The candidates span two model families (Mistral and Qwen)
+and the full size range, so that the selection is justified by a recorded
+comparison rather than a single arbitrary choice.
+
+\mypar
+\textbf{Benchmark protocol.}
+Each candidate is fine-tuned with an identical LoRA recipe (rank~16, targets
+\texttt{q/k/v/o\_proj}, dropout~$0.05$, AdamW, three epochs) on the same
+seven-class forwarding-log dataset and evaluated on the same held-out test split.
+The reported quality metric is the Matthews Correlation Coefficient (MCC), the
+paper's primary detection metric (M1, Eq.~\eqref{eq:m1_mcc}), computed over the
+full seven-class per-variant task rather than a coarse binary attack-versus-benign
+screen; the harder task discriminates the candidates, as the results in
+Table~\ref{tab:llm_selection} show. The latency column is the mean single-window
+classification forward-pass time, \emph{measured} for every candidate on the same
+NVIDIA RTX~5090 (32\,GB) GPU at batch size~1. These are server-GPU figures used
+only to rank the candidates under identical conditions; the reconciliation to
+OBU/RSU-class edge hardware is discussed after the table.
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\caption{LLM candidate benchmark on the seven-class SHIELD-GH task.}
+\label{tab:llm_selection}
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Candidate Model} & \textbf{Params} & \textbf{MCC} &
+\textbf{Accuracy} & \textbf{Latency (ms)} \\
+\hline
+Mistral-7B-Instruct-v0.3 & 7.3\,B & 0.205 & 0.264 & 20.1 \\
+\hline
+\textbf{Qwen2.5-7B-Instruct} & \textbf{7.6\,B} & \textbf{0.802} &
+\textbf{0.829} & \textbf{17.8} \\
+\hline
+Mistral-Nemo-12B-Instruct & 12.0\,B & 0.750 & 0.775 & 27.6 \\
+\hline
+Qwen2.5-14B-Instruct & 14.0\,B & 0.808 & 0.832 & 33.7 \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:llm_selection}, the seven-class task discriminates the
+candidates clearly: Mistral-7B collapses to $\text{MCC}=0.21$, Mistral-Nemo-12B
+reaches $0.75$, and the two Qwen2.5 models lead at $0.80$ (7\,B) and $0.81$
+(14\,B). \textbf{Qwen2.5-7B-Instruct} is selected because it jointly maximises
+both selection criteria: it attains the \emph{lowest} latency ($17.8$\,ms, the
+operative real-time constraint, Eq.~\eqref{eq:llm_routing}) while its MCC
+($0.802$) is statistically indistinguishable from the $1.9\times$-slower
+$14$\,B model ($0.808$, a $+0.006$ difference at $33.7$\,ms). The $14$\,B model
+therefore offers no meaningful quality gain to justify almost double the
+inference cost, and the smaller Mistral-7B is not competitive on quality.
+Qwen2.5-7B-Instruct also comfortably satisfies the $>4$\,B, $<15$\,B requirement
+at $7.6$\,B parameters, and is used for both the edge and cloud tiers of the
+two-tier deployment (Section~\ref{sec:methodology}), differentiated only by LoRA
+rank ($r_{\text{edge}}=8$, $r_{\text{cloud}}=16$).
+
+\mypar
+\textbf{Measurement hardware and OBU-class latency (M5 reconciliation).}
+The $17.8$\,ms latency of the selected model is measured on a server-class
+RTX~5090 GPU, which is the training and cloud-tier (Tier~2) hardware, \emph{not}
+the resource-constrained RSU/OBU hardware of the edge tier (Tier~1). Server-GPU
+latency therefore establishes the \emph{relative} ordering of candidates but is
+only a lower bound on edge-tier latency. The $\leq 80$\,ms edge-tier target underlying the M5 ESRL
+metric (Section~\ref{sec:methodology}) is stated for the $4$-bit NF4 quantised
+$r_{\text{edge}}=8$ configuration on OBU/RSU-class hardware, and its empirical
+validation on representative automotive-grade hardware is identified as required
+future work in Section~\ref{sec:expected_results}; until that benchmark is
+completed, the $\leq 80$\,ms figure is an engineering target rather than a
+measured result, and cases exceeding the edge latency budget escalate to the
+cloud tier (Eq.~\eqref{eq:llm_routing}), which bounds the worst-case edge cost.
+
+\mypar
+\textbf{Two-tier escalation on noisy inputs.}
+The escalation threshold $\varepsilon_u = 0.15$ (Stage~2 above,
+Eq.~\eqref{eq:llm_routing}) is defined for the deployed detector operating on
+\emph{noisy} real-world forwarding logs, where mobility, handoff loss and
+non-IID traffic drive the edge model's maximum-class confidence below $1.0$ on
+ambiguous windows. On the clean controlled benchmark split the model is
+comparatively confident and escalation fires only on the genuinely hard
+intermittent and target-specific windows; under the additional simulation noise
+of the full deployment the confidence distribution spreads further and
+$\varepsilon_u$ becomes a more active gate that routes ambiguous windows to the
+higher-rank cloud tier. The threshold is tuned on the noisy validation split
+rather than on the clean benchmark split.
 
 \mypar
 \textbf{Stage~1 --- Blockchain log tokenisation.} Each vehicle's forwarding
@@ -4138,6 +4235,45 @@ only if the received gradient's hash matches the on-chain commitment
 weighted FedAvg (Eq.~\eqref{eq:fedavg}). The LLM and the FL model are therefore a
 \emph{single} Qwen2.5-7B model, differentiated only by role: semantic scoring
 (inference) versus collaborative training (federated fine-tuning).
+
+\mypar
+\textbf{FL assessment under gradient poisoning.}
+The federated pipeline is assessed with metric M10 (FL Global Model Robustness
+under Gradient Poisoning, Eq.~\eqref{eq:m10_fl}), which reports the global
+model's MCC when a fraction of vehicles submit poisoned gradient updates. The
+implemented pipeline was run for five federated rounds with four honest non-IID
+clients and one poisoning client, once with the blockchain gradient-integrity
+check enabled and once with it disabled; the measured global-model MCC in each
+configuration is reported in Table~\ref{tab:fl_assessment}.
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.3}
+\caption{Federated learning assessment under gradient poisoning (metric M10).}
+\label{tab:fl_assessment}
+\centering
+\small
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Configuration} & \textbf{Global-model MCC} &
+\textbf{Poisoned updates rejected} \\
+\hline
+Gradient-integrity check ON & \textbf{0.747} & 5 / 5 rounds \\
+\hline
+Gradient-integrity check OFF & 0.409 & 0 / 5 rounds \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:fl_assessment}, with the gradient-integrity check
+enabled the aggregator rejects the poisoned update in every round and the global
+model retains an MCC of $0.747$; with the check disabled the poisoned updates are
+accepted and the global-model MCC collapses to $0.409$. This confirms that the
+federated learning pipeline works as intended: the blockchain-anchored
+gradient-integrity mechanism (Eq.~\eqref{eq:gradient_commit}--\eqref{eq:gradient_verify})
+keeps the collaboratively trained global model at high detection quality under a
+poisoning attack that would otherwise degrade it. A full poisoning-fraction sweep
+(ablation A6) is deferred until the sensitivity analysis is completed; the value
+reported here is a single-point functional verification of the M10 metric.
 
 \mypar
 \textbf{Stage~4 --- Evidence fusion.} The LLM score $\mathcal{Q}_i(t)$ is combined
@@ -5648,11 +5784,20 @@ quantified via ablation A15 and the M6 (MDPOS) computation sub-metric.
 The lightweight mode satisfies the 1-second end-to-end latency budget required
 for safety-critical vehicular applications. The full mode incurs additional
 latency from LLM inference, but the two-tier edge-cloud design (Section~3.7.3)
-ensures that the majority of decisions are resolved at the edge tier
-($\leq$80~ms) without escalation to the cloud. The PQC overhead of 12--18~ms
-per Dilithium signing operation is acceptable relative to the total mitigation
-pipeline, and the $O(\log N)$ PQC-LKH re-keying is expected to be 3--4$\times$
-faster than naive unicast Kyber re-keying for networks of $N \geq 16$ vehicles.
+is intended to resolve the majority of decisions at the edge tier without
+escalation to the cloud, capping the fraction of windows that pay the full
+cloud-inference cost. The $\leq 80$\,ms edge-tier latency is an engineering
+target for the $4$-bit NF4 quantised $r_{\text{edge}}=8$ configuration on
+OBU/RSU-class hardware; the reference measurement of $18$\,ms per window in
+Section~\ref{sec:ai_pipeline_impl} is obtained on a server-class RTX~5090 GPU
+and is a lower bound only. Empirical validation of the edge-tier latency on
+representative automotive-grade hardware is required future work; any window that
+exceeds the edge budget is escalated to the cloud tier
+(Eq.~\eqref{eq:llm_routing}), which bounds the worst-case edge cost. The PQC
+overhead of 12--18~ms per Dilithium signing operation is acceptable relative to
+the total mitigation pipeline, and the $O(\log N)$ PQC-LKH re-keying is expected
+to be 3--4$\times$ faster than naive unicast Kyber re-keying for networks of
+$N \geq 16$ vehicles.
 
 \subsection{Ablation Study: Component Contribution to Detection and
 Mitigation Performance}

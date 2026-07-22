@@ -1,0 +1,25 @@
+
+=== Qwen2.5-7B-Instruct (7.6B) : Qwen/Qwen2.5-7B-Instruct ===
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 3994.81it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-7B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+  fine-tuning (7-class LoRA) ...
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+    epoch 1/3 loss=0.8608
+    epoch 2/3 loss=0.5712
+    epoch 3/3 loss=0.5009
+  evaluating ...
+  -> Qwen2.5-7B-Instruct: MCC=0.8024 acc=0.8286 lat=17.83ms  (saved)
+
+=== 7-CLASS BENCHMARK (measured) ===
+Model                        Params    MCC    Acc  Lat(ms)
+Qwen2.5-7B-Instruct            7.6B  0.802  0.829     17.8
+
+evidence -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/evidence/candidate_benchmark.json

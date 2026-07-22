@@ -1,0 +1,31 @@
+liboqs-python faulthandler is disabled
+SHIELD-GH Task 8 — M6 (MDPOS) Crypto Overhead & Scalability Benchmark
+Backend: liboqs  (quantum_resistant=True)
+
+Measured per-operation cost (mean over 30 trials, ms):
+  kyber_keygen         0.018 ms
+  kyber_enc            0.019 ms
+  kyber_dec            0.016 ms
+  dilithium_keygen     0.021 ms
+  dilithium_sign       0.043 ms
+  dilithium_verify     0.020 ms
+  zkp_prove           26.018 ms
+  zkp_verify          27.611 ms
+  dkg_share            0.886 ms
+  NOTE: VRF endorser-selection cost is NOT in this table -- it is a Go/blockchain-module operation (see blockchain_standalone/results/verification/taskE_vrf_*.log for its measured cost).
+
+Measured per-window message/storage sizes (bytes):
+  b_fwd (forwarding record)      = 47 B
+  b_ZKP (Pedersen commit+proof)  = 2466 B
+  b_grad (gradient hash commit)  = 32 B
+  b_VRF                          = NOT MODELED (excluded, see note)
+
+Omega_comp(N), Omega_comm(N), Omega_store(N,t=simTime) at representative N:
+(f_op_bar(N) modeling assumption: ZKP prove+verify every vehicle every W=10.0s window; Kyber/Dilithium/DKG only on isolation, at the measured rate 0.0385 isolations/vehicle/window from the Task 8 functional-verification run)
+
+  N=50    Omega_comp=   0.2683 CPU-s/s   Omega_comm=  251.42 B/s/vehicle   Omega_store=  381750.0 B (over t=30.0s)
+  N=100   Omega_comp=   0.5367 CPU-s/s   Omega_comm=  251.42 B/s/vehicle   Omega_store=  763500.0 B (over t=30.0s)
+  N=200   Omega_comp=   1.0733 CPU-s/s   Omega_comm=  251.42 B/s/vehicle   Omega_store= 1527000.0 B (over t=30.0s)
+
+[M6]  MDPOS scalability profile written -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_crypto/../shield_gh_ml/evidence/m6_overhead_benchmark.json
+SUMMARY: M6 measured from REAL crypto-op timings + REAL message sizes; f_op_bar(N) invocation-frequency is a stated modeling assumption (not fabricated data), consistent with the report's Eq. m6_comp/comm/store.

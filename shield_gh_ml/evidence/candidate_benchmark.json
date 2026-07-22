@@ -1,0 +1,84 @@
+{
+  "task": "SHIELD-GH 7-class candidate benchmark (re-run)",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "host": "blackbox-Z790-EAGLE-AX-02",
+  "classes": [
+    "BENIGN",
+    "DP-FR",
+    "DP-IT",
+    "DP-TS",
+    "CP-FR",
+    "CP-IT",
+    "CP-TS"
+  ],
+  "results": {
+    "Qwen2.5-7B-Instruct": {
+      "params_b": 7.6,
+      "hf_id": "Qwen/Qwen2.5-7B-Instruct",
+      "mcc": 0.8024,
+      "accuracy": 0.8286,
+      "macro_f1": 0.812,
+      "latency_ms": 17.83,
+      "per_class_f1": {
+        "BENIGN": 0.7879,
+        "DP-FR": 0.7,
+        "DP-IT": 0.5294,
+        "DP-TS": 0.6667,
+        "CP-FR": 1.0,
+        "CP-IT": 1.0,
+        "CP-TS": 1.0
+      }
+    },
+    "Mistral-7B-Instruct-v0.3": {
+      "params_b": 7.3,
+      "hf_id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "mcc": 0.2045,
+      "accuracy": 0.2643,
+      "macro_f1": 0.1201,
+      "latency_ms": 20.09,
+      "per_class_f1": {
+        "BENIGN": 0.0,
+        "DP-FR": 0.0,
+        "DP-IT": 0.0,
+        "DP-TS": 0.3587,
+        "CP-FR": 0.4824,
+        "CP-IT": 0.0,
+        "CP-TS": 0.0
+      }
+    },
+    "Mistral-Nemo-12B-Instruct": {
+      "params_b": 12.0,
+      "hf_id": "mistralai/Mistral-Nemo-Instruct-2407",
+      "mcc": 0.7502,
+      "accuracy": 0.775,
+      "macro_f1": 0.7092,
+      "latency_ms": 27.58,
+      "per_class_f1": {
+        "BENIGN": 0.7879,
+        "DP-FR": 0.6471,
+        "DP-IT": 0.5294,
+        "DP-TS": 0.0,
+        "CP-FR": 1.0,
+        "CP-IT": 1.0,
+        "CP-TS": 1.0
+      }
+    },
+    "Qwen2.5-14B-Instruct": {
+      "params_b": 14.0,
+      "hf_id": "Qwen/Qwen2.5-14B-Instruct",
+      "mcc": 0.8075,
+      "accuracy": 0.8321,
+      "macro_f1": 0.813,
+      "latency_ms": 33.69,
+      "per_class_f1": {
+        "BENIGN": 0.7879,
+        "DP-FR": 0.7692,
+        "DP-IT": 0.5,
+        "DP-TS": 0.6341,
+        "CP-FR": 1.0,
+        "CP-IT": 1.0,
+        "CP-TS": 1.0
+      }
+    }
+  }
+}

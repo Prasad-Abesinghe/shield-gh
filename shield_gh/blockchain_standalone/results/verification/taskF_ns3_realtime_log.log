@@ -1,0 +1,12 @@
+[SHIELD-GH] Initialised — 4 vehicles (lightweight mode — compile with -DUSE_LIBOQS for PQC)
+[SHIELD-GH][LIVE-BC] Live Hyperledger Fabric integration ON — NS-3 will invoke the real 'debsc' chaincode during the sim with VRF-based dynamic endorser selection at chaincode level.
+[SHIELD-GH][LIVE-BC] Registered 64 RSU endorser candidates on-chain (~50 eligible; VRF selects k_end≈ceil(|E|*0.34) per tx, k_min=10).
+[SHIELD-GH] Node 1 ISOLATED & BLOCKED | t=4.00 mode=LIGHTWEIGHT score=0.92 ZKP=FAIL real_attacker=1
+[SHIELD-GH][LIVE-BC] VRF SelectEndorsers fired for isolation tx (node1) | t=4.00
+[SHIELD-GH][LIVE-BC] EvaluateIsolation(node1) committed to Fabric | t=4.00
+[SHIELD-GH] Node 0 ISOLATED & BLOCKED | t=6.00 mode=LIGHTWEIGHT score=0.81 ZKP=FAIL real_attacker=1
+[SHIELD-GH][LIVE-BC] VRF SelectEndorsers fired for isolation tx (node0) | t=6.00
+[SHIELD-GH][LIVE-BC] EvaluateIsolation(node0) committed to Fabric | t=6.00
+[SHIELD-GH][LIVE-BC] Finalising on-chain isolation for 2 node(s)...
+[SHIELD-GH][LIVE-BC] Final EvaluateIsolation(node0) committed on-chain (isolated=true).
+[SHIELD-GH][LIVE-BC] Final EvaluateIsolation(node1) committed on-chain (isolated=true).

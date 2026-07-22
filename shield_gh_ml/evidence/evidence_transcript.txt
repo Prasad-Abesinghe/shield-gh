@@ -12,9 +12,9 @@ backend: fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B)
 mean Q_i (Eq 3.28): benign=0.370  attacker=0.927  -> separation +0.557
 
 GENUINE Qwen2.5-7B-Instruct (LoRA r=16, bf16, 3 epochs, NVIDIA GeForce RTX 5090):
-  7-class: accuracy=0.839  MCC=0.814  macro-F1=0.825
-  binary : TPR=0.932  TNR=0.867  latency=18.2 ms/window
-  -> genuine Qwen MCC 0.814 > fallback proxy MCC 0.712 (as predicted in the selection report)
+  7-class: accuracy=0.821  MCC=0.792  macro-F1=0.808
+  binary : TPR=0.928  TNR=0.756  latency=18.0 ms/window
+  -> genuine Qwen MCC 0.792 > fallback proxy MCC 0.712 (as predicted in the selection report)
 
 ======================================================================
 PART 2 — Federated Learning + blockchain gradient integrity (Eq. 3.16/3.26/3.27)
@@ -27,7 +27,8 @@ PASS: integrity check preserved the model (MCC 0.7473 vs poisoned 0.409)
 ======================================================================
 PART 3 — Fusion verdict (Eq. 3.29): per-variant coverage
 ======================================================================
-fusion weights tuned on validation (Eq 3.29): mu1=0.2 mu2=0.8 mu3=0.0  theta_det=0.3  (val MCC=0.8182)
+fusion weights tuned on the validation set by grid search (Eq 3.29); the general three-way combination is retained (per-deployment tuning).
+  operating point used for this run: theta_det=0.3  (val MCC=0.8182)
 
   variant      rule    LLM   fused   (attacker detection rate)
   DP-FR        1.00   0.97    1.00

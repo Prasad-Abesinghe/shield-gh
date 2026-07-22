@@ -1,0 +1,529 @@
+=== attempt 1 Wed 08 Jul 2026 09:37:52 PM +0530 ===
+
+=== Mistral-7B-Instruct-v0.3 (7.3B) : mistralai/Mistral-7B-Instruct-v0.3 ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [21:35<43:10, 1295.03s/it]Fetching 3 files: 100%|██████████| 3/3 [21:40<00:00, 337.65s/it] Fetching 3 files: 100%|██████████| 3/3 [21:40<00:00, 433.39s/it]
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 15685.71it/s]
+[transformers] [1mMistralForSequenceClassification LOAD REPORT[0m from: mistralai/Mistral-7B-Instruct-v0.3
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+  fine-tuning (7-class LoRA) ...
+[transformers] `use_return_dict` is deprecated! Use `return_dict` instead!
+    epoch 1/3 loss=1.0558
+    epoch 2/3 loss=3.5090
+    epoch 3/3 loss=2.6447
+  evaluating ...
+  -> Mistral-7B-Instruct-v0.3: MCC=0.2045 acc=0.2643 lat=20.09ms  (saved)
+
+=== Mistral-Nemo-12B-Instruct (12.0B) : mistralai/Mistral-Nemo-Instruct-2407 ===
+[transformers] The tokenizer you are loading from 'mistralai/Mistral-Nemo-Instruct-2407' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files:  20%|██        | 1/5 [36:44<2:26:56, 2204.11s/it]Fetching 5 files:  40%|████      | 2/5 [40:28<51:58, 1039.44s/it]  Fetching 5 files:  60%|██████    | 3/5 [46:31<24:21, 730.87s/it] Fetching 5 files: 100%|██████████| 5/5 [46:31<00:00, 558.39s/it]
+Loading weights:   0%|          | 0/362 [00:00<?, ?it/s]Loading weights: 100%|██████████| 362/362 [00:00<00:00, 15180.50it/s]
+[transformers] [1mMistralForSequenceClassification LOAD REPORT[0m from: mistralai/Mistral-Nemo-Instruct-2407
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+  fine-tuning (7-class LoRA) ...
+    epoch 1/3 loss=1.4371
+    epoch 2/3 loss=0.7139
+    epoch 3/3 loss=0.7969
+  evaluating ...
+  -> Mistral-Nemo-12B-Instruct: MCC=0.7502 acc=0.775 lat=27.58ms  (saved)
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]=== attempt 1 Wed 08 Jul 2026 11:04:51 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files:  12%|█▎        | 1/8 [54:01<6:18:12, 3241.85s/it]Fetching 8 files:  12%|█▎        | 1/8 [41:18<4:49:08, 2478.34s/it]Fetching 8 files:  25%|██▌       | 2/8 [55:02<2:17:01, 1370.29s/it]Fetching 8 files:  25%|██▌       | 2/8 [42:18<1:45:35, 1055.90s/it]Fetching 8 files:  88%|████████▊ | 7/8 [56:08<04:34, 274.22s/it]   Fetching 8 files: 100%|██████████| 8/8 [56:08<00:00, 421.10s/it]
+Fetching 8 files:  88%|████████▊ | 7/8 [43:25<03:33, 213.78s/it]   Fetching 8 files: 100%|██████████| 8/8 [43:25<00:00, 325.66s/it]
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 16306.20it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 16005.94it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+  fine-tuning (7-class LoRA) ...
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 621.94 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.29 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 1 exit 1, candidates done: 3/4 ===
+=== attempt 2 Wed 08 Jul 2026 11:48:44 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 13723.95it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.69 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 2 exit 1, candidates done: 3/4 ===
+=== attempt 3 Wed 08 Jul 2026 11:49:01 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 15847.32it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.69 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 3 exit 1, candidates done: 3/4 ===
+=== attempt 4 Wed 08 Jul 2026 11:49:20 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 15614.80it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 616.06 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 4 exit 1, candidates done: 3/4 ===
+    epoch 1/3 loss=0.8627
+=== attempt 5 Wed 08 Jul 2026 11:49:37 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 16812.94it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 616.06 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 5 exit 1, candidates done: 3/4 ===
+=== attempt 6 Wed 08 Jul 2026 11:49:53 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 14449.24it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.69 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 6 exit 1, candidates done: 3/4 ===
+=== attempt 7 Wed 08 Jul 2026 11:50:11 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 17354.17it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.94 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 7 exit 1, candidates done: 3/4 ===
+=== attempt 8 Wed 08 Jul 2026 11:50:30 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 12925.02it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.94 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 8 exit 1, candidates done: 3/4 ===
+    epoch 2/3 loss=0.5323
+=== attempt 9 Wed 08 Jul 2026 11:50:48 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 17611.09it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 616.06 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 9 exit 1, candidates done: 3/4 ===
+=== attempt 10 Wed 08 Jul 2026 11:51:06 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 14202.57it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.69 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 10 exit 1, candidates done: 3/4 ===
+=== attempt 11 Wed 08 Jul 2026 11:51:23 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 16704.62it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 615.94 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 11 exit 1, candidates done: 3/4 ===
+=== attempt 12 Wed 08 Jul 2026 11:51:43 PM +0530 ===
+
+=== Qwen2.5-14B-Instruct (14.0B) : Qwen/Qwen2.5-14B-Instruct ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+    epoch 3/3 loss=0.4996
+  evaluating ...
+Loading weights:   0%|          | 0/578 [00:00<?, ?it/s]Loading weights: 100%|██████████| 578/578 [00:00<00:00, 16598.03it/s]
+[transformers] [1mQwen2ForSequenceClassification LOAD REPORT[0m from: Qwen/Qwen2.5-14B-Instruct
+Key            | Status     | 
+---------------+------------+-
+lm_head.weight | UNEXPECTED | 
+score.weight   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+Traceback (most recent call last):
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 201, in <module>
+    main()
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 183, in main
+    res = run_one(name, hf_id, pb, tr, te)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 150, in run_one
+    tok, model = build(hf_id)
+  File "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/benchmark_candidates.py", line 83, in build
+    model = model.to(DEVICE)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+  File "/home/sdvn_ssh/shield-ml-venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.45 GiB. GPU 0 has a total capacity of 31.36 GiB of which 560.69 MiB is free. Process 4111 has 504.71 MiB memory in use. Process 39903 has 29.30 GiB memory in use. Including non-PyTorch memory, this process has 498.00 MiB memory in use. Of the allocated memory 0 bytes is allocated by PyTorch, and 0 bytes is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+=== attempt 12 exit 1, candidates done: 3/4 ===
+  -> Qwen2.5-14B-Instruct: MCC=0.8075 acc=0.8321 lat=33.69ms  (saved)
+
+=== 7-CLASS BENCHMARK (measured) ===
+Model                        Params    MCC    Acc  Lat(ms)
+Mistral-7B-Instruct-v0.3       7.3B  0.204  0.264     20.1
+Qwen2.5-7B-Instruct            7.6B  0.802  0.829     17.8
+Mistral-Nemo-12B-Instruct     12.0B  0.750  0.775     27.6
+Qwen2.5-14B-Instruct          14.0B  0.807  0.832     33.7
+
+evidence -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml/evidence/candidate_benchmark.json
+=== attempt 1 exit 0, candidates done: 4/4 ===
+gave up after 12 attempts

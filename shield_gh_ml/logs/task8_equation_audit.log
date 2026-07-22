@@ -1,0 +1,44 @@
+SHIELD-GH Task 8 — Full Equation Audit (static source verification)
+Auditing: /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh_ml
+
+==============================================================================
+ A. LLM SEMANTIC SCORE  (eq:llm_score, eq:tier2)
+==============================================================================
+  [PASS] eq:llm_score    Q_i defined as malicious-class softmax mass               MALICIOUS_IDS=[1, 2, 3, 4, 5, 6] (7 classes, BENIGN excluded)
+  [PASS] eq:llm_score    threat_score() returns probability in [0,1]               LLMScorer.threat_score(text) -> float
+  [PASS] eq:tier2        Tier-2 escalation uses eps_u threshold (got 0.15)         1[max_c softmax(.)_c < eps_u]
+  [PASS] eq:llm_score    threat_score signature takes one window/text arg          (self, text)
+
+==============================================================================
+ B. REPUTATION  (eq:reputation)
+==============================================================================
+  [PASS] eq:reputation   Evidence carries R_i in [0,1] (reputation field)          fusion.Evidence.reputation
+  [PASS] eq:reputation   deficit computed as (1 - R_i), not re-derived             fusion.FusionEngine.fuse()
+
+==============================================================================
+ C. THREE-WAY FUSION  (eq:fusion, eq:weights)
+==============================================================================
+  [PASS] eq:weights      mu1 + mu2 + mu3 == 1 (normalised)                         mu1=0.34 mu2=0.33 mu3=0.33
+  [PASS] eq:weights      weight sum asserted at construction (not just by convention)FusionWeights.__post_init__
+  [PASS] eq:fusion       score = mu1*S_total + mu2*Q_i + mu3*(1-R_i)               FusionEngine.fuse() weighted sum, exact term-for-term match
+  [PASS] eq:fusion       yhat = 1[score > theta_det] (binary threshold, not re-scaled)FusionEngine.fuse() verdict
+  [PASS] eq:fusion       monotone: all-clean -> score=0, all-malicious -> score=1  lo.score=0.0 hi.score=1.0
+  [PASS] eq:fusion       S_total alone (mu1=0.34) cannot cross theta_det=0.5 unaidedmid.score=0.34 verdict=0 (confirms fusion needs >1 source, not a rule-only shortcut)
+
+==============================================================================
+ D. NS-3 <-> AI BRIDGE  (eq:bridge_ns3 — no modeling bypass)
+==============================================================================
+  [PASS] eq:bridge_ns3   ns3_infer.py imports the SAME fusion/scorer modules used elsewhere (no duplicate/shortcut logic)ns3_infer.py imports
+  [PASS] eq:bridge_ns3   verdict computed via engine.evaluate_window() (calls real Q_i + fuse, not a stub)ns3_infer.main()
+  [PASS] eq:bridge_ns3   C++ bridge header exists (shield_gh_ai_bridge.h)          /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/shield_gh_ai_bridge.h
+  [PASS] eq:bridge_ns3   bridge invokes ns3_infer.py via system() (same pattern as the Gurobi solver calls, not hand-coded)sg_ai_run_bridge()
+  [PASS] eq:bridge_ns3   bridge times the call with std::chrono (for the 'correct timing' requirement)sg_ai_run_bridge() wall-clock timer
+  [PASS] eq:bridge_ns3   integration.h drives TP/TN/FP/FN from the AI y_hat (verdict feeds the PEM, is not discarded)shield_gh_integration.h full-mode block
+  [PASS] eq:bridge_ns3   routing.cc exposes --enable_full_mode_ai CLI flag (off by default; explicit opt-in to the full pipeline)routing.cc CLI wiring
+
+==============================================================================
+ SUMMARY
+==============================================================================
+  19 PASS / 0 FAIL / 19 total checks
+  ALL EQUATIONS VERIFIED IMPLEMENTED — Task 8 pipeline matches the report, no modeling bypassed.
+
