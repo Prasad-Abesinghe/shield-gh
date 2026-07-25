@@ -2005,6 +2005,26 @@ trigger full isolation.
 This design eliminates the abrupt false-isolation problem of
 threshold-based single-evidence systems.
 
+\mypar
+\textbf{Route-Availability Condition for Full Isolation.}
+Grey hole attacks suppress only a fraction $\rho_a < 1$ of
+packets. If the isolated vehicle $v_i$ lies on the \emph{sole}
+available path between a source--destination pair, installing a
+FlowMod block rule converts a partial PDR loss of $\rho_a$ into
+a total PDR loss of $1.0$ — strictly worse than tolerating the
+attack. This suicide condition is specific to grey hole attacks
+and does not arise for black hole attacks, where $\rho_a = 1$
+and blocking always improves or maintains PDR. The DEBSC
+therefore conditions graduated response level~3 (full
+FlowMod isolation) on the SDN controller confirming the
+existence of at least one alternative route that excludes
+$v_i$ in the current topology. When no such alternative route
+exists, the DEBSC retains $v_i$ on the active path and applies
+graduated response level~2 (mandatory per-batch ZKP
+verification and traffic rate-limiting) as the best achievable
+containment, accepting partial packet loss rather than causing
+total connectivity loss on the only available path.
+
 % --- SUPERVISOR REVISION BLOCK 7: controller failover protocol subsection ---
 \subsection{Controller Failover Protocol}
 \label{sec:failover}
@@ -3356,8 +3376,18 @@ isolation.
       \left\{\sigma_j^{\text{iso}}\right\}_{j=1}^{k_{\text{key}}-1}
       \right)$
     \Comment{Eq.~\eqref{eq:rekey_sig}}
-    \State $\texttt{BROADCAST\_FLOWMOD}
-      (\mathcal{M}_{\text{iso}},\, \sigma_{\text{iso}}^*)$
+    \If{$\texttt{ALT\_ROUTE\_EXISTS}(v_i, \mathcal{G}(t))$}
+      \Comment{At least one path excluding $v_i$ in current
+               topology $\mathcal{G}(t)$}
+      \State $\texttt{BROADCAST\_FLOWMOD}
+        (\mathcal{M}_{\text{iso}},\, \sigma_{\text{iso}}^*)$
+      \Comment{Full isolation: block rule installed}
+    \Else
+      \State $\texttt{APPLY\_GRADUATED\_LEVEL2}(v_i)$
+      \Comment{No alternative route: retain on path,
+               apply rate-limit and per-batch ZKP;
+               re-evaluate at next observation window}
+    \EndIf
 
     \State \textbf{// Step 4: PQC-LKH Group Re-Keying via
       DKG Threshold Broadcast}

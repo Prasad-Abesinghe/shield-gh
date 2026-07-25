@@ -17,6 +17,7 @@ behaviour the equations predict?).
 Run:  python3 functional_verification.py
 """
 from __future__ import annotations
+import argparse
 import os
 import re
 import subprocess
@@ -28,16 +29,27 @@ BUILD_LIB = os.path.join(NS3_ROOT, "build", "lib")
 BUILD_BIN = os.path.join(NS3_ROOT, "build")
 ROUTING_BIN = os.path.join(BUILD_BIN, "scratch", "routing")
 
+AP = argparse.ArgumentParser()
+AP.add_argument("--sim-time", type=float, default=15.0,
+                help="--simTime passed to routing (default matches the "
+                     "original Task 8 evidence run)")
+AP.add_argument("--attack-percentage", type=int, default=None,
+                help="--attack_percentage passed to routing (omit to use "
+                     "routing's own default, 50)")
+ARGS = AP.parse_args()
+
 RUN_ARGS = [
     "--detection_mode=full",
     "--enable_full_mode_ai=1",
     "--attack_number=1",
     "--drop_rate=60",
-    "--simTime=15",
+    f"--simTime={ARGS.sim_time}",
     "--routing_algorithm=4",
     "--architecture=0",
     "--maxspeed=80",
 ]
+if ARGS.attack_percentage is not None:
+    RUN_ARGS.append(f"--attack_percentage={ARGS.attack_percentage}")
 
 RESULTS = []
 

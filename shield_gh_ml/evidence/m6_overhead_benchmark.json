@@ -11,19 +11,19 @@
     "liboqs_version": "0.15.0"
   },
   "ops_ms": {
-    "kyber_keygen": 0.018471500000790307,
-    "kyber_enc": 0.018467999999908596,
-    "kyber_dec": 0.01588799999960126,
-    "dilithium_keygen": 0.02057663333516757,
-    "dilithium_sign": 0.03712973333449554,
-    "dilithium_verify": 0.019758633334276965,
-    "zkp_prove": 24.92160540000062,
-    "zkp_verify": 27.212110266664997,
-    "dkg_share": 0.9098354000002473
+    "kyber_keygen": 0.019401099962124135,
+    "kyber_enc": 0.018501800028995298,
+    "kyber_dec": 0.015921666696764685,
+    "dilithium_keygen": 0.020717066702976204,
+    "dilithium_sign": 0.05305569999715469,
+    "dilithium_verify": 0.019871133372362237,
+    "zkp_prove": 25.185814333356877,
+    "zkp_verify": 26.67202623330619,
+    "dkg_share": 0.8739423999941209
   },
   "sizes_bytes": {
     "b_fwd": 47,
-    "b_zkp": 2466,
+    "b_zkp": 2465,
     "b_grad": 32
   },
   "isolation_rate_per_veh_per_window": 0.038461538461538464,
@@ -31,21 +31,21 @@
   "results": [
     {
       "N": 50,
-      "omega_comp": 0.260861093673072,
-      "omega_comm": 251.42307692307693,
-      "omega_store": 381750.0
+      "omega_comp": 0.2594779129679479,
+      "omega_comm": 251.32307692307694,
+      "omega_store": 381600.0
     },
     {
       "N": 100,
-      "omega_comp": 0.521722187346144,
-      "omega_comm": 251.42307692307693,
-      "omega_store": 763500.0
+      "omega_comp": 0.5189558259358958,
+      "omega_comm": 251.32307692307694,
+      "omega_store": 763200.0
     },
     {
       "N": 200,
-      "omega_comp": 1.043444374692288,
-      "omega_comm": 251.42307692307693,
-      "omega_store": 1527000.0
+      "omega_comp": 1.0379116518717917,
+      "omega_comm": 251.32307692307694,
+      "omega_store": 1526400.0
     }
   ]
 }

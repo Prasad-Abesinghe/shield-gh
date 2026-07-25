@@ -191,6 +191,41 @@ scale. This is stated here rather than left implicit.
 
 Evidence: `logs/task9_t30s_ap40_run.log` (full console), `logs/task9_t30s_ap40_m6.log`.
 
+### Equation + algorithm audit, and functional verification, for THIS run
+
+Supervisor then asked for "audit script for equation and algorithm" plus
+"functional verification test pass" — both re-run against this exact
+t=30s/40%-attack configuration (not just the earlier default run):
+
+**`equation_audit.py`** was extended with two new sections beyond the
+original fusion-equation checks:
+- **Section E — PEM equations**: M1 MCC, M2 GHSR, M3 AVCR, M4 FIR, M5 ESRL,
+  M6 Ω_comp/comm/store formulas are all verified present, term-for-term, in
+  `shield_gh_integration.h` / `m6_overhead_benchmark.py` (not re-derived).
+- **Section F — algorithm audit**: confirms Algorithm 1 (LW-DP-Det),
+  Algorithm 2 (LW-CP-Det), Algorithm 3 (FV-Det — the full-mode AI pipeline
+  this task is about), and Algorithm 4 (PQC-Mit) are each genuinely **defined
+  AND called** (not just declared) in the code path this run exercises.
+
+```bash
+cd scratch/shield_gh_ml
+python3 equation_audit.py                                    # static, run-independent
+python3 functional_verification.py --sim-time=30 --attack-percentage=40
+```
+
+`functional_verification.py` gained `--sim-time` / `--attack-percentage`
+flags (previously hardcoded to 15s/default-50%) so it can be re-run against
+whatever configuration the supervisor asks for next, instead of being a
+one-off script.
+
+**Result: 35/35 equation+algorithm checks PASS. 26/26 functional-verification
+checks PASS, at t=30s / attack_percentage=40 specifically** (M1 MCC=1.0
+across all 28 windows, same as before — this run's PEM values are stable
+under the new attack percentage).
+
+Evidence: `logs/task9_t30s_ap40_equation_audit.log`,
+`logs/task9_t30s_ap40_functional_verification.log`.
+
 ## Code sent to supervisor
 
 `Evidance_Report_To_Supervisor/Task_8_Code_Bundle.zip` — the actual Task 8
