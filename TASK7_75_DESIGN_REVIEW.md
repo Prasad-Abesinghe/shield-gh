@@ -1,3 +1,21 @@
+> **UPDATE — resolved.** Supervisor reviewed this finding and confirmed the
+> root cause is real but requires a design change, not a topology change:
+> full isolation must be conditioned on route availability (grey hole ≠
+> black hole, since $\rho_a<1$ means blocking on a sole path is strictly
+> worse than tolerating the attack). Supervisor sent a formal patch
+> (Route-Availability Condition, DEBSC subsection + Algorithm PQC-Mit Step
+> 3), applied to `main.tex`, and implemented in code: `ALT_ROUTE_EXISTS()`
+> (routing.cc, BFS reachability check on the live link-lifetime graph
+> excluding the candidate node) gates `shield_gh_isolated_nodes[n]=true` in
+> `shield_gh_integration.h`; when no alternate route exists, SHIELD-GH falls
+> back to graduated response level 2 (rate-limit + per-batch ZKP) instead of
+> a full block. **Verified fix**, same 4-node/1-flow scenario, node 0
+> attacker: PDR now stabilises at **92–95%** post-detection (previously
+> collapsed to ~50%), MCC stays 1.0 throughout, log shows
+> `[ROUTE-GATE] ... WITHHELD` + `RATE-LIMITED` every window instead of a
+> full block. Evidence: `shield_gh/evidence/route_availability_gate_run.log`.
+> The rest of this document is the original finding, kept for the record.
+
 # Task 7.75 — Design Review: Is Any Implementation Performance "Very Poor"?
 
 **Task (supervisor):** *"Report if design changes are required if the performance

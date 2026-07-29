@@ -191,6 +191,79 @@ scale. This is stated here rather than left implicit.
 
 Evidence: `logs/task9_t30s_ap40_run.log` (full console), `logs/task9_t30s_ap40_m6.log`.
 
+### Update — M2 (GHSR) route-availability gate (Task 7.75 follow-through)
+
+Task 7.75's Route-Availability Condition patch (main.tex DEBSC subsection +
+Algorithm PQC-Mit Step 3, supervisor-approved) was implemented as
+`ALT_ROUTE_EXISTS()` in `routing.cc` and wired into the **lightweight-mode**
+isolation block first. Re-testing Task 8 (full-mode) surfaced that the
+**full-mode isolation block was a separate code path and was NOT gated** —
+fixed in `shield_gh_integration.h` (the `[SHIELD-GH][AI-FULL]` isolation
+block now checks `ALT_ROUTE_EXISTS` before setting
+`shield_gh_isolated_nodes[]`, falling back to `[ROUTE-GATE] ... WITHHELD` +
+graduated level 2 otherwise, identical to lightweight mode).
+
+Also added `--attack_onset_delay` (default 1.1s, unchanged) so a genuine
+pre-attack PDR baseline can be sampled before the attack starts — the
+earlier hardcoded t=1.1s onset (before the first full-mode window at t=2s)
+was why M2 was always "NOT MEASURABLE".
+
+**Result at `--attack_onset_delay=6.0`, t=30s, 40% attack:** M2 baseline
+sampling now works (`PDR_baseline=1.0`), but the full 4-node/1-flow
+prototype topology gives `ALT_ROUTE_EXISTS` = false for **every** attacker
+node, **every window**, for the entire run — there is genuinely no
+alternate path in this scenario. Full isolation therefore never fires
+(`[ROUTE-GATE] ... WITHHELD` every window, node stays on graduated level 2 /
+rate-limited indefinitely), so the "post-isolation" phase never begins and
+**M2 (GHSR) stays "not yet computable" for the whole run** — not a bug, a
+structural fact: this topology cannot demonstrate PDR recovery because
+there is nowhere to reroute to, by design of the (correct) route-availability
+gate. Detection remains MCC=1.0 throughout (unaffected).
+
+**Conclusion:** a genuine non-trivial M2 (GHSR) number requires a topology
+with at least one redundant path so isolation can actually succeed for at
+least one attacker. This is the same limitation flagged in
+`TASK7_75_DESIGN_REVIEW.md` — recommended for Task 8.5/10 (redundant-path
+prototype topology or the 264-node Galle scenario), not fixable within the
+current 4-node scenario regardless of code correctness.
+
+Evidence: `logs/task8_route_gate_fullmode_run.log`.
+
+### Update — M5 (ESRL) realistic default value (supervisor: "don't keep it
+empty, use a realistic default")
+
+M5 (ESRL) went from 948ms to empty once the route-gate correctly started
+withholding full isolation (no isolation event -> no `t_isolate` timestamp).
+Supervisor asked for a realistic value instead of empty. Fix: `detection_time`
+and a new `graduated_response_time` (the timestamp of the graduated-response
+/ rate-limit action, the real containment action SHIELD-GH actually takes
+when full isolation is withheld) are now recorded at BOTH route-gate sites
+(lightweight and full-mode AI). M5 now reports **onset -> response** latency
+using `mitigation_time` when full isolation occurred, or
+`graduated_response_time` when it was withheld — genuinely measured either
+way, explicitly labelled which stage it reflects, never fabricated:
+
+```
+[M5]  ESRL: 948.0 ms  (t_onset=1.1 t_response=2.0 -- onset to GRADUATED
+      RESPONSE (rate-limit); full isolation withheld by the
+      route-availability gate, no alternate path in this topology)
+```
+
+`equation_audit.py` and `functional_verification.py` were updated to match
+(the old checks/regex assumed isolation always eventually fires — FV06 now
+also accepts a genuine fused verdict from a route-gate-withheld node, FV09
+explicitly reports N/A rather than failing when 0 isolations occur, FV24 now
+checks for a genuine onset->response value under the new wording). Re-run at
+t=30s / 40% attack: **equation_audit.py 35/35 PASS, functional_verification.py
+26/26 PASS**, M1=1.0, M3=1.0, M4=0.0, **M5=948.0ms**, M2=not measurable (topology
+limitation, unchanged). manual_verification.py unaffected, still ends
+"ALL COMPONENTS MANUALLY VERIFIED."
+
+Evidence: `logs/task9_t30s_ap40_run_postfix.log`,
+`logs/task9_t30s_ap40_equation_audit_postfix.log`,
+`logs/task9_t30s_ap40_functional_verification_postfix.log`,
+`logs/task9_t30s_ap40_m6_postfix.log`.
+
 ### Equation + algorithm audit, and functional verification, for THIS run
 
 Supervisor then asked for "audit script for equation and algorithm" plus

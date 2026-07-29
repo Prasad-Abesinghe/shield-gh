@@ -14,11 +14,11 @@ Task 6.5 : LLM selection evidence, ML and LLM component implementation (done)
 
 Task 7 : Upgrading research questions and performance evaluation metrics, Designing research experiments to match research questions (done)
 
-Task 7.5 : Application of all AI patches already sent by the supervisor up to this moment. (done)
+Task 7.5 : Application of all AI patches already sent by the supervisor up to this moment. (done — see Task7_5_Evidence/TASK7_5_EVIDENCE.md: full NS-3 live log, full code bundle, equation audit 35/35 PASS, functional verification 26/26 PASS, hand-verified M1-M6 PEMs; M7-M12 out of scope per report's own ablation-only taxonomy, deferred to Task 9.5)
 
-Task 7.75: Report if design changes are required if the performance of the implementation is very poor. Report the superior way you implemented so that design can be updated and apply the patch. If no changes, let me know.  (done — see TASK7_75_DESIGN_REVIEW.md: no algorithm design change needed, one topology/metric issue flagged for Task 8.5/10)
+Task 7.75: Report if design changes are required if the performance of the implementation is very poor. Report the superior way you implemented so that design can be updated and apply the patch. If no changes, let me know.  (done — supervisor confirmed "Very good", marked complete. Route-Availability Condition patch applied to main.tex DEBSC subsection + Algorithm PQC-Mit, implemented as ALT_ROUTE_EXISTS() in routing.cc, verified PDR 50%→92-95%)
 
-Task 8 : Full system implementation evidence with correct timing and correct coding without bypassing modeling - 1 data point of PEMs needed (in progress - need to do)
+Task 8 : Full system implementation evidence with correct timing and correct coding without bypassing modeling - 1 data point of PEMs needed (in progress - route-gate + M5 realistic-default fix applied, re-sent evidence, awaiting supervisor confirmation)
 
 Task 8.5 : Sensitivity analysis for full system
 

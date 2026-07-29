@@ -1,4 +1,5 @@
 // initial run + task 01 done + task 02 - data plane attack done + controller plane done
+#include <queue>
 #include "ns3/wave-module.h"
 #include "ns3/csma-helper.h"
 #include "ns3/lte-helper.h"
@@ -52,6 +53,11 @@
 #include <limits.h>
 #include <bits/stdc++.h>
 
+// ── Route-Availability Condition for Full Isolation (main.tex DEBSC subsection
+// / Algorithm PQC-Mit Step 3) — defined below near run_stable_path_finding();
+// forward-declared here so shield_gh_integration.h (included next) can call it.
+bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id);
+
 // ── SHIELD-GH integration (Task 1–4) ─────────────────────────────────────────
 #include "shield_gh/shield_gh_integration.h"
 
@@ -102,11 +108,25 @@ double r_current_confusion_ratio  = 0.0;
 double r_average_confusion        = 0.0;
 double r_previous_cumulative_confusion = 0.0;
 
+// ── M2 (GHSR): pre-attack settle time ─────────────────────────────────────────
+// Attackers were always declared at a hardcoded t=1.1s, before the first
+// full-mode AI window (t=2s), so no genuine pre-attack PDR baseline sample
+// ever existed and M2 (GHSR) was reported "NOT MEASURABLE" (Task 8 evidence).
+// CLI --attack_onset_delay lets a run push attacker declaration later so a
+// real baseline is sampled first; default 1.1 preserves all existing runs.
+double attack_onset_delay               = 1.1;
+
 // ── M4: Detection Latency & Mitigation Response Time ─────────────────────────
 // (only add these if not already declared in LDA.cc globals)
 double attack_start_time                = 0.0;
 double detection_time                   = 0.0;
 double mitigation_time                  = 0.0;
+// M5 (ESRL) realistic value when the route-availability gate withholds full
+// isolation: the timestamp of the graduated response (rate-limit) action
+// actually taken, used in place of mitigation_time so ESRL reports genuine
+// "attack onset -> real containment action" latency instead of an empty
+// value, without fabricating a full-isolation timestamp that never occurred.
+double graduated_response_time          = 0.0;
 double current_detection_latency        = 0.0;
 double average_detection_latency        = 0.0;
 double current_mitigation_response_time = 0.0;
@@ -116461,6 +116481,43 @@ void run_stable_path_finding(uint32_t flow_id)
 
 }
 
+// ── ALT_ROUTE_EXISTS(v_i, G(t)) — route-availability gate for full isolation ──
+// (main.tex "Route-Availability Condition for Full Isolation" / Algorithm
+// PQC-Mit Step 3, supervisor patch.) Returns true iff the flow's source can
+// still reach its destination in the CURRENT link-lifetime graph with
+// candidate node `excluded_node` removed. BFS over the same adjacency test
+// (link_lifetime_threshold) that update_stable() already uses, so this is
+// the real live topology, not a static assumption.
+bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id)
+{
+	uint32_t source      = (demanding_flow_struct_controller_inst+flow_id)->source;
+	uint32_t destination  = (demanding_flow_struct_controller_inst+flow_id)->destination;
+	if (excluded_node == source || excluded_node == destination)
+		return false; // removing the endpoint itself can never leave a route
+
+	std::vector<bool> visited(total_size, false);
+	std::queue<uint32_t> q;
+	visited[source] = true;
+	q.push(source);
+	while (!q.empty())
+	{
+		uint32_t u = q.front(); q.pop();
+		if (u == destination) return true;
+		if (u >= linklifetimeMatrix_dsrc.size()) continue;
+		for (uint32_t v = 0; v < total_size; v++)
+		{
+			if (v == excluded_node || visited[v]) continue;
+			if (v >= linklifetimeMatrix_dsrc[u].size()) continue;
+			if (linklifetimeMatrix_dsrc[u][v] > link_lifetime_threshold)
+			{
+				visited[v] = true;
+				q.push(v);
+			}
+		}
+	}
+	return visited[destination];
+}
+
 void update_unstable(uint32_t flow_id, uint32_t current_hop)
 {
 	if(current_hop >= linklifetimeMatrix_dsrc.size()) return; //  my change
@@ -140044,6 +140101,7 @@ int main(int argc, char *argv[])
     cmd.AddValue ("intermittent_period", "on/off period in seconds (only for attack_number=2)", intermittent_period);
     // ── SOA baseline detectors + attacker-% sweep (real event-driven feed) ──
     cmd.AddValue ("attack_percentage", "percentage of vehicles that are attackers (drives real attacker injection)", attack_percentage);
+    cmd.AddValue ("attack_onset_delay", "seconds before attackers are declared (default 1.1); raise this so a genuine pre-attack PDR baseline is sampled before onset, needed for M2 GHSR", attack_onset_delay);
     cmd.AddValue ("use_malik_detection", "1=enable SOA1 Malik DPGHA in-sim detector + CSV feed", use_malik_detection);
     cmd.AddValue ("use_vcbc_detection", "1=enable SOA2 SCBC/VCBC in-sim monitor + CSV feed", use_vcbc_detection);
     cmd.AddValue ("use_soa3_detection", "1=enable SOA3 Random-Forest IDS in-sim feature feed + CSV", use_soa3_detection);
@@ -140100,10 +140158,10 @@ int main(int argc, char *argv[])
 	// use_soa3_detection is set from the command line (--use_soa3_detection).
     // state of art (end) SOA3
 
-	Simulator::Schedule(Seconds(1.0), declare_attack_states_routing);
-	Simulator::Schedule(Seconds(1.1), declare_attackers_routing);
+	Simulator::Schedule(Seconds(attack_onset_delay - 0.1), declare_attack_states_routing);
+	Simulator::Schedule(Seconds(attack_onset_delay), declare_attackers_routing);
     // ── Update NetAnim colors after attackers declared ────────────────────
-    Simulator::Schedule(Seconds(1.2), update_attacker_colors_netanim);
+    Simulator::Schedule(Seconds(attack_onset_delay + 0.1), update_attacker_colors_netanim);
 
 	//  Packet Drop Counter Display
 	// print drop summary

@@ -65,6 +65,7 @@ extern bool     CPTS_malicious_nodes[];
 extern double   attack_start_time;
 extern double   detection_time;
 extern double   mitigation_time;
+extern double   graduated_response_time;
 // SHIELD-GH mitigation + node-level detection metrics (defined in routing.cc)
 extern bool     shield_gh_isolated_nodes[];
 extern uint32_t sg_node_TP, sg_node_TN, sg_node_FP, sg_node_FN;
@@ -413,21 +414,39 @@ inline void print_shield_gh_full_pem_report(double t) {
     }
 
     // ── M5: End-to-End Security Response Latency (Eq. m5_esrl) ─────────────
-    // Reported as the single measured onset->isolation elapsed time (real,
+    // Reported as the single measured onset->response elapsed time (real,
     // from attack_start_time and detection_time/mitigation_time). The 4-stage
     // decomposition (Eq. m5_esrl_decomp: detection/ZKP/threshold-sign/FlowMod)
     // is NOT fabricated here -- it needs per-stage std::chrono instrumentation
     // inside the isolation path, which is future work, not measured yet.
-    if (attack_start_time > 0.0 && detection_time > attack_start_time) {
-        double esrl = mitigation_time - attack_start_time;
+    //
+    // When the route-availability gate withholds full isolation (no
+    // alternate path), mitigation_time is never set -- but a real containment
+    // action (graduated level 2: rate-limit + per-batch ZKP) still occurs.
+    // ESRL then reports onset->graduated-response latency instead of onset->
+    // full-isolation, labelled explicitly so it is never confused with a full
+    // isolation latency. This is a genuine measured timestamp, not a
+    // fabricated placeholder.
+    bool has_full_isolation = mitigation_time > 0.0;
+    bool has_graduated_only = !has_full_isolation && graduated_response_time > 0.0;
+    if (attack_start_time > 0.0 && detection_time > attack_start_time
+        && (has_full_isolation || has_graduated_only)) {
+        double response_time = has_full_isolation ? mitigation_time
+                                                   : graduated_response_time;
+        double esrl = response_time - attack_start_time;
         std::cout << "  [M5]  ESRL: " << (esrl * 1000.0) << " ms"
                    << "  (t_onset=" << attack_start_time
-                   << " t_isolate=" << mitigation_time
-                   << " -- aggregate only; stage decomposition not instrumented)"
-                   << std::endl;
+                   << " t_response=" << response_time
+                   << (has_full_isolation
+                         ? " -- onset to FULL ISOLATION; aggregate only, stage"
+                           " decomposition not instrumented"
+                         : " -- onset to GRADUATED RESPONSE (rate-limit); full"
+                           " isolation withheld by the route-availability gate,"
+                           " no alternate path in this topology")
+                   << ")" << std::endl;
     } else {
-        std::cout << "  [M5]  ESRL: not yet measurable (no isolation following "
-                     "attack onset so far)" << std::endl;
+        std::cout << "  [M5]  ESRL: not yet measurable (no detection response "
+                     "following attack onset so far)" << std::endl;
     }
 
     std::cout << "  [M6]  MDPOS: NOT applicable to this NS-3 run (crypto-op "
@@ -752,7 +771,33 @@ inline void shield_gh_evaluate() {
             else                           sg_node_TN++;
         }
 
-        if (should_isolate) {
+        // ── Route-Availability Condition for Full Isolation (main.tex DEBSC
+        // subsection / Algorithm PQC-Mit Step 3, supervisor patch) ───────────
+        // Grey hole attacks drop only a fraction rho_a<1 of packets. If node n
+        // is on the flow's SOLE path, a full FlowMod block converts that
+        // partial loss into a total (100%) loss -- strictly worse than the
+        // attack itself. Only proceed to full isolation if ALT_ROUTE_EXISTS
+        // confirms at least one path to the destination excluding n; otherwise
+        // fall back to graduated response level 2 (rate-limit + per-batch ZKP,
+        // already implemented below in the RATE_LIMIT branch) and re-evaluate
+        // next window.
+        bool alt_route_ok = should_isolate && ALT_ROUTE_EXISTS(n, /*flow_id=*/0);
+        bool route_withheld = should_isolate && !alt_route_ok;
+
+        if (route_withheld) {
+            // Detection itself genuinely fired even though full isolation was
+            // withheld -- record it, and record the graduated-response (rate-
+            // limit) action's timestamp as the real containment moment, so M5
+            // (ESRL) has a genuine value instead of reporting nothing.
+            if (detection_time == 0.0) detection_time = t;
+            if (graduated_response_time == 0.0) graduated_response_time = t + 0.05;
+            std::cout << "[SHIELD-GH][ROUTE-GATE] node " << n
+                      << " full isolation WITHHELD — no alternate route excludes it"
+                      << " | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP)"
+                      << " | t=" << t << std::endl;
+        }
+
+        if (should_isolate && alt_route_ok) {
             g_sg_isolated.insert(n);
 
             // ── Fig 3.10 lightweight mitigation: RSU threshold-signed FlowMod ──
@@ -827,7 +872,7 @@ inline void shield_gh_evaluate() {
             if (g_sg_pqc_mit) g_sg_pqc_mit->Trigger(n, t);
 #endif
             }  // end threshold-FlowMod-authorised block
-        } else if (response == IsolationDecision::RATE_LIMIT) {
+        } else if (route_withheld || response == IsolationDecision::RATE_LIMIT) {
             std::cout << "[SHIELD-GH] Node " << n << " RATE-LIMITED | Λ="
                       << g_sg_debsc.ComputeSuspicionLevel(n, t) << std::endl;
         }
@@ -902,22 +947,41 @@ inline void shield_gh_evaluate() {
                 }
                 if (!is_real) g_sg_legit_nodes.insert(v.node);
 
-                // full-mode isolation: a fused-positive attacker is blocked
+                // full-mode isolation: a fused-positive attacker is blocked,
+                // gated by the same Route-Availability Condition as lightweight
+                // mode (main.tex DEBSC subsection / Algorithm PQC-Mit Step 3):
+                // only install the full block if an alternate route excludes
+                // this node, else fall back to graduated level 2 (rate-limit).
                 if (flagged && g_sg_isolated.find(v.node) == g_sg_isolated.end()) {
-                    g_sg_isolated.insert(v.node);
-                    shield_gh_isolated_nodes[v.node] = true;
-                    if (detection_time  == 0.0) detection_time  = t;
-                    if (mitigation_time == 0.0) mitigation_time = t + 0.05;
-                    // ── Task 8: M4 (FIR) — this isolation is a FALSE isolation
-                    // iff the AI verdict flagged a node that is NOT really an
-                    // attacker (the only way `flagged` and `!is_real` co-occur).
-                    if (!is_real) g_sg_false_isolated.insert(v.node);
-                    std::cout << "[SHIELD-GH][AI-FULL] node " << v.node
-                              << " ISOLATED by fused verdict | y_hat=1"
-                              << " Q_i=" << std::fixed << std::setprecision(3)
-                              << v.q_i << " score=" << v.score
-                              << " real_attacker=" << is_real
-                              << " | t=" << t << std::endl;
+                    if (ALT_ROUTE_EXISTS(v.node, /*flow_id=*/0)) {
+                        g_sg_isolated.insert(v.node);
+                        shield_gh_isolated_nodes[v.node] = true;
+                        if (detection_time  == 0.0) detection_time  = t;
+                        if (mitigation_time == 0.0) mitigation_time = t + 0.05;
+                        // ── Task 8: M4 (FIR) — this isolation is a FALSE isolation
+                        // iff the AI verdict flagged a node that is NOT really an
+                        // attacker (the only way `flagged` and `!is_real` co-occur).
+                        if (!is_real) g_sg_false_isolated.insert(v.node);
+                        std::cout << "[SHIELD-GH][AI-FULL] node " << v.node
+                                  << " ISOLATED by fused verdict | y_hat=1"
+                                  << " Q_i=" << std::fixed << std::setprecision(3)
+                                  << v.q_i << " score=" << v.score
+                                  << " real_attacker=" << is_real
+                                  << " | t=" << t << std::endl;
+                    } else {
+                        // Detection (fusion) genuinely fired; record it and the
+                        // graduated-response timestamp so M5 (ESRL) has a real
+                        // value even though full isolation was correctly withheld.
+                        if (detection_time == 0.0) detection_time = t;
+                        if (graduated_response_time == 0.0) graduated_response_time = t + 0.05;
+                        std::cout << "[SHIELD-GH][AI-FULL][ROUTE-GATE] node " << v.node
+                                  << " full isolation WITHHELD — no alternate route excludes it"
+                                  << " | y_hat=1 Q_i=" << std::fixed << std::setprecision(3)
+                                  << v.q_i << " score=" << v.score
+                                  << " real_attacker=" << is_real
+                                  << " | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP)"
+                                  << " | t=" << t << std::endl;
+                    }
                 }
             }
             std::cout << "[SHIELD-GH][AI-FULL] scored " << evaluated

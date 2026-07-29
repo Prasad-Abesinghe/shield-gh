@@ -1,0 +1,4 @@
+{"node":0,"is_attacker":1,"rcv":12,"fwd":0,"reputation":0.0867347,"speed":13.9,"rule":0,"s_total":1,"per_src":{}}
+{"node":1,"is_attacker":1,"rcv":3,"fwd":0,"reputation":0.214286,"speed":13.9,"rule":0,"s_total":1,"per_src":{"2":{"fwd":0,"drp":3}}}
+{"node":2,"is_attacker":0,"rcv":3,"fwd":3,"reputation":0.774857,"speed":13.9,"rule":0,"s_total":0,"per_src":{"2":{"fwd":3,"drp":0}}}
+{"node":3,"is_attacker":0,"rcv":3,"fwd":3,"reputation":0.789857,"speed":13.9,"rule":0,"s_total":0,"per_src":{}}

@@ -19,7 +19,9 @@ Checked equations (report anchors):
     eq:m2_ghsr     M2 GHSR = (PDR_post - PDR_attack) / (PDR_baseline - PDR_attack)
     eq:m3_avcr     M3 AVCR = (1/k) sum 1[TPR_variant >= theta_cov]
     eq:m4_fir      M4 FIR = |falsely isolated legit vehicles| / |legit vehicles|
-    eq:m5_esrl     M5 ESRL = t_isolate - t_onset
+    eq:m5_esrl     M5 ESRL = t_response - t_onset (t_response = full isolation
+                   if the route-availability gate allowed it, else the
+                   graduated-response/rate-limit timestamp)
     eq:m6_comp/comm/store  M6 Omega_comp/comm/store(N) closed-form scalability
 
 Checked algorithms (report anchors, invoked by name in the full-mode path):
@@ -227,9 +229,12 @@ def main():
           or "g_sg_false_isolated.size()" in src_integ,
           "print_shield_gh_full_pem_report()")
 
-    check("eq:m5_esrl", "M5 ESRL formula: t_isolate - t_onset, using the "
-          "real attack_start_time / mitigation_time timestamps",
-          "mitigation_time - attack_start_time" in src_integ,
+    check("eq:m5_esrl", "M5 ESRL formula: t_response - t_onset, using the "
+          "real attack_start_time / mitigation_time (full isolation) or "
+          "graduated_response_time (route-gate withheld) timestamps",
+          "response_time-attack_start_time" in src_integ.replace(" ", "")
+          and "mitigation_time>0.0" in src_integ.replace(" ", "")
+          and "graduated_response_time" in src_integ,
           "print_shield_gh_full_pem_report()")
 
     check("eq:m6_comp", "M6 crypto-benchmark script exists and evaluates "

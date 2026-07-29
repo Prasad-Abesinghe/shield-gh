@@ -238,15 +238,21 @@ Attack state: DP-FR (Fixed Rate) ACTIVE
 Solution at nodes cleared at 1
 sent all flow data from node 4
 current time is 1
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
 link lifetime optimization beginning at 1.0345
 finished writing link lifetime status at1.0345
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 957
+delay is 1007
 reading lifetime from csv at1.0346
 link lifetime conversion finished at+1.0346e+09ns
 updating flows - path finding at1.0348
@@ -272,6 +278,11 @@ Proposed RL started at 1.0359
 1
 Proposed RL learning finished at 1.0359
 Transmitting delta values at1.036
+
+
+
+
+
 Initialized flow counters at 1.0995
 Forcing exactly 2 attackers out of 4 vehicles
 Node 0 forced as ATTACKER
@@ -336,10 +347,10 @@ average_latency 5.30767 ms
 [LW-DP-Det] Node 0 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.50417
 [LW-DP-Det] Node 1 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.170837
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=1.99801
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=213ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=224ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.988 score=0.831 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=1.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.997 score=0.917 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=1.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.59 ms | bridge wall-clock (incl. one-off model load) = 283.9 ms | both << W=10s window | t=2.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.59 ms | bridge wall-clock (incl. one-off model load) = 337.9 ms | both << W=10s window | t=2.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -375,6 +386,8 @@ written to file successfully
 Solution at nodes cleared at 2.00
 sent all flow data from node 4
 current time is 2.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
@@ -382,11 +395,15 @@ At controller: updated flow source 3to destination 0flow size 0packet size 750Qo
 Retransmission packet dropped for flow id 0packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 2.03
 finished writing link lifetime status at2.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1147
+delay is 1037
 reading lifetime from csv at2.03
 link lifetime conversion finished at+2034600000.00ns
 updating flows - path finding at2.03
@@ -412,6 +429,11 @@ Proposed RL started at 2.04
 1
 Proposed RL learning finished at 2.04
 Transmitting delta values at2.04
+
+
+
+
+
 Initialized flow counters at 2.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -458,9 +480,9 @@ average_latency 2.65 ms
 [LW-DP-Det] Node 1 SUSPECTED — S1:1 S2:0 S3:0 corrPDR=0.10
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=2
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=3.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=209ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=250ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.931 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=2.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.49 ms | bridge wall-clock (incl. one-off model load) = 276.1 ms | both << W=10s window | t=3.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.48 ms | bridge wall-clock (incl. one-off model load) = 316.7 ms | both << W=10s window | t=3.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=1 TN=2 FP=0 FN=1
   M1a Detection Accuracy: 75.0%
@@ -496,17 +518,23 @@ written to file successfully
 Solution at nodes cleared at 3.00
 sent all flow data from node 4
 current time is 3.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 3.03
 finished writing link lifetime status at3.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1087
+delay is 1123
 reading lifetime from csv at3.03
 link lifetime conversion finished at+3034600000.00ns
 updating flows - path finding at3.03
@@ -532,6 +560,11 @@ Proposed RL started at 3.04
 1
 Proposed RL learning finished at 3.04
 Transmitting delta values at3.04
+
+
+
+
+
 Initialized flow counters at 3.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -583,10 +616,10 @@ average_latency 1.77 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=4.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=3
 [SHIELD-GH][AI] full-mode: dumped 2 node windows -> /tmp/shieldgh_window.jsonl | t=4.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.4ms (load=213ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.4ms (load=246ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.826 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=3.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.932 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=3.998
-[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.37 ms | bridge wall-clock (incl. one-off model load) = 278.4 ms | both << W=10s window | t=4.0
+[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.38 ms | bridge wall-clock (incl. one-off model load) = 312.6 ms | both << W=10s window | t=4.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -622,17 +655,23 @@ written to file successfully
 Solution at nodes cleared at 4.00
 sent all flow data from node 4
 current time is 4.00
+
 Retransmission packet dropped for flow id 0packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 4.03
 finished writing link lifetime status at4.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 922
+delay is 1108
 reading lifetime from csv at4.03
 link lifetime conversion finished at+4034600000.00ns
 updating flows - path finding at4.03
@@ -658,6 +697,11 @@ Proposed RL started at 4.04
 1
 Proposed RL learning finished at 4.04
 Transmitting delta values at4.04
+
+
+
+
+
 Initialized flow counters at 4.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -728,10 +772,10 @@ average_latency 2.90 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=5.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=4
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=5.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=202ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=267ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.995 score=0.839 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=4.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.997 score=0.927 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=4.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.65 ms | bridge wall-clock (incl. one-off model load) = 268.6 ms | both << W=10s window | t=5.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.64 ms | bridge wall-clock (incl. one-off model load) = 337.8 ms | both << W=10s window | t=5.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -767,18 +811,24 @@ written to file successfully
 Solution at nodes cleared at 5.00
 sent all flow data from node 4
 current time is 5.00
+
 Retransmission packet dropped for flow id 3packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 Retransmission packet dropped for flow id 3packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 5.03
 finished writing link lifetime status at5.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1172
+delay is 1099
 reading lifetime from csv at5.03
 link lifetime conversion finished at+5034600000.00ns
 updating flows - path finding at5.03
@@ -804,6 +854,11 @@ Proposed RL started at 5.04
 1
 Proposed RL learning finished at 5.04
 Transmitting delta values at5.04
+
+
+
+
+
 Initialized flow counters at 5.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -884,10 +939,10 @@ average_latency 3.52 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=6.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=5
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=6.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=211ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=245ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.992 score=0.843 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=5.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.990 score=0.906 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=5.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.72 ms | bridge wall-clock (incl. one-off model load) = 278.9 ms | both << W=10s window | t=6.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.71 ms | bridge wall-clock (incl. one-off model load) = 313.7 ms | both << W=10s window | t=6.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -923,17 +978,23 @@ written to file successfully
 Solution at nodes cleared at 6.00
 sent all flow data from node 4
 current time is 6.00
+
 Retransmission packet dropped for flow id 3packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 3packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 6.03
 finished writing link lifetime status at6.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1049
+delay is 998
 reading lifetime from csv at6.03
 link lifetime conversion finished at+6034600000.00ns
 updating flows - path finding at6.03
@@ -959,6 +1020,11 @@ Proposed RL started at 6.04
 1
 Proposed RL learning finished at 6.04
 Transmitting delta values at6.04
+
+
+
+
+
 Initialized flow counters at 6.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1041,10 +1107,10 @@ average_latency 3.65 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=7.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=6
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=7.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=407ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=233ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.847 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=6.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.952 score=0.876 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=6.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.71 ms | bridge wall-clock (incl. one-off model load) = 526.1 ms | both << W=10s window | t=7.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.70 ms | bridge wall-clock (incl. one-off model load) = 302.4 ms | both << W=10s window | t=7.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1080,16 +1146,22 @@ written to file successfully
 Solution at nodes cleared at 7.00
 sent all flow data from node 4
 current time is 7.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 7.03
 finished writing link lifetime status at7.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1025
+delay is 1129
 reading lifetime from csv at7.03
 link lifetime conversion finished at+7034600000.00ns
 updating flows - path finding at7.03
@@ -1115,6 +1187,11 @@ Proposed RL started at 7.04
 1
 Proposed RL learning finished at 7.04
 Transmitting delta values at7.04
+
+
+
+
+
 Initialized flow counters at 7.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1179,10 +1256,10 @@ average_latency 3.66 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=8.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=7
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=8.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=211ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=370ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.997 score=0.857 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=7.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.992 score=0.886 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=7.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.54 ms | bridge wall-clock (incl. one-off model load) = 277.2 ms | both << W=10s window | t=8.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 436.8 ms | both << W=10s window | t=8.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1218,15 +1295,21 @@ written to file successfully
 Solution at nodes cleared at 8.00
 sent all flow data from node 4
 current time is 8.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
 link lifetime optimization beginning at 8.03
 finished writing link lifetime status at8.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 854
+delay is 1082
 reading lifetime from csv at8.03
 link lifetime conversion finished at+8034600000.00ns
 updating flows - path finding at8.03
@@ -1252,6 +1335,11 @@ Proposed RL started at 8.04
 1
 Proposed RL learning finished at 8.04
 Transmitting delta values at8.04
+
+
+
+
+
 Initialized flow counters at 8.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1332,10 +1420,10 @@ average_latency 3.98 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=9.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=7
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=9.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=203ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=250ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.998 score=0.864 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=8.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.991 score=0.884 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=8.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.69 ms | bridge wall-clock (incl. one-off model load) = 269.4 ms | both << W=10s window | t=9.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.71 ms | bridge wall-clock (incl. one-off model load) = 319.5 ms | both << W=10s window | t=9.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1371,17 +1459,23 @@ written to file successfully
 Solution at nodes cleared at 9.00
 sent all flow data from node 4
 current time is 9.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 Retransmission packet dropped for flow id 3packet ID: 2
 Retransmission packet dropped for flow id 2packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 9.03
 finished writing link lifetime status at9.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 865
+delay is 1046
 reading lifetime from csv at9.03
 link lifetime conversion finished at+9034600000.00ns
 updating flows - path finding at9.03
@@ -1407,6 +1501,11 @@ Proposed RL started at 9.04
 1
 Proposed RL learning finished at 9.04
 Transmitting delta values at9.04
+
+
+
+
+
 Initialized flow counters at 9.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1474,10 +1573,10 @@ average_latency 4.09 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=10.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=8
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=10.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=192ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=237ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.997 score=0.868 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=9.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.975 score=0.873 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=9.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.58 ms | bridge wall-clock (incl. one-off model load) = 302.8 ms | both << W=10s window | t=10.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.58 ms | bridge wall-clock (incl. one-off model load) = 309.4 ms | both << W=10s window | t=10.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1513,15 +1612,21 @@ written to file successfully
 Solution at nodes cleared at 10.00
 sent all flow data from node 4
 current time is 10.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
+
+
+
+
 link lifetime optimization beginning at 10.03
 finished writing link lifetime status at10.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1194
+delay is 1078
 reading lifetime from csv at10.03
 link lifetime conversion finished at+10034600000.00ns
 updating flows - path finding at10.03
@@ -1547,6 +1652,11 @@ Proposed RL started at 10.04
 1
 Proposed RL learning finished at 10.04
 Transmitting delta values at10.04
+
+
+
+
+
 Initialized flow counters at 10.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1623,10 +1733,10 @@ average_latency 4.22 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=11.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=9
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=11.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=211ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=270ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.996 score=0.870 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=10.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.980 score=0.872 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=10.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.68 ms | bridge wall-clock (incl. one-off model load) = 284.1 ms | both << W=10s window | t=11.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.68 ms | bridge wall-clock (incl. one-off model load) = 352.0 ms | both << W=10s window | t=11.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1662,17 +1772,23 @@ written to file successfully
 Solution at nodes cleared at 11.00
 sent all flow data from node 4
 current time is 11.00
+
 Retransmission packet dropped for flow id 3packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 2packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 11.03
 finished writing link lifetime status at11.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1137
+delay is 1207
 reading lifetime from csv at11.03
 link lifetime conversion finished at+11034600000.00ns
 updating flows - path finding at11.03
@@ -1698,6 +1814,11 @@ Proposed RL started at 11.04
 1
 Proposed RL learning finished at 11.04
 Transmitting delta values at11.04
+
+
+
+
+
 Initialized flow counters at 11.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1771,10 +1892,10 @@ average_latency 4.33 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=12.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=10
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=12.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=204ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=333ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.983 score=0.861 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=11.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.978 score=0.867 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=11.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.63 ms | bridge wall-clock (incl. one-off model load) = 269.5 ms | both << W=10s window | t=12.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.65 ms | bridge wall-clock (incl. one-off model load) = 406.8 ms | both << W=10s window | t=12.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1810,16 +1931,22 @@ written to file successfully
 Solution at nodes cleared at 12.00
 sent all flow data from node 4
 current time is 12.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 3packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 12.03
 finished writing link lifetime status at12.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1179
+delay is 1159
 reading lifetime from csv at12.03
 link lifetime conversion finished at+12034600000.00ns
 updating flows - path finding at12.03
@@ -1845,6 +1972,11 @@ Proposed RL started at 12.04
 1
 Proposed RL learning finished at 12.04
 Transmitting delta values at12.04
+
+
+
+
+
 Initialized flow counters at 12.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -1910,10 +2042,10 @@ average_latency 4.34 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=13.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=13.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=209ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=235ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.970 score=0.849 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=12.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.988 score=0.869 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=12.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.67 ms | bridge wall-clock (incl. one-off model load) = 281.5 ms | both << W=10s window | t=13.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.61 ms | bridge wall-clock (incl. one-off model load) = 301.6 ms | both << W=10s window | t=13.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -1950,16 +2082,22 @@ Solution at nodes cleared at 13.00
 sent all flow data from node 4
 current time is 13.00
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 13.03
 finished writing link lifetime status at13.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 920
+delay is 1111
 reading lifetime from csv at13.03
 link lifetime conversion finished at+13034600000.00ns
 updating flows - path finding at13.03
@@ -1985,6 +2123,11 @@ Proposed RL started at 13.04
 1
 Proposed RL learning finished at 13.04
 Transmitting delta values at13.04
+
+
+
+
+
 Initialized flow counters at 13.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2052,10 +2195,10 @@ average_latency 4.34 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=14.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=14.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=1283ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=1.1ms (load=261ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.995 score=0.859 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=13.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.970 score=0.860 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=13.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.57 ms | bridge wall-clock (incl. one-off model load) = 1354.7 ms | both << W=10s window | t=14.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 1.05 ms | bridge wall-clock (incl. one-off model load) = 370.3 ms | both << W=10s window | t=14.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2091,15 +2234,21 @@ written to file successfully
 Solution at nodes cleared at 14.00
 sent all flow data from node 4
 current time is 14.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
+
+
+
+
 link lifetime optimization beginning at 14.03
 finished writing link lifetime status at14.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 957
+delay is 985
 reading lifetime from csv at14.03
 link lifetime conversion finished at+14034600000.00ns
 updating flows - path finding at14.03
@@ -2125,6 +2274,11 @@ Proposed RL started at 14.04
 1
 Proposed RL learning finished at 14.04
 Transmitting delta values at14.04
+
+
+
+
+
 Initialized flow counters at 14.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2188,10 +2342,10 @@ average_latency 4.03 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=15.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=15.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=200ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=243ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.997 score=0.863 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=14.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.875 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=14.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 289.6 ms | both << W=10s window | t=15.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.57 ms | bridge wall-clock (incl. one-off model load) = 315.6 ms | both << W=10s window | t=15.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2227,16 +2381,22 @@ written to file successfully
 Solution at nodes cleared at 15.00
 sent all flow data from node 4
 current time is 15.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 15.03
 finished writing link lifetime status at15.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1101
+delay is 1032
 reading lifetime from csv at15.03
 link lifetime conversion finished at+15034600000.00ns
 updating flows - path finding at15.03
@@ -2262,6 +2422,11 @@ Proposed RL started at 15.04
 1
 Proposed RL learning finished at 15.04
 Transmitting delta values at15.04
+
+
+
+
+
 Initialized flow counters at 15.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2321,10 +2486,10 @@ average_latency 3.76 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=16.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=16.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=215ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=255ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.403 score=0.657 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=15.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.881 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=15.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.60 ms | bridge wall-clock (incl. one-off model load) = 281.2 ms | both << W=10s window | t=16.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.61 ms | bridge wall-clock (incl. one-off model load) = 348.0 ms | both << W=10s window | t=16.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2360,7 +2525,9 @@ written to file successfully
 Solution at nodes cleared at 16.00
 sent all flow data from node 4
 current time is 16.00
+
 Retransmission packet dropped for flow id 3packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
@@ -2368,11 +2535,15 @@ At controller: updated flow source 3to destination 0flow size 0packet size 750Qo
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 16.03
 finished writing link lifetime status at16.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 993
+delay is 1125
 reading lifetime from csv at16.03
 link lifetime conversion finished at+16034600000.00ns
 updating flows - path finding at16.03
@@ -2398,6 +2569,11 @@ Proposed RL started at 16.04
 1
 Proposed RL learning finished at 16.04
 Transmitting delta values at16.04
+
+
+
+
+
 Initialized flow counters at 16.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2444,10 +2620,10 @@ average_latency 3.53 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=17.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 2 node windows -> /tmp/shieldgh_window.jsonl | t=17.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.3ms (load=1086ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.3ms (load=405ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.982 score=0.846 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=16.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.884 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=16.998
-[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.34 ms | bridge wall-clock (incl. one-off model load) = 1153.7 ms | both << W=10s window | t=17.0
+[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.35 ms | bridge wall-clock (incl. one-off model load) = 471.5 ms | both << W=10s window | t=17.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2483,17 +2659,23 @@ written to file successfully
 Solution at nodes cleared at 17.00
 sent all flow data from node 4
 current time is 17.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 17.03
 finished writing link lifetime status at17.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1308
+delay is 1186
 reading lifetime from csv at17.03
 link lifetime conversion finished at+17034600000.00ns
 updating flows - path finding at17.03
@@ -2519,6 +2701,11 @@ Proposed RL started at 17.04
 1
 Proposed RL learning finished at 17.04
 Transmitting delta values at17.04
+
+
+
+
+
 Initialized flow counters at 17.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2587,10 +2774,10 @@ average_latency 3.56 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=18.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=18.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=202ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=278ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.988 score=0.847 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=17.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.883 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=17.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.67 ms | bridge wall-clock (incl. one-off model load) = 303.7 ms | both << W=10s window | t=18.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.68 ms | bridge wall-clock (incl. one-off model load) = 387.7 ms | both << W=10s window | t=18.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2626,6 +2813,8 @@ written to file successfully
 Solution at nodes cleared at 18.00
 sent all flow data from node 4
 current time is 18.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
@@ -2634,11 +2823,15 @@ Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 18.03
 finished writing link lifetime status at18.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 978
+delay is 1170
 reading lifetime from csv at18.03
 link lifetime conversion finished at+18034600000.00ns
 updating flows - path finding at18.03
@@ -2664,6 +2857,11 @@ Proposed RL started at 18.04
 1
 Proposed RL learning finished at 18.04
 Transmitting delta values at18.04
+
+
+
+
+
 Initialized flow counters at 18.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2725,10 +2923,10 @@ average_latency 3.56 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=19.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=19.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=211ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=236ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.992 score=0.848 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=18.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.882 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=18.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 281.9 ms | both << W=10s window | t=19.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 308.7 ms | both << W=10s window | t=19.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2764,17 +2962,23 @@ written to file successfully
 Solution at nodes cleared at 19.00
 sent all flow data from node 4
 current time is 19.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 19.03
 finished writing link lifetime status at19.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1184
+delay is 1154
 reading lifetime from csv at19.03
 link lifetime conversion finished at+19034600000.00ns
 updating flows - path finding at19.03
@@ -2800,6 +3004,11 @@ Proposed RL started at 19.04
 1
 Proposed RL learning finished at 19.04
 Transmitting delta values at19.04
+
+
+
+
+
 Initialized flow counters at 19.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2853,10 +3062,10 @@ average_latency 3.37 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=20.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=20.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=204ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=251ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.982 score=0.843 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=19.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.887 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=19.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.53 ms | bridge wall-clock (incl. one-off model load) = 271.1 ms | both << W=10s window | t=20.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.55 ms | bridge wall-clock (incl. one-off model load) = 318.3 ms | both << W=10s window | t=20.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -2892,6 +3101,8 @@ written to file successfully
 Solution at nodes cleared at 20.00
 sent all flow data from node 4
 current time is 20.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
@@ -2899,11 +3110,15 @@ At controller: updated flow source 3to destination 0flow size 2packet size 750Qo
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
 Retransmission packet dropped for flow id 3packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 20.03
 finished writing link lifetime status at20.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1182
+delay is 1020
 reading lifetime from csv at20.03
 link lifetime conversion finished at+20034600000.00ns
 updating flows - path finding at20.03
@@ -2929,6 +3144,11 @@ Proposed RL started at 20.04
 1
 Proposed RL learning finished at 20.04
 Transmitting delta values at20.04
+
+
+
+
+
 Initialized flow counters at 20.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -2995,10 +3215,10 @@ average_latency 3.41 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=21.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=21.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=223ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=246ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.982 score=0.841 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=20.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.886 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=20.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.64 ms | bridge wall-clock (incl. one-off model load) = 289.5 ms | both << W=10s window | t=21.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.64 ms | bridge wall-clock (incl. one-off model load) = 319.1 ms | both << W=10s window | t=21.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3034,6 +3254,8 @@ written to file successfully
 Solution at nodes cleared at 21.00
 sent all flow data from node 4
 current time is 21.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
@@ -3042,11 +3264,15 @@ Retransmission packet dropped for flow id 0packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 2
 Retransmission packet dropped for flow id 2packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 21.03
 finished writing link lifetime status at21.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1119
+delay is 1240
 reading lifetime from csv at21.03
 link lifetime conversion finished at+21034600000.00ns
 updating flows - path finding at21.03
@@ -3072,6 +3298,11 @@ Proposed RL started at 21.04
 1
 Proposed RL learning finished at 21.04
 Transmitting delta values at21.04
+
+
+
+
+
 Initialized flow counters at 21.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3138,10 +3369,10 @@ average_latency 3.42 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=22.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=22.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=204ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=1264ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.976 score=0.836 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=21.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.993 score=0.885 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=21.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.61 ms | bridge wall-clock (incl. one-off model load) = 269.3 ms | both << W=10s window | t=22.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.63 ms | bridge wall-clock (incl. one-off model load) = 1369.9 ms | both << W=10s window | t=22.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3177,17 +3408,23 @@ written to file successfully
 Solution at nodes cleared at 22.00
 sent all flow data from node 4
 current time is 22.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 22.03
 finished writing link lifetime status at22.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1068
+delay is 1051
 reading lifetime from csv at22.03
 link lifetime conversion finished at+22034600000.00ns
 updating flows - path finding at22.03
@@ -3213,6 +3450,11 @@ Proposed RL started at 22.04
 1
 Proposed RL learning finished at 22.04
 Transmitting delta values at22.04
+
+
+
+
+
 Initialized flow counters at 22.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3284,10 +3526,10 @@ average_latency 3.45 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=23.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=23.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=273ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=255ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.988 score=0.840 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=22.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.993 score=0.886 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=22.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.68 ms | bridge wall-clock (incl. one-off model load) = 382.2 ms | both << W=10s window | t=23.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.68 ms | bridge wall-clock (incl. one-off model load) = 321.6 ms | both << W=10s window | t=23.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3323,6 +3565,8 @@ written to file successfully
 Solution at nodes cleared at 23.00
 sent all flow data from node 4
 current time is 23.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
@@ -3330,11 +3574,15 @@ At controller: updated flow source 3to destination 0flow size 1packet size 750Qo
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 3packet ID: 3
 Retransmission packet dropped for flow id 2packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 23.03
 finished writing link lifetime status at23.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1130
+delay is 1082
 reading lifetime from csv at23.03
 link lifetime conversion finished at+23034600000.00ns
 updating flows - path finding at23.03
@@ -3360,6 +3608,11 @@ Proposed RL started at 23.04
 1
 Proposed RL learning finished at 23.04
 Transmitting delta values at23.04
+
+
+
+
+
 Initialized flow counters at 23.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3414,10 +3667,10 @@ average_latency 3.30 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=24.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=24.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=215ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.5ms (load=242ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.995 score=0.844 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=23.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.890 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=23.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.51 ms | bridge wall-clock (incl. one-off model load) = 286.5 ms | both << W=10s window | t=24.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.52 ms | bridge wall-clock (incl. one-off model load) = 315.1 ms | both << W=10s window | t=24.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3453,16 +3706,22 @@ written to file successfully
 Solution at nodes cleared at 24.00
 sent all flow data from node 4
 current time is 24.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 24.03
 finished writing link lifetime status at24.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1086
+delay is 1059
 reading lifetime from csv at24.03
 link lifetime conversion finished at+24034600000.00ns
 updating flows - path finding at24.03
@@ -3488,6 +3747,11 @@ Proposed RL started at 24.04
 1
 Proposed RL learning finished at 24.04
 Transmitting delta values at24.04
+
+
+
+
+
 Initialized flow counters at 24.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3532,10 +3796,10 @@ average_latency 3.16 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=25.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 2 node windows -> /tmp/shieldgh_window.jsonl | t=25.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.3ms (load=198ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=2 infer=0.3ms (load=1037ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.970 score=0.833 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=24.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.999 score=0.892 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=24.998
-[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.32 ms | bridge wall-clock (incl. one-off model load) = 288.5 ms | both << W=10s window | t=25.0
+[SHIELD-GH][AI-FULL] scored 2 nodes | pure LLM+FL inference = 0.34 ms | bridge wall-clock (incl. one-off model load) = 1113.3 ms | both << W=10s window | t=25.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3571,17 +3835,23 @@ written to file successfully
 Solution at nodes cleared at 25.00
 sent all flow data from node 4
 current time is 25.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 2
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 25.03
 finished writing link lifetime status at25.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1076
+delay is 1069
 reading lifetime from csv at25.03
 link lifetime conversion finished at+25034600000.00ns
 updating flows - path finding at25.03
@@ -3607,6 +3877,11 @@ Proposed RL started at 25.04
 1
 Proposed RL learning finished at 25.04
 Transmitting delta values at25.04
+
+
+
+
+
 Initialized flow counters at 25.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3686,10 +3961,10 @@ average_latency 3.24 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=26.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=26.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=203ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.7ms (load=236ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.996 score=0.844 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=25.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.984 score=0.885 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=25.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.64 ms | bridge wall-clock (incl. one-off model load) = 271.3 ms | both << W=10s window | t=26.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.66 ms | bridge wall-clock (incl. one-off model load) = 302.3 ms | both << W=10s window | t=26.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3725,15 +4000,21 @@ written to file successfully
 Solution at nodes cleared at 26.00
 sent all flow data from node 4
 current time is 26.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
+
+
+
+
 link lifetime optimization beginning at 26.03
 finished writing link lifetime status at26.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1035
+delay is 1146
 reading lifetime from csv at26.03
 link lifetime conversion finished at+26034600000.00ns
 updating flows - path finding at26.03
@@ -3759,6 +4040,11 @@ Proposed RL started at 26.04
 1
 Proposed RL learning finished at 26.04
 Transmitting delta values at26.04
+
+
+
+
+
 Initialized flow counters at 26.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3819,10 +4105,10 @@ average_latency 3.28 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=27.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=27.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=206ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=1292ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.970 score=0.832 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=26.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.989 score=0.885 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=26.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.57 ms | bridge wall-clock (incl. one-off model load) = 272.3 ms | both << W=10s window | t=27.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 1359.2 ms | both << W=10s window | t=27.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3858,17 +4144,23 @@ written to file successfully
 Solution at nodes cleared at 27.00
 sent all flow data from node 4
 current time is 27.00
+
 Retransmission packet dropped for flow id 0packet ID: 2
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 2packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
+
+
+
+
 link lifetime optimization beginning at 27.03
 finished writing link lifetime status at27.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 916
+delay is 1275
 reading lifetime from csv at27.03
 link lifetime conversion finished at+27034600000.00ns
 updating flows - path finding at27.03
@@ -3894,6 +4186,11 @@ Proposed RL started at 27.04
 1
 Proposed RL learning finished at 27.04
 Transmitting delta values at27.04
+
+
+
+
+
 Initialized flow counters at 27.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -3955,10 +4252,10 @@ average_latency 3.31 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=28.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=28.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=258ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=244ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.992 score=0.840 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=27.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.994 score=0.885 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=27.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.57 ms | bridge wall-clock (incl. one-off model load) = 331.8 ms | both << W=10s window | t=28.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.56 ms | bridge wall-clock (incl. one-off model load) = 310.7 ms | both << W=10s window | t=28.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -3994,17 +4291,23 @@ written to file successfully
 Solution at nodes cleared at 28.00
 sent all flow data from node 4
 current time is 28.00
+
+
 At controller: updated flow source 0to destination 3flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 1packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 3packet size 750QoS 1
 At controller: updated flow source 3to destination 0flow size 0packet size 750QoS 1
 Retransmission packet dropped for flow id 0packet ID: 3
 Retransmission packet dropped for flow id 0packet ID: 2
+
+
+
+
 link lifetime optimization beginning at 28.03
 finished writing link lifetime status at28.03
 Set parameter Username
 Academic license - for non-commercial use only - expires 2027-05-08
-delay is 1185
+delay is 1010
 reading lifetime from csv at28.03
 link lifetime conversion finished at+28034600000.00ns
 updating flows - path finding at28.03
@@ -4030,6 +4333,11 @@ Proposed RL started at 28.04
 1
 Proposed RL learning finished at 28.04
 Transmitting delta values at28.04
+
+
+
+
+
 Initialized flow counters at 28.10
 flow id 0sub flow load is 0.00 next hop 0packets 0
 flow id 0sub flow load is 0.00 next hop 2packets 0
@@ -4102,10 +4410,10 @@ average_latency 3.34 ms
 [SHIELD-GH][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=29.00
 [SHIELD-GH] Node 1 RATE-LIMITED | Λ=11
 [SHIELD-GH][AI] full-mode: dumped 4 node windows -> /tmp/shieldgh_window.jsonl | t=29.00
-[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=202ms) -> /tmp/shieldgh_verdict.json
+[SHIELD-GH ns3_infer] backend=fallback:hashing+struct+softmax (stand-in for Qwen2.5-7B) nodes=4 infer=0.6ms (load=257ms) -> /tmp/shieldgh_verdict.json
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 0 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.998 score=0.845 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=28.998
 [SHIELD-GH][AI-FULL][ROUTE-GATE] node 1 full isolation WITHHELD — no alternate route excludes it | y_hat=1 Q_i=0.988 score=0.882 real_attacker=1 | APPLY_GRADUATED_LEVEL2 (rate-limit + per-batch ZKP) | t=28.998
-[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.60 ms | bridge wall-clock (incl. one-off model load) = 274.5 ms | both << W=10s window | t=29.0
+[SHIELD-GH][AI-FULL] scored 4 nodes | pure LLM+FL inference = 0.63 ms | bridge wall-clock (incl. one-off model load) = 328.8 ms | both << W=10s window | t=29.0
 === SHIELD-GH DETECTION METRICS (node-level) ===
   Node TP=2 TN=2 FP=0 FN=0
   M1a Detection Accuracy: 100.0%
@@ -4145,311 +4453,3 @@ Node 1 [ATTACKER] Dropped=98 Forwarded=0
 Node 2 [BENIGN]   Dropped=0 Forwarded=0
 Node 3 [BENIGN]   Dropped=0 Forwarded=0
 ==============================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
