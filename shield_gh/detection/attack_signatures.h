@@ -28,9 +28,21 @@ public:
     // epsilon_f tolerates per-window sampling noise: a fixed-rate attacker has
     // consistently LOW PDR; random per-packet dropping still keeps variance
     // moderate (~0.15), so we set epsilon_f=0.20 to fire S1 on steady low PDR.
+    // Fix D (supervisor-requested): tau_f raised 0.6->0.75, confirmed by TQ1
+    // alongside theta_R's raise. Task 8.5 grid search (2026-08-08,
+    // sensitivity_analysis/gh_param_sweep_results.csv) re-swept {0.50,0.60,
+    // 0.70} at the fixed 4-node/30s operating point; 0.60 and 0.70 TIED at
+    // MCC=1.0 there (0.75 was outside that narrow grid). Applying the tied
+    // grid-midpoint (0.60) as the new global default regressed a different,
+    // larger scenario (Task 9's t=10s --routing_test=true comparison run,
+    // MCC 0.83->0.72) that the sweep never exercised -- corrected back to
+    // 0.75 (2026-08-09). The live call site (lw_dp_det.cc, via routing.cc's
+    // sg_tau_f CLI global) always passes an explicit value, so THIS default
+    // only matters for a caller that omits tau_f entirely; kept in sync
+    // with sg_tau_f's default.
     static bool S1_FixedRate(uint32_t node_id, double t,
                               double corrected_pdr, double variance,
-                              double tau_f = 0.6, double epsilon_f = 0.20);
+                              double tau_f = 0.75, double epsilon_f = 0.20);
 
     // ── Eq. 3.7: S_DP-IT ──────────────────────────────────────────────────
     // S_DP-IT(vi) = 1[ ∃T* ∈ [Tmin, Tmax] : Rm_i(T*) > γit ]

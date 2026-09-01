@@ -1,0 +1,6 @@
+[E1] plan: 6x6 grid x 3 systems x 6 variants = 648 runs; 0 already done
+[E1] (1/648) [E1] p0_rho0_b1_malik_v1: ./waf --run "routing --routing_test=true --simTime=30 --routing_algorithm=4 --N_Vehicles=200 --maxspeed=80 --attack_percentage=0 --drop_rate=0 --attack_onset_delay=6.0 --attack_number=1 --detection_mode=lightweight --use_malik_detection=1"
+    -> exit1 in 71964.8s  MCC=1.0000 GHSR= FIR=
+[E1] (2/648) [E1] p0_rho0_b1_malik_v2: ./waf --run "routing --routing_test=true --simTime=30 --routing_algorithm=4 --N_Vehicles=200 --maxspeed=80 --attack_percentage=0 --drop_rate=0 --attack_onset_delay=6.0 --attack_number=2 --detection_mode=lightweight --use_malik_detection=1"
+    -> exit-9 in 73.6s  MCC=1.0000 GHSR= FIR=
+[E1] (3/648) [E1] p0_rho0_b1_malik_v3: ./waf --run "routing --routing_test=true --simTime=30 --routing_algorithm=4 --N_Vehicles=200 --maxspeed=80 --attack_percentage=0 --drop_rate=0 --attack_onset_delay=6.0 --attack_number=3 --detection_mode=lightweight --use_malik_detection=1"

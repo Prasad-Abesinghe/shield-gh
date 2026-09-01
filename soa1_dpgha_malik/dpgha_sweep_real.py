@@ -16,10 +16,19 @@ This driver:
   3. Aggregates detection accuracy / TPR / FPR / network PDR / routing
      overhead per attacker level and plots vs attacker %.
 
-PLR comes 100% from the simulation. RRR and μ(DSN) are still modelled per
-node-type (the data-plane sim exposes no control-plane counters), but the
-attacker INJECTION and the loss measurements that drive PLR are now real and
-event-driven — exactly what the supervisor asked for.
+PLR comes 100% from the simulation; the attacker INJECTION and the loss
+measurements that drive PLR are real and event-driven.
+
+DATA-LEAKAGE FIX (2026-08-09, supervisor-flagged): RRR and mean(DSN) used to
+be synthesized by branching directly on the ground-truth is_attacker label
+(non-overlapping RNG ranges for attacker vs benign), which let the
+classifier trivially separate classes from the answer key rather than from
+simulated behaviour and inflated MCC. This NS-3 data-plane scenario has no
+real RREQ/RREP/DSN control-plane counters at all, so RRR/DSN are now marked
+unavailable (dpgha.NodeSignals.rrr_available/dsn_available=False) and the
+classifier honestly degrades to the paper's PLR-only sub-rule instead of
+fabricating the missing signals from the label. See dpgha.py for the gate
+logic.
 
 Usage:
   python3 dpgha_sweep_real.py --percts 10,20,30,40,50,60 --simTime 30
@@ -43,6 +52,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import dpgha  # faithful Eq.13-18 detector
+
+# Shared controller-suppression model (see soa_suppression.py). Lives one
+# level up alongside routing.cc so SOA1/SOA2/SOA3 all use one implementation.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import soa_suppression
 
 # 95% CI z-multiplier (normal approx), used where a spread is available.
 Z95 = 1.959963985
@@ -71,8 +85,13 @@ def parse_routing_latency_ms(stdout):
     return float(vals[-1])
 
 HOME = os.path.expanduser("~")
-NS3 = os.path.join(HOME, "ns-allinone-3.35/ns-3.35")
-RESULTS = os.path.join(NS3, "results")
+# Task 9 fix: waf/build only exist under ns-3.35-g62build (symlinked scratch/
+# back to 62/scratch); 62/ itself has no waf. routing.cc's CSV outputs use a
+# hardcoded absolute path under 62/results/, so only the build/run root needs
+# to change here, not RESULTS below.
+NS3 = os.path.join(HOME, "ns-allinone-3.35/ns-3.35-g62build")
+RESULTS_ROOT = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/62")
+RESULTS = os.path.join(RESULTS_ROOT, "results")
 MALIK_CSV = os.path.join(RESULTS, "malik_detection.csv")
 CACHE = os.path.join(RESULTS, "soa1_real_cache")  # per-percentage CSV snapshots
 
@@ -102,41 +121,125 @@ def run_ns3(pct, sim_time, attack_number):
 
 def aggregate_from_csv(csv_path):
     """Build per-node REAL signals from the simulation CSV (last window =
-    cumulative end-of-run state). PLR is derived from the measured PDR."""
+    cumulative end-of-run state). PLR is derived from the measured PDR.
+
+    Data-leakage fix (2026-08-09, supervisor-flagged): this used to
+    synthesize rreq_received/rrep_generated/mean_dsn by branching directly
+    on the ground-truth is_attacker label (an RNG with attacker-only vs
+    benign-only, non-overlapping ranges) -- meaning two of the classifier's
+    three decision signals were derived from the answer key, not from
+    simulated behaviour, which trivially inflated MCC. This NS-3 data-plane
+    scenario has no real RREQ/RREP/DSN control-plane counters at all (same
+    limitation routing.cc:338-342 documents for its own PLR-only in-sim
+    gate), so the honest fix is to mark RRR/DSN as unavailable and let
+    dpgha.classify() degrade to the PLR-only sub-rule instead of
+    fabricating the other two signals from the label.
+
+    KNOWN LIMITATION (2026-08-09, supervisor-flagged, investigated not
+    fixed): SOA1 shows ZERO variance across --rng_run seeds (MCC pinned
+    at exactly +1.0000 every time), even after the attack-model
+    compounding bug was fixed and genuine seed-to-seed variation was
+    confirmed present in the raw per-window CSV (attacker PDR trajectories
+    genuinely differ by seed at windows 0-3). Tried reading the earliest
+    window with any measurable drop instead of the last (most saturated)
+    window -- MCC still pinned at 1.0 for every seed. Root cause is
+    structural, not a fixable aggregation bug: at N_Vehicles=4 with the
+    default topology (2 attackers at drop_rate=60%, 2 benign nodes with
+    genuinely zero loss), a persistent attacker's PDR loss is large enough
+    (40-100% depending on seed/window) that PLR-only detection (δ=3%
+    threshold) trivially separates it from the two zero-loss benign nodes
+    under ANY seed -- this is a small-N/large-effect-size ceiling of the
+    scenario itself, not a property of SOA1's implementation. A genuine
+    seed-to-seed MCC spread for SOA1 would require either more nodes (so
+    borderline cases exist) or a lower/more evasive drop rate; not
+    something this evaluation script can produce on its own from a fixed
+    4-node CSV. Flagged rather than silently left unexplained."""
     rows = list(csv.DictReader(open(csv_path)))
     if not rows:
         raise RuntimeError(f"empty CSV: {csv_path}")
     node_ids = sorted({int(c.split("Node")[1].split("_")[0])
                        for c in rows[0] if c.startswith("Node") and c.endswith("_PDR")})
     last = rows[-1]  # end-of-simulation cumulative measurement
+    # Supervisor-directed model fix: ControllerCompromised (written by
+    # routing.cc's write_malik_csv()) tells evaluate() whether to suppress
+    # correctly-detected verdicts, modelling a compromised controller
+    # hiding real attackers from a detector with no independent evidence
+    # channel. Older cached CSVs (pre-fix) won't have this column --
+    # default to False (unaffected) rather than erroring.
+    controller_compromised = bool(int(last.get("ControllerCompromised", 0)))
+    # Multi-controller model (2026-08-12): per-node controller status. A node
+    # under a BENIGN controller is not suppressed even when other controllers
+    # in the network are compromised. Falls back to the run-wide flag for
+    # older CSVs written before this column existed.
+    ctrl_per_node = {}
     nodes = []
-    rng_dsn = np.random.default_rng(12345)  # only for modelled RRR/DSN
     for n in node_ids:
         pdr = float(last[f"Node{n}_PDR"])
         is_atk = int(last[f"Node{n}_IsAttacker"])
+        ctrl_per_node[n] = bool(int(last.get(f"Node{n}_CtrlCompromised",
+                                             1 if controller_compromised else 0)))
         # REAL signal: map measured PDR to data-packet counts (PLR = 1-PDR).
         dp_r = 1000
         dp_f = int(round(pdr * dp_r))
-        # Modelled control-plane signals (sim has no RREQ/RREP/DSN counters):
-        # follow the attacker's ground-truth type to set RRR/DSN plausibly.
-        if is_atk:
-            rreq_r = int(rng_dsn.integers(40, 80))
-            rrep_g = int(rreq_r * rng_dsn.uniform(0.80, 1.10))   # high RRR
-            mean_dsn = float(rng_dsn.uniform(150, 250)) if (n % 2) \
-                       else float(rng_dsn.uniform(15, 40))
-        else:
-            rreq_r = int(rng_dsn.integers(40, 80))
-            rrep_g = int(rreq_r * rng_dsn.uniform(0.20, 0.55))   # low RRR
-            mean_dsn = float(rng_dsn.uniform(17, 33))
         nodes.append(dpgha.NodeSignals(
             dp_received=dp_r, dp_forwarded=dp_f,
-            rreq_received=rreq_r, rrep_generated=rrep_g,
-            mean_dsn=mean_dsn, is_attacker=bool(is_atk)))
-    return nodes
+            rreq_received=0, rrep_generated=0, mean_dsn=0.0,
+            rrr_available=False, dsn_available=False,
+            is_attacker=bool(is_atk)))
+    return nodes, controller_compromised, ctrl_per_node
 
 
-def evaluate(nodes):
+def evaluate(nodes, controller_compromised=False, rng_run=1,
+             suppression_prob=None, ctrl_per_node=None):
+    """Supervisor-directed model fix (2026-08-09): SOA1 has no evidence
+    channel independent of the controller (no blockchain/RSU consensus of
+    its own, unlike SHIELD-GH's DEBSC). When the controller is compromised,
+    it can falsify the flow statistics SOA1's PLR gate relies on -- a
+    genuinely correct detection (verdict != 'Normal' on a real attacker) is
+    SUPPRESSED before it becomes an actionable/reported result, i.e. what
+    would have been a TP is instead counted as a FN. FP/TN are unaffected:
+    the controller shields real attackers, it does not fabricate
+    accusations against benign nodes.
+
+    PROBABILISTIC REFINEMENT (2026-08-11): suppression is no longer
+    all-or-nothing. The previous version suppressed EVERY true positive,
+    which pinned SOA1 to exactly MCC=0.00 -- indistinguishable from a
+    random-guessing detector, even though its RAW MCC here is +1.00 (it
+    detects both attackers correctly and is simply overruled). See
+    soa_suppression.py for the full rationale. Returns BOTH the raw
+    (pre-suppression) and suppressed confusion matrices so the report can
+    show "detected correctly but overruled" rather than a bare 0.00."""
     verdicts, beta, TP, TN, FP, FN = dpgha.detect_all(nodes)
+    prob = (soa_suppression.DEFAULT_SUPPRESSION_PROB
+            if suppression_prob is None else suppression_prob)
+
+    # Multi-controller model (2026-08-12): suppression is decided PER NODE from
+    # that node's own controller status, not from a single run-wide flag. Nodes
+    # under benign controllers report normally.
+    if ctrl_per_node is None:
+        ctrl_per_node = {i: controller_compromised for i in range(len(nodes))}
+
+    raw_cm = dict(TP=0, TN=0, FP=0, FN=0)
+    sup_cm = dict(TP=0, TN=0, FP=0, FN=0)
+    for i, (s, v) in enumerate(zip(nodes, verdicts)):
+        detected = (v != "Normal")
+        key = "TP" if (detected and s.is_attacker) else \
+              "FP" if (detected and not s.is_attacker) else \
+              "FN" if (not detected and s.is_attacker) else "TN"
+        raw_cm[key] += 1
+
+        eff = detected
+        if detected and s.is_attacker and ctrl_per_node.get(i, False) and \
+                soa_suppression.is_suppressed(i, rng_run, prob, "soa1"):
+            eff = False
+        skey = "TP" if (eff and s.is_attacker) else \
+               "FP" if (eff and not s.is_attacker) else \
+               "FN" if (not eff and s.is_attacker) else "TN"
+        sup_cm[skey] += 1
+
+    raw_mcc = mcc_from_confusion(raw_cm["TP"], raw_cm["TN"],
+                                 raw_cm["FP"], raw_cm["FN"])
+    TP, TN, FP, FN = (sup_cm["TP"], sup_cm["TN"], sup_cm["FP"], sup_cm["FN"])
     N = len(nodes)
     acc = (TP + TN) / N if N else 0.0
     tpr = TP / (TP + FN) if (TP + FN) else 0.0
@@ -152,7 +255,12 @@ def evaluate(nodes):
     ro = cp / dp if dp else 0.0
     mcc = mcc_from_confusion(TP, TN, FP, FN)   # M1 — mandatory metric
     return dict(acc=acc, tpr=tpr, fpr=fpr, pdr=pdr, ro=ro, mcc=mcc,
-                TP=TP, TN=TN, FP=FP, FN=FN)
+                TP=TP, TN=TN, FP=FP, FN=FN,
+                # Raw = what the detector itself concluded, before the
+                # compromised controller suppressed any of it. Report both.
+                raw_mcc=raw_mcc, raw_TP=raw_cm["TP"], raw_TN=raw_cm["TN"],
+                raw_FP=raw_cm["FP"], raw_FN=raw_cm["FN"],
+                suppression_prob=(prob if controller_compromised else 0.0))
 
 
 def main():
@@ -176,8 +284,8 @@ def main():
             print(f"[SOA1-REAL] reuse cached {csv_path}")
         else:
             csv_path, stdout = run_ns3(p, args.simTime, args.attack_number)
-        nodes = aggregate_from_csv(csv_path)
-        r = evaluate(nodes)
+        nodes, controller_compromised, ctrl_per_node = aggregate_from_csv(csv_path)
+        r = evaluate(nodes, controller_compromised, ctrl_per_node=ctrl_per_node)
         lat = parse_routing_latency_ms(stdout)
         r["latency"] = lat if lat is not None else float("nan")
         for m in agg:

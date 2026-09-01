@@ -54,7 +54,7 @@ bridge = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge)
 
 HOME = os.path.expanduser("~")
-RESULTS = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/results")
+RESULTS = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/62/results")
 RELAYS = 100           # relay opportunities per node (resolution of the rating)
 RATING_THR = bridge.RATING_THRESHOLD
 

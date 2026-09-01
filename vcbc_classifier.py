@@ -36,10 +36,10 @@ import sys
 # ═══════════════════════════════════════════════════════════════════════════════
 
 INPUT_CSV  = os.path.expanduser(
-    "~/ns-allinone-3.35/ns-3.35/results/vcbc_detection.csv"
+    "~/ns-allinone-3.35/ns-3.35/62/results/vcbc_detection.csv"
 )
 OUTPUT_CSV = os.path.expanduser(
-    "~/ns-allinone-3.35/ns-3.35/results/vcbc_final_results.csv"
+    "~/ns-allinone-3.35/ns-3.35/62/results/vcbc_final_results.csv"
 )
 
 # VCBC thresholds (match the C++ values)

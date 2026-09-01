@@ -51,7 +51,7 @@ bash run_tests.sh        # 8 tests pass, ~76% coverage
 cd ~/fabric-samples/test-network
 ./network.sh up createChannel -c mychannel        # if not already up
 ./network.sh deployCC -ccn scbcvcbc \
-    -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/soa2_blockchain_scbc_vcbc/chaincode-scbcvcbc \
+    -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/soa2_blockchain_scbc_vcbc/chaincode-scbcvcbc \
     -ccl go -c mychannel
 bash /home/sdvn_ssh/.../soa2_blockchain_scbc_vcbc/scbcvcbc_demo.sh
 ```

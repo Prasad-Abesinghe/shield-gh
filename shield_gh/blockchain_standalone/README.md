@@ -27,11 +27,11 @@ cd ~/fabric-samples/test-network
 
 # 2. Deploy the DEBSC chaincode
 ./network.sh deployCC -ccn debsc \
-  -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/chaincode-debsc \
+  -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/chaincode-debsc \
   -ccl go -c mychannel
 
 # 3. Run the evidence demo (commit forwarding records + evaluate isolation)
-bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/debsc_demo.sh
+bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/debsc_demo.sh
 
 # 4. When finished
 cd ~/fabric-samples/test-network && ./network.sh down

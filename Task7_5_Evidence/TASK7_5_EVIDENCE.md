@@ -57,7 +57,7 @@ Reproduce command (from the ns-3.35 root, with the SHIELD-GH source swapped
 into `scratch/` — see §6 build note):
 
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 ./waf build --targets=routing
 LD_LIBRARY_PATH=$PWD/build/lib:$PWD/build ./build/scratch/routing \
   --detection_mode=full --enable_full_mode_ai=1 \

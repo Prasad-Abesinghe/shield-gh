@@ -1,0 +1,363 @@
+[E1v2] grid 6x6 x 5 systems = 180 runs | done=0 remaining=180
+[E1v2] N=20 variant=S1 metric=M1(MCC) workers=12
+    [done] p0_rho20_b2_vcbc_v1_N20: ok 275s MCC=0.00
+[E1v2] progress 1/180 elapsed=4.6m eta=821.0m
+    [done] p0_rho0_shieldgh_lite_v1_N20: ok 276s MCC=0.00
+[E1v2] progress 2/180 elapsed=4.6m eta=409.7m
+    [done] p0_rho0_b3_rf_v1_N20: ok 279s MCC=0.00
+[E1v2] progress 3/180 elapsed=4.7m eta=274.6m
+    [done] p0_rho0_b2_vcbc_v1_N20: ok 280s MCC=0.00
+[E1v2] progress 4/180 elapsed=4.7m eta=205.1m
+    [done] p0_rho20_b1_malik_v1_N20: ok 293s MCC=0.00
+[E1v2] progress 5/180 elapsed=4.9m eta=170.9m
+    [done] p0_rho20_b3_rf_v1_N20: ok 295s MCC=0.00
+[E1v2] progress 6/180 elapsed=4.9m eta=142.5m
+    [done] p0_rho40_shieldgh_lite_v1_N20: ok 299s MCC=0.00
+[E1v2] progress 7/180 elapsed=5.0m eta=123.3m
+    [done] p0_rho40_shieldgh_full_v1_N20: ok 301s MCC=0.00
+[E1v2] progress 8/180 elapsed=5.0m eta=107.7m
+    [done] p0_rho20_shieldgh_full_v1_N20: ok 301s MCC=0.00
+[E1v2] progress 9/180 elapsed=5.0m eta=95.4m
+    [done] p0_rho0_shieldgh_full_v1_N20: ok 317s MCC=0.00
+[E1v2] progress 10/180 elapsed=5.3m eta=89.8m
+    [done] p0_rho20_shieldgh_lite_v1_N20: ok 318s MCC=0.00
+[E1v2] progress 11/180 elapsed=5.3m eta=81.5m
+    [done] p0_rho0_b1_malik_v1_N20: ok 325s MCC=0.00
+[E1v2] progress 12/180 elapsed=5.4m eta=75.8m
+    [done] p0_rho60_b3_rf_v1_N20: ok 264s MCC=0.00
+[E1v2] progress 13/180 elapsed=9.4m eta=120.9m
+    [done] p0_rho60_shieldgh_lite_v1_N20: ok 274s MCC=0.00
+[E1v2] progress 14/180 elapsed=9.4m eta=112.0m
+    [done] p0_rho40_b3_rf_v1_N20: ok 292s MCC=0.00
+[E1v2] progress 15/180 elapsed=9.5m eta=104.7m
+    [done] p0_rho40_b2_vcbc_v1_N20: ok 296s MCC=0.00
+[E1v2] progress 16/180 elapsed=9.5m eta=97.7m
+    [done] p0_rho40_b1_malik_v1_N20: ok 304s MCC=0.00
+[E1v2] progress 17/180 elapsed=9.6m eta=92.5m
+    [done] p0_rho80_shieldgh_lite_v1_N20: ok 285s MCC=0.00
+[E1v2] progress 18/180 elapsed=10.0m eta=90.3m
+    [done] p0_rho60_b2_vcbc_v1_N20: ok 304s MCC=0.00
+[E1v2] progress 19/180 elapsed=10.1m eta=85.2m
+    [done] p0_rho80_b2_vcbc_v1_N20: ok 289s MCC=0.00
+[E1v2] progress 20/180 elapsed=10.2m eta=81.8m
+    [done] p0_rho60_shieldgh_full_v1_N20: ok 336s MCC=0.00
+[E1v2] progress 21/180 elapsed=10.3m eta=77.7m
+    [done] p0_rho60_b1_malik_v1_N20: ok 325s MCC=0.00
+[E1v2] progress 22/180 elapsed=10.3m eta=74.1m
+    [done] p0_rho80_b1_malik_v1_N20: ok 321s MCC=0.00
+[E1v2] progress 23/180 elapsed=10.6m eta=72.7m
+    [done] p0_rho80_shieldgh_full_v1_N20: ok 362s MCC=0.00
+[E1v2] progress 24/180 elapsed=11.1m eta=71.8m
+    [done] p0_rho80_b3_rf_v1_N20: ok 282s MCC=0.00
+[E1v2] progress 25/180 elapsed=14.1m eta=87.5m
+    [done] p0_rho100_shieldgh_lite_v1_N20: ok 292s MCC=0.00
+[E1v2] progress 26/180 elapsed=14.4m eta=85.2m
+    [done] p20_rho0_shieldgh_lite_v1_N20: ok 268s MCC=-0.03
+[E1v2] progress 27/180 elapsed=14.7m eta=83.3m
+    [done] p0_rho100_b1_malik_v1_N20: ok 326s MCC=0.00
+[E1v2] progress 28/180 elapsed=15.0m eta=81.2m
+    [done] p0_rho100_b3_rf_v1_N20: ok 303s MCC=0.00
+[E1v2] progress 29/180 elapsed=15.1m eta=78.5m
+    [done] p0_rho100_b2_vcbc_v1_N20: ok 328s MCC=0.00
+[E1v2] progress 30/180 elapsed=15.1m eta=75.6m
+    [done] p20_rho0_b2_vcbc_v1_N20: ok 291s MCC=0.00
+[E1v2] progress 31/180 elapsed=15.2m eta=73.0m
+    [done] p20_rho0_b3_rf_v1_N20: ok 277s MCC=-0.06
+[E1v2] progress 32/180 elapsed=15.3m eta=70.6m
+    [done] p20_rho0_b1_malik_v1_N20: ok 322s MCC=-0.06
+[E1v2] progress 33/180 elapsed=15.6m eta=69.6m
+    [done] p20_rho0_shieldgh_full_v1_N20: ok 339s MCC=-0.12
+[E1v2] progress 34/180 elapsed=15.7m eta=67.5m
+    [done] p20_rho20_shieldgh_full_v1_N20: ok 293s MCC=0.66
+[E1v2] progress 35/180 elapsed=15.9m eta=66.0m
+    [done] p0_rho100_shieldgh_full_v1_N20: ok 398s MCC=0.00
+[E1v2] progress 36/180 elapsed=16.1m eta=64.3m
+    [done] p20_rho20_shieldgh_lite_v1_N20: ok 267s MCC=0.85
+[E1v2] progress 37/180 elapsed=18.6m eta=71.7m
+    [done] p20_rho20_b2_vcbc_v1_N20: ok 287s MCC=0.64
+[E1v2] progress 38/180 elapsed=19.5m eta=72.8m
+    [done] p20_rho40_shieldgh_lite_v1_N20: ok 293s MCC=0.89
+[E1v2] progress 39/180 elapsed=20.0m eta=72.3m
+    [done] p20_rho40_b1_malik_v1_N20: ok 290s MCC=0.77
+[E1v2] progress 40/180 elapsed=20.0m eta=70.1m
+    [done] p20_rho20_b1_malik_v1_N20: ok 348s MCC=0.70
+[E1v2] progress 41/180 elapsed=20.2m eta=68.4m
+    [done] p20_rho20_b3_rf_v1_N20: ok 314s MCC=0.85
+[E1v2] progress 42/180 elapsed=20.2m eta=66.3m
+    [done] p20_rho40_b2_vcbc_v1_N20: ok 299s MCC=0.75
+[E1v2] progress 43/180 elapsed=20.2m eta=64.5m
+    [done] p20_rho60_shieldgh_full_v1_N20: ok 282s MCC=0.61
+[E1v2] progress 44/180 elapsed=20.4m eta=63.1m
+    [done] p20_rho40_shieldgh_full_v1_N20: ok 331s MCC=0.71
+[E1v2] progress 45/180 elapsed=20.6m eta=61.8m
+    [done] p20_rho40_b3_rf_v1_N20: ok 313s MCC=0.77
+[E1v2] progress 46/180 elapsed=20.8m eta=60.7m
+    [done] p20_rho60_shieldgh_lite_v1_N20: ok 298s MCC=0.90
+[E1v2] progress 47/180 elapsed=20.9m eta=59.2m
+    [done] p20_rho60_b1_malik_v1_N20: ok 316s MCC=0.75
+[E1v2] progress 48/180 elapsed=21.3m eta=58.7m
+    [done] p20_rho60_b2_vcbc_v1_N20: ok 309s MCC=0.76
+[E1v2] progress 49/180 elapsed=23.7m eta=63.4m
+    [done] p20_rho80_shieldgh_full_v1_N20: ok 288s MCC=0.71
+[E1v2] progress 50/180 elapsed=24.8m eta=64.5m
+    [done] p20_rho60_b3_rf_v1_N20: ok 334s MCC=0.90
+[E1v2] progress 51/180 elapsed=25.0m eta=63.3m
+    [done] p20_rho80_shieldgh_lite_v1_N20: ok 305s MCC=0.91
+[E1v2] progress 52/180 elapsed=25.1m eta=61.8m
+    [done] p20_rho80_b2_vcbc_v1_N20: ok 308s MCC=0.78
+[E1v2] progress 53/180 elapsed=25.3m eta=60.7m
+    [done] p20_rho100_shieldgh_full_v1_N20: ok 304s MCC=0.66
+[E1v2] progress 54/180 elapsed=25.5m eta=59.5m
+    [done] p20_rho80_b3_rf_v1_N20: ok 315s MCC=0.91
+[E1v2] progress 55/180 elapsed=25.5m eta=57.9m
+    [done] p20_rho80_b1_malik_v1_N20: ok 325s MCC=0.70
+[E1v2] progress 56/180 elapsed=25.6m eta=56.7m
+    [done] p20_rho100_shieldgh_lite_v1_N20: ok 305s MCC=0.78
+[E1v2] progress 57/180 elapsed=25.7m eta=55.4m
+    [done] p20_rho100_b1_malik_v1_N20: ok 316s MCC=0.65
+[E1v2] progress 58/180 elapsed=26.1m eta=54.9m
+    [done] p20_rho100_b3_rf_v1_N20: ok 289s MCC=0.78
+[E1v2] progress 59/180 elapsed=26.2m eta=53.6m
+    [done] p20_rho100_b2_vcbc_v1_N20: ok 350s MCC=0.64
+[E1v2] progress 60/180 elapsed=26.7m eta=53.5m
+    [done] p40_rho0_shieldgh_full_v1_N20: ok 337s MCC=-0.19
+[E1v2] progress 61/180 elapsed=29.3m eta=57.2m
+    [done] p40_rho0_shieldgh_lite_v1_N20: ok 308s MCC=0.22
+[E1v2] progress 62/180 elapsed=29.9m eta=57.0m
+    [done] p40_rho20_shieldgh_lite_v1_N20: ok 270s MCC=0.74
+[E1v2] progress 63/180 elapsed=30.0m eta=55.7m
+    [done] p40_rho0_b2_vcbc_v1_N20: ok 302s MCC=0.27
+[E1v2] progress 64/180 elapsed=30.1m eta=54.6m
+    [done] p40_rho20_b2_vcbc_v1_N20: ok 295s MCC=0.74
+[E1v2] progress 65/180 elapsed=30.6m eta=54.1m
+    [done] p40_rho20_shieldgh_full_v1_N20: ok 310s MCC=0.58
+[E1v2] progress 66/180 elapsed=30.6m eta=52.9m
+    [done] p40_rho0_b3_rf_v1_N20: ok 324s MCC=0.22
+[E1v2] progress 67/180 elapsed=30.7m eta=51.8m
+    [done] p40_rho20_b3_rf_v1_N20: ok 282s MCC=0.78
+[E1v2] progress 68/180 elapsed=30.8m eta=50.7m
+    [done] p40_rho20_b1_malik_v1_N20: ok 318s MCC=0.67
+[E1v2] progress 69/180 elapsed=30.9m eta=49.7m
+    [done] p40_rho40_shieldgh_full_v1_N20: ok 293s MCC=0.62
+[E1v2] progress 70/180 elapsed=31.0m eta=48.8m
+    [done] p40_rho0_b1_malik_v1_N20: ok 365s MCC=-0.11
+[E1v2] progress 71/180 elapsed=31.1m eta=47.8m
+    [done] p40_rho40_shieldgh_lite_v1_N20: ok 322s MCC=0.89
+[E1v2] progress 72/180 elapsed=32.1m eta=48.2m
+    [done] p40_rho40_b1_malik_v1_N20: ok 318s MCC=0.72
+[E1v2] progress 73/180 elapsed=34.6m eta=50.8m
+    [done] p40_rho40_b3_rf_v1_N20: ok 303s MCC=0.89
+[E1v2] progress 74/180 elapsed=35.0m eta=50.2m
+    [done] p40_rho60_shieldgh_full_v1_N20: ok 339s MCC=0.78
+[E1v2] progress 75/180 elapsed=35.8m eta=50.1m
+    [done] p40_rho40_b2_vcbc_v1_N20: ok 367s MCC=0.88
+[E1v2] progress 76/180 elapsed=36.1m eta=49.4m
+    [done] p40_rho60_shieldgh_lite_v1_N20: ok 334s MCC=0.89
+[E1v2] progress 77/180 elapsed=36.2m eta=48.4m
+    [done] p40_rho60_b1_malik_v1_N20: ok 346s MCC=0.77
+[E1v2] progress 78/180 elapsed=36.4m eta=47.6m
+    [done] p40_rho80_b1_malik_v1_N20: ok 318s MCC=0.71
+[E1v2] progress 79/180 elapsed=36.4m eta=46.6m
+    [done] p40_rho80_shieldgh_full_v1_N20: ok 336s MCC=0.86
+[E1v2] progress 80/180 elapsed=36.5m eta=45.6m
+    [done] p40_rho60_b3_rf_v1_N20: ok 343s MCC=0.90
+[E1v2] progress 81/180 elapsed=36.5m eta=44.6m
+    [done] p40_rho60_b2_vcbc_v1_N20: ok 349s MCC=0.89
+[E1v2] progress 82/180 elapsed=36.5m eta=43.7m
+    [done] p40_rho80_shieldgh_lite_v1_N20: ok 332s MCC=0.89
+[E1v2] progress 83/180 elapsed=36.6m eta=42.7m
+    [done] p40_rho80_b2_vcbc_v1_N20: ok 290s MCC=0.90
+[E1v2] progress 84/180 elapsed=36.9m eta=42.2m
+    [done] p40_rho80_b3_rf_v1_N20: ok 331s MCC=0.89
+[E1v2] progress 85/180 elapsed=40.2m eta=44.9m
+    [done] p40_rho100_shieldgh_full_v1_N20: ok 329s MCC=0.84
+[E1v2] progress 86/180 elapsed=40.5m eta=44.3m
+    [done] p40_rho100_b1_malik_v1_N20: ok 298s MCC=0.67
+[E1v2] progress 87/180 elapsed=41.0m eta=43.9m
+    [done] p40_rho100_b2_vcbc_v1_N20: ok 297s MCC=0.79
+[E1v2] progress 88/180 elapsed=41.1m eta=43.0m
+    [done] p40_rho100_shieldgh_lite_v1_N20: ok 328s MCC=0.77
+[E1v2] progress 89/180 elapsed=41.3m eta=42.2m
+    [done] p60_rho0_b2_vcbc_v1_N20: ok 286s MCC=0.19
+[E1v2] progress 90/180 elapsed=41.3m eta=41.3m
+    [done] p60_rho0_shieldgh_lite_v1_N20: ok 303s MCC=0.18
+[E1v2] progress 91/180 elapsed=41.5m eta=40.6m
+    [done] p60_rho0_b3_rf_v1_N20: ok 308s MCC=-0.10
+[E1v2] progress 92/180 elapsed=41.7m eta=39.9m
+    [done] p60_rho20_shieldgh_full_v1_N20: ok 303s MCC=0.72
+[E1v2] progress 93/180 elapsed=42.0m eta=39.3m
+    [done] p60_rho0_shieldgh_full_v1_N20: ok 336s MCC=0.02
+[E1v2] progress 94/180 elapsed=42.0m eta=38.4m
+    [done] p60_rho0_b1_malik_v1_N20: ok 337s MCC=0.17
+[E1v2] progress 95/180 elapsed=42.1m eta=37.7m
+    [done] p40_rho100_b3_rf_v1_N20: ok 345s MCC=0.77
+[E1v2] progress 96/180 elapsed=42.2m eta=36.9m
+    [done] p60_rho20_shieldgh_lite_v1_N20: ok 327s MCC=0.76
+[E1v2] progress 97/180 elapsed=45.6m eta=39.0m
+    [done] p60_rho20_b1_malik_v1_N20: ok 342s MCC=0.71
+[E1v2] progress 98/180 elapsed=46.2m eta=38.7m
+    [done] p60_rho20_b3_rf_v1_N20: ok 308s MCC=0.73
+[E1v2] progress 99/180 elapsed=46.3m eta=37.8m
+    [done] p60_rho40_shieldgh_full_v1_N20: ok 306s MCC=0.88
+[E1v2] progress 100/180 elapsed=46.4m eta=37.1m
+    [done] p60_rho20_b2_vcbc_v1_N20: ok 334s MCC=0.71
+[E1v2] progress 101/180 elapsed=46.6m eta=36.4m
+    [done] p60_rho40_shieldgh_lite_v1_N20: ok 322s MCC=0.85
+[E1v2] progress 102/180 elapsed=46.7m eta=35.7m
+    [done] p60_rho60_b1_malik_v1_N20: ok 273s MCC=0.76
+[E1v2] progress 103/180 elapsed=46.7m eta=34.9m
+    [done] p60_rho40_b2_vcbc_v1_N20: ok 308s MCC=0.83
+[E1v2] progress 104/180 elapsed=46.8m eta=34.2m
+    [done] p60_rho40_b1_malik_v1_N20: ok 329s MCC=0.76
+[E1v2] progress 105/180 elapsed=47.0m eta=33.6m
+    [done] p60_rho60_shieldgh_full_v1_N20: ok 307s MCC=0.92
+[E1v2] progress 106/180 elapsed=47.1m eta=32.9m
+    [done] p60_rho60_shieldgh_lite_v1_N20: ok 305s MCC=0.83
+[E1v2] progress 107/180 elapsed=47.2m eta=32.2m
+    [done] p60_rho40_b3_rf_v1_N20: ok 318s MCC=0.85
+[E1v2] progress 108/180 elapsed=47.3m eta=31.5m
+    [done] p60_rho60_b2_vcbc_v1_N20: ok 299s MCC=0.81
+[E1v2] progress 109/180 elapsed=50.6m eta=33.0m
+    [done] p60_rho60_b3_rf_v1_N20: ok 300s MCC=0.83
+[E1v2] progress 110/180 elapsed=51.2m eta=32.6m
+    [done] p60_rho80_shieldgh_full_v1_N20: ok 299s MCC=0.93
+[E1v2] progress 111/180 elapsed=51.2m eta=31.9m
+    [done] p60_rho80_b3_rf_v1_N20: ok 280s MCC=0.82
+[E1v2] progress 112/180 elapsed=51.4m eta=31.2m
+    [done] p60_rho80_b2_vcbc_v1_N20: ok 284s MCC=0.81
+[E1v2] progress 113/180 elapsed=51.4m eta=30.5m
+    [done] p60_rho100_shieldgh_lite_v1_N20: ok 264s MCC=0.70
+[E1v2] progress 114/180 elapsed=51.4m eta=29.8m
+    [done] p60_rho80_shieldgh_lite_v1_N20: ok 310s MCC=0.82
+[E1v2] progress 115/180 elapsed=51.5m eta=29.1m
+    [done] p60_rho100_b1_malik_v1_N20: ok 280s MCC=0.71
+[E1v2] progress 116/180 elapsed=51.8m eta=28.6m
+    [done] p60_rho100_b2_vcbc_v1_N20: ok 287s MCC=0.71
+[E1v2] progress 117/180 elapsed=52.0m eta=28.0m
+    [done] p60_rho100_shieldgh_full_v1_N20: ok 312s MCC=0.92
+[E1v2] progress 118/180 elapsed=52.0m eta=27.3m
+    [done] p60_rho100_b3_rf_v1_N20: ok 289s MCC=0.71
+[E1v2] progress 119/180 elapsed=52.1m eta=26.7m
+    [done] p60_rho80_b1_malik_v1_N20: ok 342s MCC=0.75
+[E1v2] progress 120/180 elapsed=52.3m eta=26.1m
+    [done] p80_rho0_shieldgh_full_v1_N20: ok 323s MCC=0.21
+[E1v2] progress 121/180 elapsed=56.0m eta=27.3m
+    [done] p80_rho0_shieldgh_lite_v1_N20: ok 287s MCC=0.17
+[E1v2] progress 122/180 elapsed=56.0m eta=26.6m
+    [done] p80_rho0_b3_rf_v1_N20: ok 286s MCC=0.14
+[E1v2] progress 123/180 elapsed=56.2m eta=26.0m
+    [done] p80_rho0_b1_malik_v1_N20: ok 298s MCC=0.16
+[E1v2] progress 124/180 elapsed=56.2m eta=25.4m
+    [done] p80_rho0_b2_vcbc_v1_N20: ok 305s MCC=0.17
+[E1v2] progress 125/180 elapsed=56.5m eta=24.8m
+    [done] p80_rho20_shieldgh_full_v1_N20: ok 305s MCC=0.68
+[E1v2] progress 126/180 elapsed=56.5m eta=24.2m
+    [done] p80_rho20_shieldgh_lite_v1_N20: ok 305s MCC=0.71
+[E1v2] progress 127/180 elapsed=56.6m eta=23.6m
+    [done] p80_rho20_b1_malik_v1_N20: ok 302s MCC=0.62
+[E1v2] progress 128/180 elapsed=56.8m eta=23.1m
+    [done] p80_rho40_shieldgh_full_v1_N20: ok 304s MCC=0.80
+[E1v2] progress 129/180 elapsed=57.2m eta=22.6m
+    [done] p80_rho20_b2_vcbc_v1_N20: ok 313s MCC=0.69
+[E1v2] progress 130/180 elapsed=57.2m eta=22.0m
+    [done] p80_rho20_b3_rf_v1_N20: ok 319s MCC=0.71
+[E1v2] progress 131/180 elapsed=57.4m eta=21.5m
+    [done] p80_rho40_shieldgh_lite_v1_N20: ok 336s MCC=0.81
+[E1v2] progress 132/180 elapsed=57.9m eta=21.1m
+    [done] p80_rho60_shieldgh_full_v1_N20: ok 269s MCC=0.87
+[E1v2] progress 133/180 elapsed=60.7m eta=21.4m
+    [done] p80_rho40_b1_malik_v1_N20: ok 291s MCC=0.76
+[E1v2] progress 134/180 elapsed=60.8m eta=20.9m
+    [done] p80_rho40_b2_vcbc_v1_N20: ok 294s MCC=0.81
+[E1v2] progress 135/180 elapsed=60.9m eta=20.3m
+    [done] p80_rho40_b3_rf_v1_N20: ok 292s MCC=0.80
+[E1v2] progress 136/180 elapsed=61.0m eta=19.7m
+    [done] p80_rho60_shieldgh_lite_v1_N20: ok 294s MCC=0.83
+[E1v2] progress 137/180 elapsed=61.4m eta=19.3m
+    [done] p80_rho60_b2_vcbc_v1_N20: ok 292s MCC=0.81
+[E1v2] progress 138/180 elapsed=61.5m eta=18.7m
+    [done] p80_rho80_shieldgh_full_v1_N20: ok 291s MCC=0.87
+[E1v2] progress 139/180 elapsed=62.0m eta=18.3m
+    [done] p80_rho80_b1_malik_v1_N20: ok 282s MCC=0.69
+[E1v2] progress 140/180 elapsed=62.1m eta=17.7m
+    [done] p80_rho60_b1_malik_v1_N20: ok 336s MCC=0.70
+[E1v2] progress 141/180 elapsed=62.1m eta=17.2m
+    [done] p80_rho60_b3_rf_v1_N20: ok 319s MCC=0.82
+[E1v2] progress 142/180 elapsed=62.2m eta=16.6m
+    [done] p80_rho80_shieldgh_lite_v1_N20: ok 302s MCC=0.79
+[E1v2] progress 143/180 elapsed=62.2m eta=16.1m
+    [done] p80_rho80_b2_vcbc_v1_N20: ok 312s MCC=0.74
+[E1v2] progress 144/180 elapsed=63.1m eta=15.8m
+    [done] p80_rho100_b1_malik_v1_N20: ok 260s MCC=0.65
+[E1v2] progress 145/180 elapsed=65.4m eta=15.8m
+    [done] p80_rho100_shieldgh_full_v1_N20: ok 278s MCC=0.85
+[E1v2] progress 146/180 elapsed=65.5m eta=15.2m
+    [done] p80_rho100_shieldgh_lite_v1_N20: ok 288s MCC=0.65
+[E1v2] progress 147/180 elapsed=65.7m eta=14.8m
+    [done] p80_rho80_b3_rf_v1_N20: ok 303s MCC=0.78
+[E1v2] progress 148/180 elapsed=65.7m eta=14.2m
+    [done] p80_rho100_b2_vcbc_v1_N20: ok 295s MCC=0.65
+[E1v2] progress 149/180 elapsed=66.3m eta=13.8m
+    [done] p80_rho100_b3_rf_v1_N20: ok 291s MCC=0.65
+[E1v2] progress 150/180 elapsed=66.3m eta=13.3m
+    [done] p100_rho0_shieldgh_lite_v1_N20: ok 285s MCC=0.17
+[E1v2] progress 151/180 elapsed=66.8m eta=12.8m
+    [done] p100_rho0_b3_rf_v1_N20: ok 303s MCC=0.22
+[E1v2] progress 152/180 elapsed=67.3m eta=12.4m
+    [done] p100_rho0_shieldgh_full_v1_N20: ok 324s MCC=0.21
+[E1v2] progress 153/180 elapsed=67.4m eta=11.9m
+    [done] p100_rho0_b1_malik_v1_N20: ok 323s MCC=0.16
+[E1v2] progress 154/180 elapsed=67.5m eta=11.4m
+    [done] p100_rho0_b2_vcbc_v1_N20: ok 330s MCC=0.17
+[E1v2] progress 155/180 elapsed=67.7m eta=10.9m
+    [done] p100_rho20_shieldgh_full_v1_N20: ok 339s MCC=0.68
+[E1v2] progress 156/180 elapsed=68.8m eta=10.6m
+    [done] p100_rho20_b1_malik_v1_N20: ok 308s MCC=0.65
+[E1v2] progress 157/180 elapsed=70.6m eta=10.3m
+    [done] p100_rho20_shieldgh_lite_v1_N20: ok 316s MCC=0.71
+[E1v2] progress 158/180 elapsed=70.6m eta=9.8m
+    [done] p100_rho40_shieldgh_full_v1_N20: ok 266s MCC=0.85
+[E1v2] progress 159/180 elapsed=70.7m eta=9.3m
+    [done] p100_rho20_b2_vcbc_v1_N20: ok 305s MCC=0.69
+[E1v2] progress 160/180 elapsed=70.8m eta=8.8m
+    [done] p100_rho20_b3_rf_v1_N20: ok 316s MCC=0.71
+[E1v2] progress 161/180 elapsed=71.0m eta=8.4m
+    [done] p100_rho40_b2_vcbc_v1_N20: ok 290s MCC=0.81
+[E1v2] progress 162/180 elapsed=72.1m eta=8.0m
+    [done] p100_rho40_b1_malik_v1_N20: ok 322s MCC=0.76
+[E1v2] progress 163/180 elapsed=72.2m eta=7.5m
+    [done] p100_rho40_shieldgh_lite_v1_N20: ok 353s MCC=0.81
+[E1v2] progress 164/180 elapsed=72.2m eta=7.0m
+    [done] p100_rho60_shieldgh_full_v1_N20: ok 294s MCC=0.87
+[E1v2] progress 165/180 elapsed=72.4m eta=6.6m
+    [done] p100_rho40_b3_rf_v1_N20: ok 323s MCC=0.81
+[E1v2] progress 166/180 elapsed=72.8m eta=6.1m
+    [done] p100_rho60_shieldgh_lite_v1_N20: ok 319s MCC=0.83
+[E1v2] progress 167/180 elapsed=73.0m eta=5.7m
+    [done] p100_rho60_b1_malik_v1_N20: ok 262s MCC=0.70
+[E1v2] progress 168/180 elapsed=73.1m eta=5.2m
+    [done] p100_rho60_b2_vcbc_v1_N20: ok 299s MCC=0.81
+[E1v2] progress 169/180 elapsed=75.6m eta=4.9m
+    [done] p100_rho60_b3_rf_v1_N20: ok 297s MCC=0.80
+[E1v2] progress 170/180 elapsed=75.6m eta=4.4m
+    [done] p100_rho80_shieldgh_full_v1_N20: ok 307s MCC=0.87
+[E1v2] progress 171/180 elapsed=75.8m eta=4.0m
+    [done] p100_rho80_shieldgh_lite_v1_N20: ok 304s MCC=0.78
+[E1v2] progress 172/180 elapsed=75.9m eta=3.5m
+    [done] p100_rho80_b1_malik_v1_N20: ok 301s MCC=0.69
+[E1v2] progress 173/180 elapsed=76.0m eta=3.1m
+    [done] p100_rho80_b2_vcbc_v1_N20: ok 269s MCC=0.74
+[E1v2] progress 174/180 elapsed=76.6m eta=2.6m
+    [done] p100_rho100_shieldgh_full_v1_N20: ok 275s MCC=0.85
+[E1v2] progress 175/180 elapsed=76.8m eta=2.2m
+    [done] p100_rho80_b3_rf_v1_N20: ok 299s MCC=0.78
+[E1v2] progress 176/180 elapsed=77.2m eta=1.8m
+    [done] p100_rho100_b1_malik_v1_N20: ok 267s MCC=0.65
+[E1v2] progress 177/180 elapsed=77.3m eta=1.3m
+    [done] p100_rho100_shieldgh_lite_v1_N20: ok 295s MCC=0.65
+[E1v2] progress 178/180 elapsed=77.3m eta=0.9m
+    [done] p100_rho100_b3_rf_v1_N20: ok 274s MCC=0.65
+[E1v2] progress 179/180 elapsed=77.7m eta=0.4m
+    [done] p100_rho100_b2_vcbc_v1_N20: ok 286s MCC=0.65
+[E1v2] progress 180/180 elapsed=77.7m eta=0.0m
+[E1v2] COMPLETE in 77.7 min -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/E1_results/e1_m1_results.csv

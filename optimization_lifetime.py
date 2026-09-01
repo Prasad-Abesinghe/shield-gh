@@ -2,6 +2,7 @@ import gurobipy as gp
 from gurobipy import GRB
 import csv
 import time
+import os
 
 try:
 	time1 = time.time()*1000
@@ -17,7 +18,7 @@ try:
 	mobility_scenario = 1;
 	d_max = 270
 
-	with open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data.csv",'r',encoding='UTF8') as csvfile:
+	with open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data.csv",'r',encoding='UTF8') as csvfile:
 		csvreader = csv.reader(csvfile,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
 		
 		for row in csvreader:
@@ -111,17 +112,38 @@ try:
 				term2 = ((delta_py[(i*n)+j])*(delta_py[(i*n)+j]))+((delta_vy[(i*n)+j])*(delta_vy[(i*n)+j])*lsqu)+(2*(delta_py[(i*n)+j])*(delta_vy[(i*n)+j])*l)+(0.25*(delta_ay[(i*n)+j])*(delta_ay[(i*n)+j])*lquad)+((delta_ay[(i*n)+j])*(delta_py[(i*n)+j])*lsqu)+((delta_vy[(i*n)+j])*(delta_ay[(i*n)+j])*lcub)
 		
 				m.addConstr((d_max*d_max) >= ((term1)+(term2)))
+				# PDQ1 (supervisor-requested, D12 follow-up): the model as
+				# originally written had NO lower bound on l beyond lb=0.0 --
+				# a link that expires an instant after selection (l~0.0) was
+				# just as "valid" a solution as a long-lived one, since the
+				# objective only maximizes l with no floor. Add an explicit
+				# minimum-lifetime constraint; a link that cannot sustain at
+				# least L_MIN seconds is excluded (treated as no-link, same
+				# as the d_max early-reject branch below) rather than
+				# selected as an expiring-immediately "optimal" choice.
+				L_MIN = float(os.environ.get("SHIELD_GH_MIN_LIFETIME", "0.0"))
+				if L_MIN > 0.0:
+					m.addConstr(l >= L_MIN)
 				m.setParam('OutputFlag',0)
+				m.setParam('TimeLimit', 30)
 				# Solve it!
 				m.optimize()
 
 				#print(f"Optimal objective value: {m.objVal}")
 				#print("Solution values: %s=%g" %(l.Varname, l.X))
-				lifetime.append(l.X)
+				if m.Status == GRB.INFEASIBLE:
+					# PDQ1: min-lifetime constraint made this link infeasible
+					# -- exclude it (0.0 = "no link", consistent with the
+					# d_max early-reject branch above), rather than crashing
+					# on l.X with no solution (the pre-existing code never
+					# checked m.Status at all, per the earlier D3 finding).
+					lifetime.append(0.0)
+				else:
+					lifetime.append(l.X)
 				
 				#lifetime.append(1.0)
 	
-	with open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution.csv",'w',encoding='UTF8') as csvfile:
+	with open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution.csv",'w',encoding='UTF8') as csvfile:
 		writer = csv.writer(csvfile,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
 		for i in range(n**2):
 			s1 = str(float(lifetime[i]))

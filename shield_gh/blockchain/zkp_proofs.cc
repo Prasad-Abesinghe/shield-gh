@@ -21,16 +21,38 @@ ZKPCommitment ZKPProofStore::CreateCommitment(uint32_t node_id, uint32_t n_fwd) 
 // consistent with observable blockchain receipt count.
 // A grey hole node that dropped packets cannot produce valid proof
 // because blockchain count ≠ its committed n_fwd.
+//
+// Fix 1 (supervisor, this round): the comparison here was EXACT equality
+// (commit.n_fwd == observable_count), so ANY nonzero gap between a node's
+// cumulative received and forwarded counts -- including ordinary MAC-layer
+// collision loss on a perfectly honest node, not just deliberate grey-hole
+// dropping -- was marked FAIL. Verified against the actual code before
+// changing it (this comment previously described the check accurately: it
+// WAS bare equality, confirmed by reading this file, not assumed from the
+// supervisor's description). Fix: allow a small cumulative tolerance
+// epsilon (packets lost to real-world MAC contention/collision, not
+// attacker-scale dropping) before declaring FAIL. PASS iff
+// (observable_count - commit.n_fwd) <= epsilon; a negative gap (n_fwd >
+// observable_count, which should not happen for an honest node) still
+// counts as a 0-magnitude gap here since committing to forward MORE than
+// what was received is not the failure mode this gate targets.
 ZKPProof ZKPProofStore::GenerateProof(const ZKPCommitment& commit,
                                        uint32_t observable_count) {
     ZKPProof proof;
     proof.node_id = commit.node_id;
     proof.C = commit.C;
 
+    static const uint32_t SG_ZKP_CUM_EPSILON = 3;  // supervisor-prescribed tolerance
+    uint32_t gap = (observable_count > commit.n_fwd)
+                       ? (observable_count - commit.n_fwd)
+                       : 0;
+
     // Sigma-protocol:
-    // Honest prover: n_fwd == observable_count → proof valid
-    // Malicious prover: n_fwd < observable_count (dropped packets) → proof FAILS
-    if (commit.n_fwd == observable_count) {
+    // Honest prover: gap <= epsilon (received/forwarded match within normal
+    // MAC-layer loss tolerance) → proof valid
+    // Malicious prover: gap > epsilon (dropped packets beyond plausible
+    // collision loss) → proof FAILS
+    if (gap <= SG_ZKP_CUM_EPSILON) {
         // Valid proof: respond with blinding factor (simplified sigma protocol)
         proof.challenge = (uint64_t)(observable_count * 31 + 7) % m_params.p;
         proof.response  = (commit.r + proof.challenge * commit.n_fwd) % m_params.p;

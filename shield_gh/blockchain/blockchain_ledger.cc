@@ -72,12 +72,20 @@ double BlockchainLedger::ComputeTrustScore(uint32_t node_id, double t,
 // ── Eq. 3.18 ────────────────────────────────────────────────────────────────
 // Ri(t) = (1/|Hi|) Σ_{h∈Hi} T_mob_i(h)
 // NOTE: T_mob values are committed to ledger after MATD correction (Eq. 3.17)
-double BlockchainLedger::ComputeReputation(uint32_t node_id, double t) const {
+// Fix C (supervisor-requested, C4/C8 root cause): Hi is now a genuine
+// windowed history set (timestamp in [t-W, t]), matching every other
+// windowed metric in this file (ComputePDR, ComputePDRVariance) and Eq.
+// 3.18's own "history set Hi" framing -- previously this only filtered
+// timestamp<=t with no lower bound, averaging the ENTIRE run since t=0.
+// A node that dropped heavily early and then went clean, or vice versa,
+// now reflects its recent W-second behavior instead of a permanently
+// diluted all-time average.
+double BlockchainLedger::ComputeReputation(uint32_t node_id, double t, uint32_t W) const {
     // In practice, the MATD-corrected trust values are stored in the ledger
     // Here we compute from raw records; MATD correction applied by caller
     std::vector<double> trust_values;
     for (const auto& rec : m_forwarding_log) {
-        if (rec.node_id == node_id && rec.timestamp <= t) {
+        if (rec.node_id == node_id && rec.timestamp >= (t - W) && rec.timestamp <= t) {
             uint32_t n_drop = (rec.n_rx > rec.n_fwd) ? (rec.n_rx - rec.n_fwd) : 0;
             double trust = (1.0 + rec.n_fwd) / (1.0 + rec.n_fwd + 1.0 + n_drop + 1e-9);
             trust_values.push_back(trust);

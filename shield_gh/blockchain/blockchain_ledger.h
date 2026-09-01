@@ -58,7 +58,12 @@ public:
                              double alpha = 1.0, double beta = 1.0) const;
 
     // ── Eq. 3.18: Ri(t) = (1/|Hi|) Σ T_mob_i(h) over Hi ───────────
-    double ComputeReputation(uint32_t node_id, double t) const;
+    // Fix C (supervisor-requested, C4/C8 root cause): Hi is a windowed
+    // history set, not the unbounded log since t=0 -- W defaults to the
+    // same W=10 the signature engine already uses (ComputePDR), so a
+    // node's reputation reflects its recent behavior, not a permanently-
+    // diluted all-time average.
+    double ComputeReputation(uint32_t node_id, double t, uint32_t W = 10) const;
 
     // ── Eq. 3.14: Validi = 1[ Hash(Δwi||t||idi) == C_BC_i ] ────────
     bool VerifyGradientHash(uint32_t node_id, uint32_t round,

@@ -88,11 +88,24 @@ inline double sg_ai_run_bridge(const std::string& python,
                                const std::string& script,
                                const std::string& in_file,
                                const std::string& out_file,
-                               bool genuine) {
+                               bool genuine,
+                               bool fresh_state = false,
+                               double mu1 = -1.0,
+                               double mu3 = -1.0) {
     std::ostringstream cmd;
     cmd << python << " " << script
         << " --in " << in_file << " --out " << out_file;
     if (genuine) cmd << " --genuine";
+    // Fix 4 (supervisor): only the FIRST window of this NS-3 process should
+    // wipe .fl_state.pkl -- passed true by the caller when g_sg_window==0.
+    // Every other window in this run must NOT pass it, or FL round/window
+    // state would never persist even within a single run.
+    if (fresh_state) cmd << " --fresh_state";
+    // Fix 5 (supervisor): mu1/mu3 fusion-weight override for the grid search
+    // (mu3 fixed at 0.15, mu1 in {0.55,0.65,0.75}, mu2 derived). Negative
+    // sentinel means "use ns3_infer.py's own default" (unset).
+    if (mu1 >= 0.0) cmd << " --mu1 " << mu1;
+    if (mu3 >= 0.0) cmd << " --mu3 " << mu3;
     // route the bridge's stderr evidence line into the NS-3 console
     cmd << " 2>&1";
     auto t0 = std::chrono::steady_clock::now();

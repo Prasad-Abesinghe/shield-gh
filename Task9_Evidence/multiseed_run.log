@@ -1,0 +1,30 @@
+  [SHIELD-GH (proposed)] rng_run=1: MCC=+0.9400
+  [SHIELD-GH (proposed)] rng_run=2: MCC=+0.5800
+  [SHIELD-GH (proposed)] rng_run=3: MCC=+0.9400
+  [SHIELD-GH (proposed)] rng_run=4: MCC=+0.9400
+  [SHIELD-GH (proposed)] rng_run=5: MCC=+0.8800
+  [SOA1 (Malik DPGHA)] rng_run=1: MCC=+1.0000
+  [SOA1 (Malik DPGHA)] rng_run=2: MCC=+1.0000
+  [SOA1 (Malik DPGHA)] rng_run=3: MCC=+1.0000
+  [SOA1 (Malik DPGHA)] rng_run=4: MCC=+1.0000
+  [SOA1 (Malik DPGHA)] rng_run=5: MCC=+1.0000
+  [SOA2 (SCBC/VCBC)] rng_run=1: MCC=+1.0000
+  [SOA2 (SCBC/VCBC)] rng_run=2: MCC=+0.5773
+  [SOA2 (SCBC/VCBC)] rng_run=3: MCC=+0.5773
+  [SOA2 (SCBC/VCBC)] rng_run=4: MCC=+1.0000
+  [SOA2 (SCBC/VCBC)] rng_run=5: MCC=+1.0000
+  [SOA3 (Random Forest)] rng_run=1: MCC=+0.8915
+  [SOA3 (Random Forest)] rng_run=2: MCC=+0.9452
+  [SOA3 (Random Forest)] rng_run=3: MCC=+0.9452
+  [SOA3 (Random Forest)] rng_run=4: MCC=+0.8915
+  [SOA3 (Random Forest)] rng_run=5: MCC=+0.9452
+
+==============================================================================
+ MULTI-SEED SUMMARY (5 seeds, t=10s, attack_percentage=40%)
+==============================================================================
+  SHIELD-GH (proposed)     mean=+0.8560  std=0.1399  range=[+0.5800, +0.9400]
+  SOA1 (Malik DPGHA)       mean=+1.0000  std=0.0000  range=[+1.0000, +1.0000]
+  SOA2 (SCBC/VCBC)         mean=+0.8309  std=0.2071  range=[+0.5773, +1.0000]
+  SOA3 (Random Forest)     mean=+0.9237  std=0.0263  range=[+0.8915, +0.9452]
+
+[multiseed] CSV -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/Task9_Evidence/multiseed_results.csv

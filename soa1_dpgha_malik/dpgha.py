@@ -34,6 +34,18 @@ class NodeSignals:
     rrep_generated: int = 0
     mean_dsn: float = 0.0
     is_attacker: bool = False
+    # Data-leakage fix (2026-08-09, supervisor-flagged): rreq_received=0 (the
+    # dataclass default) now means "RRR unavailable" -- see rrr()/classify()
+    # below. Previously the real-run sweep (dpgha_sweep_real.py) synthesized
+    # rreq_received/rrep_generated/mean_dsn by branching on the ground-truth
+    # is_attacker label before this point, which let rrr_gate/dsn_gate
+    # trivially separate the classes from the answer key rather than from
+    # simulated behaviour. This NS-3 scenario is data-plane-only and has no
+    # real RREQ/RREP/DSN control-plane counters (routing.cc:338-342 already
+    # documents this), so the honest fix is PLR-only evaluation, not
+    # fabricated RRR/DSN.
+    rrr_available: bool = True
+    dsn_available: bool = True
 
 
 def plr(s: NodeSignals) -> float:
@@ -52,15 +64,29 @@ def rrr(s: NodeSignals) -> float:
 
 
 def compute_beta(nodes) -> float:
-    """Eq.17: dynamic β = mean of all nodes' μ(DSN)."""
-    if not nodes:
+    """Eq.17: dynamic β = mean of all nodes' μ(DSN), over nodes with a real
+    DSN measurement only (skips dsn_available=False nodes)."""
+    have_dsn = [n for n in nodes if n.dsn_available]
+    if not have_dsn:
         return 0.0
-    return sum(n.mean_dsn for n in nodes) / len(nodes)
+    return sum(n.mean_dsn for n in have_dsn) / len(have_dsn)
 
 
 def classify(s: NodeSignals, beta: float, delta=DELTA, lam=LAMBDA) -> str:
-    """Eq.18: 'SmartGHA' | 'SeqNoGHA' | 'Normal'."""
+    """Eq.18: 'SmartGHA' | 'SeqNoGHA' | 'Normal'.
+    When rrr_available AND dsn_available are both True (real RREQ/RREP/DSN
+    counters exist), the paper's full Eq.18 conjunction applies exactly as
+    specified: SmartGHA needs PLR AND RRR; SeqNoGHA needs DSN AND
+    (PLR OR RRR). When this NS-3 scenario has no real RREQ/RREP/DSN
+    counters at all (rrr_available=dsn_available=False), the detector
+    honestly degrades to the paper's PLR sub-rule alone (Eq.13-14) rather
+    than either fabricating RRR/DSN from the ground-truth label (the
+    original leak) or silently going blind to every attacker because a
+    3-signal AND/OR conjunction can never fire with two gates held
+    permanently False (the intermediate regression this replaces)."""
     plr_gate = plr(s) > delta
+    if not (s.rrr_available and s.dsn_available):
+        return "SmartGHA_PLRonly" if plr_gate else "Normal"
     rrr_gate = rrr(s) >= lam
     dsn_gate = s.mean_dsn >= beta
     if plr_gate and rrr_gate:

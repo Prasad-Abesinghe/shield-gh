@@ -87,6 +87,14 @@ bool AttackSignatureEngine::S3_TargetSpecific(
             kl_div += pdr * std::log(pdr / uniform + 1e-9);
         }
     }
+    // Supervisor wiring check (Q: "print raw D_KL for an attacker node"):
+    // this only prints when per_source_pdr is non-empty, i.e. when the
+    // upstream pre-filter in shield_gh_integration.h actually populated it
+    // (>=2 flows with a >0.5 PDR spread) -- if S3 never fires, check first
+    // whether this print ever appears at all.
+    std::cout << "[S3-DEBUG] per_source_pdr.size()=" << per_source_pdr.size()
+              << " D_KL=" << kl_div << " tau_ts=" << tau_ts
+              << " fires=" << (kl_div > tau_ts) << std::endl;
     return kl_div > tau_ts;
 }
 

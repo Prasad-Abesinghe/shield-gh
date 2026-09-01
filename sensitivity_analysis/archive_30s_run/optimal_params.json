@@ -1,0 +1,100 @@
+{
+  "sg_W": {
+    "symbol": "W",
+    "desc": "Observation window (slots)",
+    "grid": [
+      5,
+      10,
+      20
+    ],
+    "default": 10,
+    "best_value": 10,
+    "best_mcc": 1.0,
+    "default_mcc": 1.0,
+    "changed": false
+  },
+  "sg_tau_f": {
+    "symbol": "tau_f",
+    "desc": "S1 PDR threshold",
+    "grid": [
+      0.5,
+      0.6,
+      0.7
+    ],
+    "default": 0.75,
+    "best_value": 0.6,
+    "best_mcc": 1.0,
+    "default_mcc": null,
+    "changed": true
+  },
+  "sg_eps_f": {
+    "symbol": "epsilon_f",
+    "desc": "S1 variance bound",
+    "grid": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "default": 0.2,
+    "best_value": 0.2,
+    "best_mcc": 1.0,
+    "default_mcc": 1.0,
+    "changed": false
+  },
+  "sg_tau_it": {
+    "symbol": "tau_it",
+    "desc": "S2 per-slot threshold",
+    "grid": [
+      0.6,
+      0.7,
+      0.8
+    ],
+    "default": 0.7,
+    "best_value": 0.7,
+    "best_mcc": 1.0,
+    "default_mcc": 1.0,
+    "changed": false
+  },
+  "sg_gamma_it": {
+    "symbol": "gamma_it",
+    "desc": "S2 autocorrelation",
+    "grid": [
+      1.1,
+      1.3,
+      1.5
+    ],
+    "default": 1.3,
+    "best_value": 1.3,
+    "best_mcc": 1.0,
+    "default_mcc": 1.0,
+    "changed": false
+  },
+  "sg_tau_ts": {
+    "symbol": "tau_ts",
+    "desc": "S3 KL-divergence threshold",
+    "grid": [
+      0.3,
+      0.5,
+      0.7
+    ],
+    "default": 0.5,
+    "best_value": 0.5,
+    "best_mcc": 1.0,
+    "default_mcc": 1.0,
+    "changed": false
+  },
+  "sg_theta_R": {
+    "symbol": "theta_R",
+    "desc": "DEBSC reputation isolation threshold",
+    "grid": [
+      0.3,
+      0.4,
+      0.5
+    ],
+    "default": 0.6,
+    "best_value": 0.4,
+    "best_mcc": 1.0,
+    "default_mcc": null,
+    "changed": true
+  }
+}

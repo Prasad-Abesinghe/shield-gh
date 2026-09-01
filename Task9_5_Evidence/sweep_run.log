@@ -1,0 +1,78 @@
+[ABL] 5 ablations, seeds=[1], 38 runs remaining (already done: 0)
+    [done] A1_ablated_x60_s1: ok 49s MCC=0.84 CP=1.00
+[ABL] progress 1/38 elapsed=0.8m eta=30.5m
+    [done] A1_control_x120_s1: ok 49s MCC=0.80 CP=1.00
+[ABL] progress 2/38 elapsed=0.8m eta=14.8m
+    [done] A1_control_x60_s1: ok 51s MCC=0.85 CP=1.00
+[ABL] progress 3/38 elapsed=0.8m eta=9.9m
+    [done] A1_ablated_x90_s1: ok 52s MCC=0.85 CP=1.00
+[ABL] progress 4/38 elapsed=0.9m eta=7.3m
+    [done] A1_control_x30_s1: ok 52s MCC=0.84 CP=1.00
+[ABL] progress 5/38 elapsed=0.9m eta=5.7m
+    [done] A1_ablated_x120_s1: ok 53s MCC=0.80 CP=1.00
+[ABL] progress 6/38 elapsed=0.9m eta=4.7m
+    [done] A1_ablated_x30_s1: ok 53s MCC=0.84 CP=1.00
+[ABL] progress 7/38 elapsed=0.9m eta=3.9m
+    [done] A1_control_x90_s1: ok 59s MCC=0.80 CP=1.00
+[ABL] progress 8/38 elapsed=1.0m eta=3.7m
+    [done] A4_control_x10_s1: ok 47s MCC=0.17 CP=1.00
+[ABL] progress 9/38 elapsed=1.6m eta=5.3m
+    [done] A1_control_x150_s1: ok 50s MCC=0.85 CP=1.00
+[ABL] progress 10/38 elapsed=1.7m eta=4.7m
+    [done] A1_ablated_x150_s1: ok 51s MCC=0.85 CP=1.00
+[ABL] progress 11/38 elapsed=1.7m eta=4.1m
+    [done] A4_ablated_x10_s1: ok 51s MCC=0.17 CP=1.00
+[ABL] progress 12/38 elapsed=1.7m eta=3.7m
+    [done] A4_control_x20_s1: ok 52s MCC=0.51 CP=1.00
+[ABL] progress 13/38 elapsed=1.7m eta=3.3m
+    [done] A4_ablated_x20_s1: ok 52s MCC=0.50 CP=1.00
+[ABL] progress 14/38 elapsed=1.7m eta=3.0m
+    [done] A4_ablated_x30_s1: ok 50s MCC=0.81 CP=1.00
+[ABL] progress 15/38 elapsed=1.8m eta=2.8m
+    [done] A4_control_x30_s1: ok 56s MCC=0.79 CP=1.00
+[ABL] progress 16/38 elapsed=1.8m eta=2.5m
+    [done] A7_control_x10_s1: ok 47s MCC=0.17 CP=1.00
+[ABL] progress 17/38 elapsed=2.4m eta=3.0m
+    [done] A4_control_x40_s1: ok 51s MCC=0.80 CP=1.00
+[ABL] progress 18/38 elapsed=2.5m eta=2.8m
+    [done] A7_ablated_x10_s1: ok 47s MCC=0.17 CP=1.00
+[ABL] progress 19/38 elapsed=2.5m eta=2.5m
+    [done] A4_ablated_x40_s1: ok 54s MCC=0.84 CP=1.00
+[ABL] progress 20/38 elapsed=2.6m eta=2.3m
+    [done] A7_ablated_x30_s1: ok 52s MCC=0.81 CP=1.00
+[ABL] progress 21/38 elapsed=2.6m eta=2.1m
+    [done] A7_control_x30_s1: ok 55s MCC=0.81 CP=1.00
+[ABL] progress 22/38 elapsed=2.7m eta=1.9m
+    [done] A7_ablated_x50_s1: ok 51s MCC=0.84 CP=1.00
+[ABL] progress 23/38 elapsed=2.7m eta=1.7m
+    [done] A7_control_x50_s1: ok 54s MCC=0.84 CP=1.00
+[ABL] progress 24/38 elapsed=2.7m eta=1.6m
+    [done] A7_control_x70_s1: ok 49s MCC=0.84 CP=1.00
+[ABL] progress 25/38 elapsed=3.3m eta=1.7m
+    [done] A12_control_x1_s1: ok 49s MCC=0.80 CP=0.00
+[ABL] progress 26/38 elapsed=3.3m eta=1.5m
+    [done] A7_ablated_x70_s1: ok 52s MCC=0.84 CP=1.00
+[ABL] progress 27/38 elapsed=3.3m eta=1.4m
+    [done] A12_control_x2_s1: ok 51s MCC=0.80 CP=1.00
+[ABL] progress 28/38 elapsed=3.4m eta=1.2m
+    [done] SIG_control_x10_s1: ok 47s MCC=0.17 CP=1.00
+[ABL] progress 29/38 elapsed=3.4m eta=1.1m
+    [done] A12_control_x4_s1: ok 51s MCC=0.80 CP=1.00
+[ABL] progress 30/38 elapsed=3.5m eta=0.9m
+    [done] SIG_ablated_x10_s1: ok 51s MCC=0.00 CP=1.00
+[ABL] progress 31/38 elapsed=3.6m eta=0.8m
+    [done] A12_control_x8_s1: ok 64s MCC=0.80 CP=1.00
+[ABL] progress 32/38 elapsed=3.7m eta=0.7m
+    [done] SIG_ablated_x30_s1: ok 48s MCC=0.00 CP=1.00
+[ABL] progress 33/38 elapsed=4.1m eta=0.6m
+    [done] SIG_control_x30_s1: ok 53s MCC=0.81 CP=1.00
+[ABL] progress 34/38 elapsed=4.1m eta=0.5m
+    [done] SIG_control_x50_s1: ok 50s MCC=0.84 CP=1.00
+[ABL] progress 35/38 elapsed=4.2m eta=0.4m
+    [done] SIG_control_x70_s1: ok 48s MCC=0.84 CP=1.00
+[ABL] progress 36/38 elapsed=4.3m eta=0.2m
+    [done] SIG_ablated_x50_s1: ok 50s MCC=0.00 CP=1.00
+[ABL] progress 37/38 elapsed=4.3m eta=0.1m
+    [done] SIG_ablated_x70_s1: ok 48s MCC=0.00 CP=1.00
+[ABL] progress 38/38 elapsed=4.3m eta=0.0m
+[ABL] COMPLETE in 4.3 min -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/Task9_5_Evidence/ablation_results.csv

@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 import dpgha  # faithful Eq.13-18 detector (verified against paper Table 2)
 
 HOME = os.path.expanduser("~")
-RESULTS = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/results")
+RESULTS = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/62/results")
 
 DP_BUDGET = 1000   # data packets routed through each node (resolution of PLR)
 RREQ_BUDGET = 60   # control-plane request volume per node

@@ -1,0 +1,3 @@
+p,rho_a,system,variant,M1_MCC,M2_GHSR,M3_AVCR,M4_FIR,M5_ESRL_ms,elapsed_s,status
+0,0,b1_malik,1,1.0000,,,,,71964.8,exit1
+0,0,b1_malik,2,1.0000,,,,,73.6,exit-9

@@ -37,9 +37,16 @@ import json
 import argparse
 import subprocess
 
+# Shared controller-suppression model (see soa_suppression.py), one level up.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import soa_suppression
+
 HOME = os.path.expanduser("~")
-INPUT_CSV = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/results/vcbc_detection.csv")
-OUTPUT_CSV = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/results/soa2_blockchain_results.csv")
+# routing.cc writes vcbc_detection.csv to a hardcoded absolute path under
+# 62/results/ regardless of which root the binary was built/run from
+# (Task 9: waf/build only exist under ns-3.35-g62build).
+INPUT_CSV = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/62/results/vcbc_detection.csv")
+OUTPUT_CSV = os.path.join(HOME, "ns-allinone-3.35/ns-3.35/62/results/soa2_blockchain_results.csv")
 FABRIC = os.path.join(HOME, "fabric-samples")
 TESTNET = os.path.join(FABRIC, "test-network")
 
@@ -94,7 +101,19 @@ def aggregate(input_csv):
             d = round(pdr * RELAYS_PER_WINDOW)
             delivered[n] += d
             not_delivered[n] += RELAYS_PER_WINDOW - d
-    return node_ids, delivered, not_delivered, is_attacker, len(rows)
+    # Supervisor-directed model fix: ControllerCompromised (written by
+    # routing.cc's write_vcbc_csv()) -- see report()'s suppression logic.
+    controller_compromised = bool(int(rows[-1].get("ControllerCompromised", 0)))
+    # Multi-controller model (2026-08-12): per-node controller status; a node
+    # under a benign controller is not suppressed. Falls back to the run-wide
+    # flag for CSVs written before this column existed.
+    ctrl_per_node = {
+        n: bool(int(rows[-1].get(f"Node{n}_CtrlCompromised",
+                                 1 if controller_compromised else 0)))
+        for n in node_ids
+    }
+    return (node_ids, delivered, not_delivered, is_attacker, len(rows),
+            controller_compromised, ctrl_per_node)
 
 
 # ── 3/4. Real Fabric chaincode calls ────────────────────────────────────────
@@ -162,22 +181,63 @@ def run_local(node_ids, delivered, not_delivered):
 
 
 # ── 5. Metrics + report ─────────────────────────────────────────────────────
-def report(node_ids, status, delivered, not_delivered, is_attacker, total_windows, mode):
-    TP = TN = FP = FN = 0
+def mcc_from_confusion(TP, TN, FP, FN):
+    """Matthews Correlation Coefficient, epsilon-guarded exactly like
+    routing.cc::calculate_mcc() (Task 9: apples-to-apples MCC across SOA1/
+    SOA3/SHIELD-GH, none of which previously computed MCC for SOA2)."""
+    import math
+    eps = 1e-6
+    num = (TP * TN) - (FP * FN)
+    den = math.sqrt((TP + FP + eps) * (TP + FN + eps) *
+                    (TN + FP + eps) * (TN + FN + eps))
+    return num / den if den else 0.0
+
+
+def report(node_ids, status, delivered, not_delivered, is_attacker, total_windows, mode,
+           controller_compromised=False, rng_run=1, suppression_prob=None,
+           ctrl_per_node=None):
+    """Supervisor-directed model fix (2026-08-09): SOA2 has no evidence
+    channel independent of the controller (its blockchain smart contract
+    still only sees what the controller lets it see -- unlike SHIELD-GH's
+    DEBSC, which is fed directly by the LLM/Fusion Engine and RSU
+    consensus, bypassing the controller). When the controller is
+    compromised, a real detection (classified malicious on a genuine
+    attacker) is SUPPRESSED before it becomes an actionable/reported
+    result -- what would have been a TP is instead a FN. FP/TN unaffected."""
+    prob = (soa_suppression.DEFAULT_SUPPRESSION_PROB
+            if suppression_prob is None else suppression_prob)
+    if ctrl_per_node is None:
+        ctrl_per_node = {n: controller_compromised for n in node_ids}
+
+    # Multi-controller model (2026-08-12): suppression decided per node from
+    # that node's own controller. Nodes under benign controllers report
+    # normally, so the network-wide MCC reflects the mix of domains.
+    raw_cm = dict(TP=0, TN=0, FP=0, FN=0)
+    sup_cm = dict(TP=0, TN=0, FP=0, FN=0)
     classified = {}
     for n in node_ids:
-        mal = 1 if status[n] in ("grey", "black") else 0
-        classified[n] = mal
-        a = is_attacker[n]
-        if mal and a: TP += 1
-        elif mal and not a: FP += 1
-        elif not mal and a: FN += 1
-        else: TN += 1
+        detected = status[n] in ("grey", "black")
+        a = bool(is_attacker[n])
+        raw_cm["TP" if (detected and a) else "FP" if (detected and not a)
+               else "FN" if a else "TN"] += 1
+
+        eff = detected
+        if detected and a and ctrl_per_node.get(n, False) and \
+                soa_suppression.is_suppressed(n, rng_run, prob, "soa2"):
+            eff = False
+        sup_cm["TP" if (eff and a) else "FP" if (eff and not a)
+               else "FN" if a else "TN"] += 1
+        classified[n] = 1 if eff else 0
+
+    raw_mcc = mcc_from_confusion(raw_cm["TP"], raw_cm["TN"],
+                                 raw_cm["FP"], raw_cm["FN"])
+    TP, TN, FP, FN = (sup_cm["TP"], sup_cm["TN"], sup_cm["FP"], sup_cm["FN"])
 
     N = len(node_ids)
     acc = (TP + TN) / N if N else 0.0
     fpr = FP / (FP + TN) if (FP + TN) else 0.0
     tpr = TP / (TP + FN) if (TP + FN) else 0.0
+    mcc = mcc_from_confusion(TP, TN, FP, FN)
 
     # Paper metrics: PDR = delivered/total relays; RO Eq.3 = (Dnet+Dctrl)/Dnet
     tot_delivered = sum(delivered.values())
@@ -196,6 +256,10 @@ def report(node_ids, status, delivered, not_delivered, is_attacker, total_window
     print(f"║  Classification Accuracy : {acc*100:6.2f}%                          ║")
     print(f"║  False Positive Rate     : {fpr*100:6.2f}%                          ║")
     print(f"║  True Positive Rate      : {tpr*100:6.2f}%                          ║")
+    print(f"║  M1 MCC (actionable)     : {mcc:+6.4f}                          ║")
+    print(f"║  M1 MCC (raw, pre-suppr.): {raw_mcc:+6.4f}                          ║")
+    if controller_compromised:
+        print(f"║  Controller COMPROMISED — suppression p={prob:.2f}             ║")
     print(f"║  Network PDR (Eq.1)      : {net_pdr*100:6.2f}%                          ║")
     print(f"║  Routing Overhead (Eq.3) : {routing_overhead:6.3f}                          ║")
     print("╠══════════════════════════════════════════════════════════════╣")
@@ -211,10 +275,10 @@ def report(node_ids, status, delivered, not_delivered, is_attacker, total_window
     with open(OUTPUT_CSV, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["Technique", "Mode", "Windows", "Nodes", "TP", "TN", "FP", "FN",
-                    "Accuracy", "FPR", "TPR", "NetworkPDR", "RoutingOverhead"])
+                    "Accuracy", "FPR", "TPR", "MCC", "NetworkPDR", "RoutingOverhead"])
         w.writerow(["SOA2_Alabdulatif_SCBC_VCBC", mode, total_windows, N,
                     TP, TN, FP, FN, f"{acc:.4f}", f"{fpr:.4f}", f"{tpr:.4f}",
-                    f"{net_pdr:.4f}", f"{routing_overhead:.4f}"])
+                    f"{mcc:.4f}", f"{net_pdr:.4f}", f"{routing_overhead:.4f}"])
         w.writerow([])
         w.writerow(["Node", "Delivered", "NotDelivered", "Rating",
                     "OnChainStatus", "Classified", "IsAttacker", "Correct"])
@@ -233,13 +297,16 @@ def main():
     ap.add_argument("--input", default=INPUT_CSV)
     args = ap.parse_args()
 
-    node_ids, delivered, not_delivered, is_attacker, windows = aggregate(args.input)
+    (node_ids, delivered, not_delivered, is_attacker, windows,
+     controller_compromised, ctrl_per_node) = aggregate(args.input)
     if args.dry_run:
         status = run_local(node_ids, delivered, not_delivered)
-        report(node_ids, status, delivered, not_delivered, is_attacker, windows, "dry-run")
+        report(node_ids, status, delivered, not_delivered, is_attacker, windows, "dry-run",
+               controller_compromised, ctrl_per_node=ctrl_per_node)
     else:
         status = run_on_fabric(node_ids, delivered, not_delivered, is_attacker)
-        report(node_ids, status, delivered, not_delivered, is_attacker, windows, "fabric")
+        report(node_ids, status, delivered, not_delivered, is_attacker, windows, "fabric",
+               controller_compromised, ctrl_per_node=ctrl_per_node)
 
 
 if __name__ == "__main__":

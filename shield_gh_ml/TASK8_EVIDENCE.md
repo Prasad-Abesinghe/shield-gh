@@ -22,7 +22,7 @@ LLM semantic score + rule signature + blockchain reputation → three-way fusion
 ## How to reproduce
 
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 ./waf build --targets=routing
 LD_LIBRARY_PATH=$PWD/build/lib:$PWD/build ./build/scratch/routing \
   --detection_mode=full --enable_full_mode_ai=1 \
@@ -160,7 +160,7 @@ identical to the live run's printed value. Evidence: `logs/task8_manual_verifica
 Supervisor confirmed Task 8 ("Fine") and asked for a run at **t=30s,
 40% attack percentage** with all PEM values reported. Reproduce:
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 LD_LIBRARY_PATH=$PWD/build/lib:$PWD/build ./build/scratch/routing \
   --detection_mode=full --enable_full_mode_ai=1 \
   --attack_number=1 --drop_rate=60 --attack_percentage=40 --simTime=30 \
@@ -312,7 +312,7 @@ is shared across all tasks), and all archived evidence logs.
 A screen recording of the exact reproduce command below, run start-to-finish,
 covers the "real-time running video clip" ask — record this yourself:
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 ./waf build --targets=routing
 LD_LIBRARY_PATH=$PWD/build/lib:$PWD/build ./build/scratch/routing \
   --detection_mode=full --enable_full_mode_ai=1 \

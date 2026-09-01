@@ -1,5 +1,7 @@
 // initial run + task 01 done + task 02 - data plane attack done + controller plane done
 #include <queue>
+#include <map>
+#include <tuple>
 #include "ns3/wave-module.h"
 #include "ns3/csma-helper.h"
 #include "ns3/lte-helper.h"
@@ -57,6 +59,24 @@
 // / Algorithm PQC-Mit Step 3) — defined below near run_stable_path_finding();
 // forward-declared here so shield_gh_integration.h (included next) can call it.
 bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id);
+// Checks ALT_ROUTE_EXISTS across every active flow (2*flows), not just flow 0
+// -- since Fix A (round-robin source/destination), each node is genuinely
+// only on a subset of flows, so hardcoding flow_id=0 checked the wrong
+// flow's connectivity for every node not on flow 0's path (the confirmed
+// cause of isolation being withheld for 100% of detections, blocking PDR
+// and MCC from ever benefiting from mitigation).
+bool ALT_ROUTE_EXISTS_ANY_FLOW(uint32_t excluded_node);
+
+// Fix 2 (supervisor): single textual source of truth for the flow count,
+// since shield_gh_integration.h (included below) is parsed BEFORE
+// "const int flows = SG_FLOWS_COUNT;" is defined further down this file, so
+// its extern array declarations (node_flow_received/forwarded) cannot use
+// the runtime constant "flows" directly as an array bound -- they need a
+// preprocessor constant available at header-parse time instead. Both this
+// macro and the later "const int flows = SG_FLOWS_COUNT;" definition must
+// stay in sync (they always will, since the definition literally reads this
+// macro rather than repeating the literal).
+#define SG_FLOWS_COUNT 6
 
 // ── SHIELD-GH integration (Task 1–4) ─────────────────────────────────────────
 #include "shield_gh/shield_gh_integration.h"
@@ -148,21 +168,33 @@ bool present_DPFR_attack_nodes = false; // DP-FR: Fixed Rate
 bool present_DPIT_attack_nodes = false; // DP-IT: Intermittent
 bool present_DPTS_attack_nodes = false; // DP-TS: Target Specific
 
+// Ceiling for all per-node detection/attack-state arrays below. Was hardcoded
+// [100] (silent out-of-bounds write past node id 99); must stay >= total_size
+// (defined later in this file as 205) since node ids run 0..total_size-1.
+const int NODE_STATE_CEILING = 210;
+
 // attacker node arrays
-bool DPFR_malicious_nodes[100] = {false};
-bool DPIT_malicious_nodes[100] = {false};
-bool DPTS_malicious_nodes[100] = {false};
+bool DPFR_malicious_nodes[NODE_STATE_CEILING] = {false};
+bool DPIT_malicious_nodes[NODE_STATE_CEILING] = {false};
+bool DPTS_malicious_nodes[NODE_STATE_CEILING] = {false};
 
 // ── SHIELD-GH mitigation state ───────────────────────────────────────────────
 // Set by shield_gh_evaluate() when DEBSC confirms a grey hole (Eq. 3.19).
 // Once true, the network blocks the node (models threshold-signed FlowMod):
 // should_drop_grey_hole() treats packets routed to it as dropped so the
 // attacker can no longer relay traffic. This is the actual mitigation.
-bool shield_gh_isolated_nodes[100] = {false};
+bool shield_gh_isolated_nodes[NODE_STATE_CEILING] = {false};
 
 // CLI toggle: 1 = SHIELD-GH detection/isolation ON (default),
 //             0 = OFF (attacker keeps attacking — for NetAnim attack videos)
 int enable_shield_gh = 1;
+
+// ── Ablation-study component toggles (supervisor DA1-DA6 diagnostics) ────────
+// Each defaults to 1 (on) so existing full-lightweight-mode behaviour is
+// unchanged unless explicitly disabled via CLI.
+int enable_signatures = 1; // 0 = skip S1-S6 signature evaluation (flagged=isolated-only)
+int enable_matd       = 1; // 0 = bypass MATD correction, use raw PDR
+int enable_zkp_gate   = 1; // 0 = isolate on statistical gate alone (no ZKP requirement)
 
 // ── Task 8: full-mode AI (LLM+FL) NS-3 integration ───────────────────────────
 // CLI --enable_full_mode_ai=1 drives the full-mode detection pipeline
@@ -179,6 +211,73 @@ std::string sg_ai_python = "/home/sdvn_ssh/.pyenv/versions/3.10.14/bin/python3";
 std::string sg_ai_window_file  = "/tmp/shieldgh_window.jsonl";
 std::string sg_ai_verdict_file = "/tmp/shieldgh_verdict.json";
 double sg_ai_last_infer_ms = 0.0;   // per-window inference latency (evidence)
+// Fix 5 (supervisor): fusion-weight override for the mu1/mu2/mu3 grid search
+// (Eq. 3.29). Negative sentinel = use ns3_infer.py's own compiled-in default
+// (FusionWeights: mu1=0.34/mu2=0.33/mu3=0.33). mu2 is always derived as
+// 1-mu1-mu3 on the Python side so only mu1/mu3 need a CLI surface here.
+double sg_ai_mu1 = -1.0;
+double sg_ai_mu3 = -1.0;
+
+// ── Task 8.5: sensitivity-analysis CLI surface for the tab:gh_sensitivity
+// grid search (main.tex, Sec. "Sensitivity Analysis and Threshold Selection").
+// These 7 detection thresholds were previously hardcoded literals with no
+// CLI path (LW_DP_Det's W=10, AttackSignatureEngine's tau_f/epsilon_f/
+// tau_it/gamma_it/tau_ts default args, DEBSC's theta_R via g_sg_debsc).
+// Negative/zero sentinels below mean "use the compiled-in default"; the
+// sweep driver (sensitivity_analysis/sweep_gh_params.py) overrides one at a
+// time, all others held at default, per the supervisor's instruction.
+// Task 8.5 grid-search result (sensitivity_analysis/gh_param_sweep_results.csv,
+// optimal_params.json, 2026-08-08): each of the 7 values below was swept over
+// its main.tex tab:gh_sensitivity grid as a real 30s NS-3 run (all others held
+// at THIS default), one data point per value, no repeated seeds, and set to
+// the value maximising the run's CUM M1b MCC. 5 of 7 (W, epsilon_f, tau_it,
+// gamma_it, tau_ts) were already at the MCC-maximising value -- unchanged.
+// theta_R changed (see note below); the other 5 grid points were flat ties
+// at MCC=1.0 in this 4-node/30s scenario (no differentiation to select on
+// at this scale), so their pre-sweep defaults stand.
+//
+// CORRECTION (2026-08-09, Task 9): tau_f was initially also changed to 0.60
+// (the grid midpoint of {0.60,0.70}, which TIED with 0.75 at MCC=1.0 on the
+// 4-node prototype -- see gh_param_sweep_results.csv: tau_f in {0.60,0.70}
+// both score MCC=1.0, only tau_f=0.50 differs at MCC=0.98). Applying that
+// tied-grid pick as the GLOBAL default silently regressed a different,
+// larger scenario never exercised by the sweep: Task 9's t=10s comparison
+// run (--routing_test=true, 20-node topology, attack_percentage=40,
+// maxspeed=80 default) dropped from MCC=0.83 (tau_f=0.75) to MCC=0.72
+// (tau_f=0.60) -- confirmed by isolating tau_f alone (theta_R has zero
+// effect on this scenario's M1b: verified identical MCC=0.83 at both
+// theta_R=0.40 and 0.60 here, since no isolation events occur in a 10s
+// run to exercise the DEBSC gate). Root cause: 0.60 was never actually
+// SUPERIOR to 0.75 anywhere it was tested (only tied, on the one small
+// scenario the sweep used); 0.75 is also the supervisor's own prior
+// "Fix D" value, independently validated on a separate, larger test.
+// Reverted to 0.75 for this reason -- a tie within one narrow validation
+// scenario is not sufficient grounds to change a global default that
+// other scenarios depend on.
+// Task 9 fix (supervisor-flagged): multi-seed support. Declared here (not
+// local to main()) so grey_hole_drop_decision() can fold it into the drop
+// RNG seed -- see that function and the --rng_run CLI flag for the full
+// rationale. Default 1 (ns-3's own default run number) reproduces every
+// prior single-run result unchanged.
+uint32_t g_rng_run = 1;
+
+uint32_t sg_W       = 10;    // observation window, slots  {5,10,20} -> sweep-confirmed optimum, unchanged
+double   sg_tau_f   = 0.75;  // S1 PDR threshold           {0.50,0.60,0.70} -> reverted to Fix D value; 0.60 only tied (never beat) 0.75 in-sweep and regressed the Task 9 routing_test=true scenario (MCC 0.83->0.72), see correction note above
+double   sg_eps_f   = 0.20;  // S1 variance bound           {0.10,0.20,0.30} -> sweep-confirmed optimum, unchanged
+double   sg_tau_it  = 0.70;  // S2 per-slot threshold       {0.60,0.70,0.80} -> sweep-confirmed optimum, unchanged
+double   sg_gamma_it= 1.30;  // S2 autocorrelation          {1.10,1.30,1.50} -> sweep-confirmed optimum, unchanged
+double   sg_tau_ts  = 0.50;  // S3 KL-divergence threshold  {0.30,0.50,0.70} -> sweep-confirmed optimum, unchanged
+// theta_R: Task 8.5 sweep picked 0.40 (grid {0.30,0.40,0.50} tied at MCC=1.0,
+// midpoint kept) -- but this CONFLICTS with the supervisor's earlier "Fix D"
+// (theta_R 0.4->0.6, TQ1-confirmed: false isolations 166->96, zero-attack PDR
+// 53.55%->72-76% on a larger/different test). This 4-node/30s sweep never
+// produces a false isolation at ANY of the 3 grid values (FP=0 throughout),
+// so it cannot see the effect Fix D was fixing -- the two results are not
+// actually in tension, they are measuring different regimes. Applied per the
+// supervisor's Task 8.5 instruction ("select the parameter with best
+// performance ... set those as settings"); flagged here rather than silently
+// overwritten. See sensitivity_analysis/gh_param_sweep_results.csv.
+double   sg_theta_R = 0.40;  // DEBSC reputation isolation  {0.30,0.40,0.50} -> Task 8.5 sweep result (was 0.60 per Fix D, see note above)
 
 // CLI: video_mode=1 caps each flow to 'video_flow_packets' packets so the
 // grey-hole drop/forward behaviour is individually visible in NetAnim.
@@ -193,6 +292,24 @@ uint32_t sg_node_TN = 0; // not flagged AND really benign
 uint32_t sg_node_FP = 0; // flagged BUT really benign  (false alarm)
 uint32_t sg_node_FN = 0; // not flagged BUT really an attacker (miss)
 
+// ── Controller-plane confusion matrix (multi-controller, 2026-08-12) ────────
+// One entry per CONTROLLER per window: did LW-CP-Det correctly identify this
+// controller's status? With M>1 and only a subset malicious, a benign
+// controller can now be falsely flagged, so these are genuine (non-trivial)
+// detection statistics rather than a foregone conclusion.
+uint32_t sg_cp_TP = 0;  // flagged AND really a malicious controller
+uint32_t sg_cp_TN = 0;  // not flagged AND really benign
+uint32_t sg_cp_FP = 0;  // flagged BUT really benign
+uint32_t sg_cp_FN = 0;  // not flagged BUT really malicious
+
+// ── CUMULATIVE confusion matrix across ALL windows of the run ────────────────
+// DQ1 fix (supervisor Assessment on questions_set_2 answers): sg_node_TP/TN/FP/FN
+// above are reset to 0 at the top of every evaluation window, so a bare read of
+// them (e.g. at the end of the run) is only the LAST window's snapshot across
+// all nodes, not the run's aggregate detection performance. These counters sum
+// every window's per-node classification and are what run-end MCC must use.
+uint64_t sg_cum_TP = 0, sg_cum_TN = 0, sg_cum_FP = 0, sg_cum_FN = 0;
+
 // SHIELD-GH dual-mode detection selector (CLI --detection_mode). Applied to the
 // shield_gh integration via sg_set_mode() right after cmd.Parse().
 std::string sg_detection_mode = "lightweight";
@@ -205,28 +322,76 @@ bool present_CPIT_attack_nodes = false; // CP-IT: Intermittent
 bool present_CPTS_attack_nodes = false; // CP-TS: Target Specific
 
 // CP attacker node arrays
-bool CPFR_malicious_nodes[100] = {false};
-bool CPIT_malicious_nodes[100] = {false};
-bool CPTS_malicious_nodes[100] = {false};
+bool CPFR_malicious_nodes[NODE_STATE_CEILING] = {false};
+bool CPIT_malicious_nodes[NODE_STATE_CEILING] = {false};
+bool CPTS_malicious_nodes[NODE_STATE_CEILING] = {false};
 
 int cp_attack_number     = 4;   // 4=CP-FR, 5=CP-IT, 6=CP-TS
 int enable_cp_attack     = 0;   // CLI: 1 = schedule controller-plane attack (Algorithm 2 demo)
+// Supervisor-directed model fix (2026-08-09): a compromised controller does
+// not just cause packet loss -- it occupies a privileged architectural
+// position and can falsify the flow statistics / detection-relevant
+// evidence that data-plane-only detectors (SOA1/SOA2/SOA3, none of which
+// have a channel independent of the controller) rely on, SUPPRESSING a
+// correctly-computed detection verdict before it becomes an actionable
+// result -- distinct from, and in addition to, any packet-drop effect.
+// Set true by declare_attackers_controller() when the controller is
+// compromised; consumed by SOA1/SOA2's confusion-matrix computation
+// (malik_monitor_window(), vcbc_monitor_window()) to suppress their
+// verdict for nodes they would otherwise have correctly flagged, modelling
+// the "detector says attacker, controller rejects/hides the finding"
+// scenario. SHIELD-GH's own detection is NOT gated by this: per the
+// report's design (DEBSC, Sec. "Blockchain Plane"), LLM/Fusion verdicts go
+// directly to the RSU-consensus-maintained ledger, bypassing the
+// controller entirely, so it has no analogous single point of falsification.
+bool g_controller_is_malicious = false;
+
+// ── Multi-controller model (supervisor-directed, 2026-08-12) ────────────────
+// The report (main.tex "Multi-Controller Flat Architecture", symbol M in the
+// notation table) specifies M registered SDN controllers, each with its own
+// Dilithium key and trust score T_c(0)=1, with segment authority distributed
+// so that "controller compromise is therefore not a single point of failure."
+//
+// The simulation previously implemented M=1 and, worse, FORCED that single
+// controller malicious whenever the probability draw missed -- so every
+// vehicle in the network was always under a compromised controller, every
+// baseline detection was always suppressed, and all three SOTA baselines
+// returned a uniform MCC=0.00. That was an artefact of the M=1
+// implementation, not a property of the attack model.
+//
+// With M controllers and each vehicle assigned to exactly one of them, a
+// baseline detects normally for vehicles under BENIGN controllers and is
+// suppressed only for vehicles under MALICIOUS ones. The intermediate MCC
+// then emerges from the attack model itself rather than from a tuned
+// suppression probability.
+uint32_t N_Controllers = 4;   // M -- CLI: --N_Controllers
+bool     controller_is_malicious[NODE_STATE_CEILING] = {false};  // per-controller
+uint32_t node_controller[NODE_STATE_CEILING]         = {0};      // vehicle -> controller
+
+// True iff the controller serving vehicle n is compromised. This replaces the
+// global g_controller_is_malicious in every per-node suppression decision.
+inline bool node_under_malicious_controller(uint32_t n)
+{
+    if(enable_cp_attack != 1) return false;
+    return controller_is_malicious[node_controller[n]];
+}
+
 int cp_attack_percentage = 50;  // percentage of vehicles the controller targets
 int cp_drop_rate         = 50;  // how much the controller reduces load (drop %)
 int cp_target_flow       = 0;   // only for CP-TS
 // reuses attack_percentage and intermittent_period from data plane
 
 // ── Per-node forwarding counters (for attacker PDR tracking) ─────────────────
-uint32_t node_forwarded_count[100] = {0};  // packets this node actually forwarded
-uint32_t node_received_count[100]  = {0};  // packets this node received to forward
+uint32_t node_forwarded_count[NODE_STATE_CEILING] = {0};  // packets this node actually forwarded
+uint32_t node_received_count[NODE_STATE_CEILING]  = {0};  // packets this node received to forward
 
 // add this near your other global arrays (top of file):
-uint32_t cp_drop_counter[100] = {0};  // per-node CP drop counter
-uint32_t dp_drop_counter[100] = {0};  // per-node DP drop counter (fix DP too)
+uint32_t cp_drop_counter[NODE_STATE_CEILING] = {0};  // per-node CP drop counter
+uint32_t dp_drop_counter[NODE_STATE_CEILING] = {0};  // per-node DP drop counter (fix DP too)
 
 // state of art (start)
-// uint32_t cp_drop_counter[100] = {0};  // per-node CP drop counter
-// uint32_t dp_drop_counter[100] = {0};  // per-node DP drop counter (fix DP too)
+// uint32_t cp_drop_counter[NODE_STATE_CEILING] = {0};  // per-node CP drop counter
+// uint32_t dp_drop_counter[NODE_STATE_CEILING] = {0};  // per-node DP drop counter (fix DP too)
 // state of art (end)
 
 // @da end
@@ -245,11 +410,11 @@ uint32_t dp_drop_counter[100] = {0};  // per-node DP drop counter (fix DP too)
 bool     use_malik_detection              = false; // set true in main() to enable
 double   malik_delta_plr                  = 3.0;   // δ — PLR threshold (%), Eq.14
 double   malik_alpha                      = 0.15;  // (legacy; unused by PLR gate)
-bool     malik_flagged_nodes[100]         = {false};
-uint32_t malik_window_received[100]       = {0};
-uint32_t malik_window_forwarded[100]      = {0};
-double   malik_window_pdr[100]            = {0.0};
-uint32_t malik_consecutive_low[100]       = {0};
+bool     malik_flagged_nodes[NODE_STATE_CEILING]         = {false};
+uint32_t malik_window_received[NODE_STATE_CEILING]       = {0};
+uint32_t malik_window_forwarded[NODE_STATE_CEILING]      = {0};
+double   malik_window_pdr[NODE_STATE_CEILING]            = {0.0};
+uint32_t malik_consecutive_low[NODE_STATE_CEILING]       = {0};
 uint32_t MALIK_CONSEC_TRIGGER             = 2;
 double   malik_network_avg_pdr            = 0.0;
 double   malik_dynamic_threshold          = 0.0;
@@ -263,12 +428,12 @@ double   malik_network_pdr                = 0.0;
 // state of art (start)  ── Alabdulatif VCBC ──────────────────────────────────
 // SOA2
 bool     use_vcbc_detection              = false;
-double   vcbc_window_pdr[100]            = {0.0};
-uint32_t vcbc_vote_count[100]            = {0};
+double   vcbc_window_pdr[NODE_STATE_CEILING]            = {0.0};
+uint32_t vcbc_vote_count[NODE_STATE_CEILING]            = {0};
 uint32_t vcbc_total_windows              = 0;
 double   vcbc_pdr_threshold              = 0.78;
 double   vcbc_vote_fraction_threshold    = 0.50;
-bool     vcbc_classified_malicious[100]  = {false};
+bool     vcbc_classified_malicious[NODE_STATE_CEILING]  = {false};
 double   vcbc_detection_accuracy         = 0.0;
 double   vcbc_fpr                        = 0.0;
 double   vcbc_network_pdr                = 0.0;
@@ -280,11 +445,11 @@ bool     use_soa3_detection              = false;
 uint32_t soa3_window_number              = 0;
 double   soa3_detection_accuracy         = 0.0;
 double   soa3_fpr                        = 0.0;
-bool     soa3_classified_malicious[100]  = {false};
-uint32_t soa3_win_received[100]          = {0};
-uint32_t soa3_win_forwarded[100]         = {0};
-uint32_t soa3_win_dp_drops[100]          = {0};
-uint32_t soa3_win_cp_drops[100]          = {0};
+bool     soa3_classified_malicious[NODE_STATE_CEILING]  = {false};
+uint32_t soa3_win_received[NODE_STATE_CEILING]          = {0};
+uint32_t soa3_win_forwarded[NODE_STATE_CEILING]         = {0};
+uint32_t soa3_win_dp_drops[NODE_STATE_CEILING]          = {0};
+uint32_t soa3_win_cp_drops[NODE_STATE_CEILING]          = {0};
 // state of art (end) SOA3
 
 
@@ -293,15 +458,16 @@ int lambda = 1; // 30
 const int Flow_size = 5; // 55
 uint32_t flow_size = 5; // 55
 
-const int total_size = 5; // fixed topology ceiling. NOTE: the Gurobi link-
-                          // lifetime optimisation (optimization_lifetime.py) is
-                          // sized by total_size and loops Vehicle/RSU nodes up to
-                          // it, so raising this makes every MILP solve huge/slow
-                          // and reads nonexistent nodes. Keep at 5 (N_Vehicles=4
-                          // + 1 RSU). Attacker-% sweep varies attackers within
-                          // these 4 vehicles (25/50/75% = 1/2/3 real attackers).
+const int total_size = 205; // topology ceiling, raised from 5 to support N=200
+                          // vehicles + RSUs. NOTE: routing_algorithm=4's route-
+                          // cost/congestion matrices (convert_link_lifetimes(),
+                          // link_lifetime_vector[], etc., ~line 117930+) index by
+                          // total_size assuming it equals the real node count —
+                          // that only held by coincidence at the old default (5).
+                          // Re-indexing those to use real node count is tracked
+                          // as a SEPARATE fix; not done here (see RD1 audit).
 uint32_t N_RSUs = 1; // 20
-uint32_t N_Vehicles = 4; // 80
+uint32_t N_Vehicles = 4; // 80, CLI-overridable via --N_Vehicles/--num_vehicles
 
 // "dilukshan start
 // ── Single PDR per node (local forwarding only) ───────────────────────────────
@@ -313,7 +479,18 @@ uint32_t node_relay_forwarded[total_size] = {0};
 uint32_t node_relay_received[total_size]  = {0};
 // "da end
 
-const int flows = 2;
+// Fix 2 (supervisor): raised from 2 to 6 so more flows are placed across the
+// verified mesh region (routing_algorithm==4 flow-placement block, ~line
+// 142100), giving all mesh-restricted attacker nodes (Fix 1) a real chance
+// of carrying live traffic. Every array/tag that depends on flow count keys
+// off this single constant (grep-audited: node_flow_received/forwarded,
+// CustomFlowDataUplinkTag1's m_source/m_destination/m_X/m_P/m_Q and their
+// GetSerializedSize/Serialize/Deserialize loops, the controller-plane
+// Q_f/L_f/W_f/... struct arrays, path_list/sources_list/destinations_list --
+// all use "2*flows" or "flows", no stray hardcoded flow-count literal found
+// that needed updating separately) so a clean rebuild keeps wire format and
+// array sizing consistent.
+const int flows = SG_FLOWS_COUNT;
 
 // ── Per-(node, flow) forwarding counters for S3 target-specific detection ────
 // node_flow_received[n][f] / node_flow_forwarded[n][f] let SHIELD-GH's S3
@@ -492,7 +669,13 @@ void declare_attackers_routing()
 
 // ── Force exact attacker count based on attack_percentage ─────────────────
     uint32_t num_attackers = (uint32_t)round((attack_percentage / 100.0) * N_Vehicles);
-    if(num_attackers == 0) num_attackers = 1; // at least 1 attacker always
+    // "At least 1 attacker" floor only applies when a non-zero percentage was
+    // requested but rounded down to 0 (e.g. a small % at small N) -- it must
+    // NOT override an explicit attack_percentage=0, which should mean a
+    // genuine zero-attacker baseline (needed for M2/GHSR and clean-baseline
+    // diagnostics). Previously this floor fired unconditionally, so
+    // attack_percentage=0 still forced 1 attacker.
+    if(num_attackers == 0 && attack_percentage > 0) num_attackers = 1;
 
     cout << "Forcing exactly " << num_attackers
          << " attackers out of " << N_Vehicles << " vehicles" << endl;
@@ -505,14 +688,42 @@ void declare_attackers_routing()
         DPTS_malicious_nodes[i] = false;
     }
 
-    // Assign first num_attackers vehicle nodes as attackers
-    for(uint32_t i = 0; i < num_attackers && i < N_Vehicles; i++)
+    // ── Fix 1 (supervisor): attacker placement restricted to the reachable
+    // mesh region ────────────────────────────────────────────────────────
+    // Previously attackers were always the first num_attackers node indices
+    // starting at node 0. The verified topology (BFS reachability, multiple
+    // probe rounds, documented at the mesh_start flow-placement block ~line
+    // 142018) shows nodes 0..mesh_start-1 form a pure chain with ZERO
+    // redundant paths, while nodes mesh_start..N_Vehicles-1 form a real
+    // 2-row mesh with redundant connectivity. Attackers placed in the chain
+    // region are frequently unreachable by any flow, making them
+    // structurally undetectable regardless of detector quality (confirmed
+    // in diagnostic_questions/answers_all_fixes_DA1-6.md, Fix F). Placing
+    // attackers starting from the mesh boundary instead ensures they are
+    // actually exercised by live traffic. mesh_start matches the same
+    // formula already used by the flow-placement fix.
+    uint32_t mesh_start = N_Vehicles / 3 + 1; // = 7 when N_Vehicles = 20
+    if(mesh_start >= N_Vehicles) mesh_start = 0; // degenerate small-N fallback
+
+    uint32_t mesh_region_size = N_Vehicles - mesh_start;
+    if(mesh_region_size == 0) mesh_region_size = N_Vehicles; // fallback: whole range
+
+    cout << "Attacker placement: mesh_start=" << mesh_start
+         << " (mesh region = nodes " << mesh_start << ".." << (N_Vehicles - 1)
+         << ", " << mesh_region_size << " reachable nodes)" << endl;
+
+    // Assign attackers starting at mesh_start, wrapping within
+    // [mesh_start, N_Vehicles-1] so all forced attackers land in the
+    // verified-reachable mesh region instead of the unreachable chain.
+    for(uint32_t k = 0; k < num_attackers; k++)
     {
+        uint32_t i = mesh_start + (k % mesh_region_size);
+
         if(present_DPFR_attack_nodes) DPFR_malicious_nodes[i] = true;
         if(present_DPIT_attack_nodes) DPIT_malicious_nodes[i] = true;
         if(present_DPTS_attack_nodes) DPTS_malicious_nodes[i] = true;
 
-        cout << "Node " << i << " forced as ATTACKER" << endl;
+        cout << "Node " << i << " forced as ATTACKER (mesh-restricted placement)" << endl;
     }
     
     
@@ -586,38 +797,61 @@ void declare_attack_states_controller()
 
 void declare_attackers_controller()
 {
-    // cp_attack_percentage = what % of controllers are malicious
-    // In routing_test mode there is 1 controller (RSU/node 4).
-    // We decide once whether THAT controller is malicious.
+    // ── Multi-controller model (supervisor-directed, 2026-08-12) ────────────
+    // M = N_Controllers registered controllers (report: "Multi-Controller Flat
+    // Architecture"). Each vehicle is assigned to EXACTLY ONE controller. The
+    // number of malicious controllers is derived from cp_attack_percentage:
+    //
+    //     n_malicious = round(cp_attack_percentage/100 * M), clamped to >= 1
+    //
+    // The >=1 clamp guarantees the CP attack actually occurs (replacing the
+    // old unconditional "force the single controller malicious" fallback,
+    // which made cp_attack_percentage inert and compromised the WHOLE network
+    // every run). Malicious controllers are the first n_malicious indices, so
+    // the assignment is deterministic given M and the percentage; vehicles are
+    // distributed round-robin, which keeps domains evenly sized for any N/M.
+    if(N_Controllers == 0) N_Controllers = 1;
 
-    // controller index 0 = the single controller in routing_test
-    bool controller_is_malicious = GetBooleanWithProbability(cp_attack_percentage, 0);
+    uint32_t n_malicious =
+        (uint32_t)std::llround((double)cp_attack_percentage / 100.0 * (double)N_Controllers);
+    if(n_malicious < 1)             n_malicious = 1;
+    if(n_malicious > N_Controllers) n_malicious = N_Controllers;
 
-    // fallback: if not selected, force it (same pattern as data plane fallback)
-    if(!controller_is_malicious)
-    {
-        cout << "CP Fallback: forcing controller as attacker" << endl;
-        controller_is_malicious = true;
-    }
+    for(uint32_t c = 0; c < N_Controllers; c++)
+        controller_is_malicious[c] = (c < n_malicious);
 
-    // if the controller is malicious, ALL vehicles it serves get tampered rules
-    // mark all vehicle nodes so print_per_node_pdr can label them
+    // Retained for backward compatibility with any remaining global checks:
+    // true iff AT LEAST ONE controller is compromised. Per-node decisions must
+    // use node_under_malicious_controller(n), not this flag.
+    g_controller_is_malicious = (n_malicious > 0);
+
+    cout << "CP Controllers: M=" << N_Controllers
+         << " malicious=" << n_malicious
+         << " (cp_attack_percentage=" << cp_attack_percentage << "%)" << endl;
+
+    // Assign each vehicle to exactly one controller (round-robin) and tamper
+    // flow rules only for vehicles served by a MALICIOUS controller.
     for(uint32_t i = 0; i < total_size; i++)
     {
         if(i >= N_Vehicles) // skip RSU
         {
+            node_controller[i]      = 0;
             CPFR_malicious_nodes[i] = false;
             CPIT_malicious_nodes[i] = false;
             CPTS_malicious_nodes[i] = false;
             continue;
         }
 
-        // all vehicles under a malicious controller receive tampered flow rules
-        CPFR_malicious_nodes[i] = (present_CPFR_attack_nodes && controller_is_malicious);
-        CPIT_malicious_nodes[i] = (present_CPIT_attack_nodes && controller_is_malicious);
-        CPTS_malicious_nodes[i] = (present_CPTS_attack_nodes && controller_is_malicious);
+        node_controller[i] = i % N_Controllers;
+        bool mal = controller_is_malicious[node_controller[i]];
+
+        CPFR_malicious_nodes[i] = (present_CPFR_attack_nodes && mal);
+        CPIT_malicious_nodes[i] = (present_CPIT_attack_nodes && mal);
+        CPTS_malicious_nodes[i] = (present_CPTS_attack_nodes && mal);
 
         cout << "CP Node " << i
+             << " controller=" << node_controller[i]
+             << " ctrl_malicious=" << mal
              << " CPFR=" << CPFR_malicious_nodes[i]
              << " CPIT=" << CPIT_malicious_nodes[i]
              << " CPTS=" << CPTS_malicious_nodes[i] << endl;
@@ -625,7 +859,7 @@ void declare_attackers_controller()
 
     attack_start_time = Simulator::Now().GetSeconds();
     cout << "CP Attackers declared at t=" << attack_start_time
-         << " controller_malicious=" << controller_is_malicious << endl;
+         << " malicious_controllers=" << n_malicious << "/" << N_Controllers << endl;
 }
 
 // state of art (start)
@@ -643,7 +877,7 @@ void reset_malik_window_counters()
 void write_malik_csv()
 {
     fstream fout;
-    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/malik_detection.csv",
+    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/malik_detection.csv",
               ios::out | ios::app);
     if(!fout.is_open())
     {
@@ -653,11 +887,19 @@ void write_malik_csv()
     if(malik_window_number == 0)
     {
         fout << "Window,Time_s,NetworkAvgPDR,DynamicThreshold,"
-             << "MalikDetectionAccuracy,MalikFPR,NetworkPDR";
+             << "MalikDetectionAccuracy,MalikFPR,NetworkPDR,ControllerCompromised";
         for(uint32_t n = 0; n < N_Vehicles; n++)
-            fout << ",Node" << n << "_PDR,Node" << n << "_Flagged,Node" << n << "_IsAttacker";
+            fout << ",Node" << n << "_PDR,Node" << n << "_Flagged,Node" << n << "_IsAttacker"
+                 << ",Node" << n << "_CtrlCompromised";
         fout << "\n";
     }
+    // Supervisor-directed model fix: expose whether the controller is
+    // compromised so the Python-side re-evaluation (dpgha_sweep_real.py,
+    // which independently recomputes its own verdict rather than reading
+    // Node{n}_Flagged) can also apply the verdict-suppression effect --
+    // see the fix note above the malik_monitor_window() confusion-matrix
+    // computation for the full rationale.
+    bool controller_compromised_now = (enable_cp_attack == 1) && g_controller_is_malicious;
     fout << malik_window_number << ","
          << fixed << setprecision(3)
          << Simulator::Now().GetSeconds() << ","
@@ -665,15 +907,38 @@ void write_malik_csv()
          << malik_dynamic_threshold        << ","
          << malik_detection_accuracy       << ","
          << malik_fpr                      << ","
-         << malik_network_pdr;
+         << malik_network_pdr              << ","
+         << (controller_compromised_now ? 1 : 0);
     for(uint32_t n = 0; n < N_Vehicles; n++)
     {
+        // Consistency fix (2026-08-11): SOA1's ground truth previously
+        // checked ONLY the data plane, while SOA2 (write_vcbc_csv) and SOA3
+        // (soa3_monitor_window) had already been extended to cover
+        // controller-plane attackers by the supervisor's round-6
+        // instruction ("correct SOA2 and SOA3 to report a value"). That
+        // instruction named only two baselines, so SOA1 was left scored
+        // against a DIFFERENT, easier ground truth than the other two: a
+        // CP-only compromised node counted as BENIGN for SOA1, which is the
+        // exact defect the supervisor identified in SOA2. Extended here to
+        // the identical rule so all three baselines are scored on the same
+        // ground truth. CP status is capped to OBSERVABLE impact
+        // (cp_drop_counter>0) for the same reason as SOA2/SOA3: DPGHA is a
+        // PLR/traffic-based detector with no channel to perceive
+        // administrative controller compromise before it produces
+        // measurable loss, so labelling an unaffected node "attacker" would
+        // be an untestable false negative, not a real detection gap.
         bool is_real_attacker = DPFR_malicious_nodes[n]
                              || DPIT_malicious_nodes[n]
-                             || DPTS_malicious_nodes[n];
+                             || DPTS_malicious_nodes[n]
+                             || ((CPFR_malicious_nodes[n] || CPIT_malicious_nodes[n]
+                                  || CPTS_malicious_nodes[n]) && cp_drop_counter[n] > 0);
         fout << "," << fixed << setprecision(4) << malik_window_pdr[n]
              << "," << (malik_flagged_nodes[n] ? 1 : 0)
-             << "," << (is_real_attacker       ? 1 : 0);
+             << "," << (is_real_attacker       ? 1 : 0)
+             // Multi-controller fix (2026-08-12): per-node controller status,
+             // so the Python evaluator suppresses only nodes whose OWN
+             // controller is compromised.
+             << "," << (node_under_malicious_controller(n) ? 1 : 0);
     }
     fout << "\n";
     fout.close();
@@ -745,13 +1010,29 @@ void malik_monitor_window()
     }
 
     // Step 4: compute detection metrics (TP/TN/FP/FN)
+    // Supervisor-directed model fix: SOA1 has no evidence channel
+    // independent of the controller (no blockchain/RSU consensus of its
+    // own) -- when the controller is compromised (enable_cp_attack=1,
+    // g_controller_is_malicious), a correctly-computed flag is suppressed
+    // before it becomes an actionable/reported result (falsified
+    // OpenFlow counters / corrupted flow-statistics source), i.e. a real
+    // TP is hidden and counted as FN instead. FP/TN are unaffected: the
+    // controller shields real attackers, it does not fabricate accusations.
     uint32_t TP = 0, TN = 0, FP = 0, FN = 0;
     for(uint32_t n = 0; n < N_Vehicles; n++)
     {
+        // Consistency fix (2026-08-11): CP-plane ground truth added to match
+        // SOA2/SOA3 -- see the rationale note in write_malik_csv().
         bool is_attacker = DPFR_malicious_nodes[n]
                         || DPIT_malicious_nodes[n]
-                        || DPTS_malicious_nodes[n];
-        bool flagged     = malik_flagged_nodes[n];
+                        || DPTS_malicious_nodes[n]
+                        || ((CPFR_malicious_nodes[n] || CPIT_malicious_nodes[n]
+                             || CPTS_malicious_nodes[n]) && cp_drop_counter[n] > 0);
+        // Multi-controller fix (2026-08-12): suppression is now PER-NODE --
+        // a detection is hidden only if THIS node's own controller is
+        // compromised. Nodes under benign controllers report normally.
+        bool flagged     = malik_flagged_nodes[n]
+                        && !node_under_malicious_controller(n);
         if( flagged &&  is_attacker) TP++;
         if( flagged && !is_attacker) FP++;
         if(!flagged &&  is_attacker) FN++;
@@ -773,30 +1054,57 @@ void malik_monitor_window()
 void write_vcbc_csv()
 {
     fstream fout;
-    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/vcbc_detection.csv",
+    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/vcbc_detection.csv",
               ios::out | ios::app);
     if(!fout.is_open()) { cout << "[VCBC] ERROR: cannot open vcbc_detection.csv" << endl; return; }
 
     if(vcbc_window_number == 0)
     {
-        fout << "Window,Time_s,VcbcDetAcc,VcbcFPR,NetworkPDR";
+        fout << "Window,Time_s,VcbcDetAcc,VcbcFPR,NetworkPDR,ControllerCompromised";
         for(uint32_t n = 0; n < N_Vehicles; n++)
             fout << ",Node" << n << "_PDR,Node" << n << "_VoteCount"
-                 << ",Node" << n << "_Classified,Node" << n << "_IsAttacker";
+                 << ",Node" << n << "_Classified,Node" << n << "_IsAttacker"
+                 << ",Node" << n << "_CtrlCompromised";
         fout << "\n";
     }
 
+    // Supervisor-directed model fix: expose whether the controller is
+    // compromised, same rationale as write_malik_csv() -- SOA2's Python
+    // bridge (scbcvcbc_bridge.py) applies the verdict-suppression effect.
+    bool controller_compromised_now = (enable_cp_attack == 1) && g_controller_is_malicious;
     fout << vcbc_window_number << "," << fixed << setprecision(3)
          << Simulator::Now().GetSeconds() << ","
-         << vcbc_detection_accuracy << "," << vcbc_fpr << "," << vcbc_network_pdr;
+         << vcbc_detection_accuracy << "," << vcbc_fpr << "," << vcbc_network_pdr
+         << "," << (controller_compromised_now ? 1 : 0);
 
     for(uint32_t n = 0; n < N_Vehicles; n++)
     {
-        bool is_real = DPFR_malicious_nodes[n] || DPIT_malicious_nodes[n] || DPTS_malicious_nodes[n];
+        // Fix (supervisor-directed, 2026-08-09): ground truth was DP-only,
+        // so a controller-compromised (CP-only) node was always labelled
+        // "benign" here regardless of actual attack status. SOA2 (VCBC)
+        // observes only per-node forwarding PDR, exactly the same signal
+        // a CP-FR/CP-IT/CP-TS attack degrades at the affected vehicles, so
+        // it CAN in principle detect CP-driven PDR loss -- it was simply
+        // never being credited (or penalised) for doing so because its
+        // own evaluation never checked for it. Ground truth now covers
+        // both attack planes, matching SOA3's ground truth and the real
+        // threat model. Consistency fix: like SOA3, CP status is further
+        // capped to nodes with an OBSERVABLE effect (cp_drop_counter>0) --
+        // SOA2 is also a traffic/PDR-based detector with no channel to
+        // perceive administrative controller compromise before it produces
+        // measurable packet loss (e.g. a CP-TS attack targeting a flow
+        // this node never carries), so labelling it "attacker" anyway
+        // would only produce an unfair, untestable false negative rather
+        // than a meaningful detection gap.
+        bool is_real = DPFR_malicious_nodes[n] || DPIT_malicious_nodes[n] || DPTS_malicious_nodes[n]
+                    || ((CPFR_malicious_nodes[n] || CPIT_malicious_nodes[n]
+                         || CPTS_malicious_nodes[n]) && cp_drop_counter[n] > 0);
         fout << "," << fixed << setprecision(4) << vcbc_window_pdr[n]
              << "," << vcbc_vote_count[n]
              << "," << (vcbc_classified_malicious[n] ? 1 : 0)
-             << "," << (is_real ? 1 : 0);
+             << "," << (is_real ? 1 : 0)
+             // Multi-controller fix (2026-08-12): per-node controller status.
+             << "," << (node_under_malicious_controller(n) ? 1 : 0);
     }
     fout << "\n";
     fout.close();
@@ -842,11 +1150,22 @@ void vcbc_monitor_window()
     }
 
     // Step 4: TP/TN/FP/FN
+    // Fix (supervisor-directed, 2026-08-09): ground truth extended to cover
+    // controller-plane attacks (CPFR/CPIT/CPTS), capped to observable
+    // impact (cp_drop_counter>0) -- matches write_vcbc_csv()'s ground
+    // truth below and SOA3's; see the fix notes there for rationale.
+    // Verdict-suppression fix: SOA2 also has no evidence channel
+    // independent of the controller, so a real detection is hidden
+    // (counted as FN) when the controller is compromised -- see the
+    // rationale note above malik_monitor_window()'s equivalent fix.
     uint32_t TP=0, TN=0, FP=0, FN=0;
     for(uint32_t n = 0; n < N_Vehicles; n++)
     {
-        bool a = DPFR_malicious_nodes[n] || DPIT_malicious_nodes[n] || DPTS_malicious_nodes[n];
-        bool c = vcbc_classified_malicious[n];
+        bool a = DPFR_malicious_nodes[n] || DPIT_malicious_nodes[n] || DPTS_malicious_nodes[n]
+              || ((CPFR_malicious_nodes[n] || CPIT_malicious_nodes[n]
+                   || CPTS_malicious_nodes[n]) && cp_drop_counter[n] > 0);
+        // Multi-controller fix (2026-08-12): per-node suppression.
+        bool c = vcbc_classified_malicious[n] && !node_under_malicious_controller(n);
 		if( c &&  a) TP++;
         if( c && !a) FP++;
         if(!c &&  a) FN++;
@@ -867,7 +1186,7 @@ void write_soa3_csv_header(fstream& fout)
     fout << "window,sim_time_s,node_id,is_attacker,"
          << "pkt_received,pkt_forwarded,pkt_drop_dp,pkt_drop_cp,"
          << "local_pdr,drop_rate_dp,drop_rate_cp,"
-         << "fwd_ratio,drop_total,recv_gt0"
+         << "fwd_ratio,drop_total,recv_gt0,controller_compromised"
          << "\n";
 }
 // state of art (end) SOA3
@@ -880,7 +1199,7 @@ void soa3_monitor_window()
     if (!use_soa3_detection) return;
 
     fstream fout;
-    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/soa3_rf_features.csv",
+    fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/soa3_rf_features.csv",
               ios::out | ios::app);
     if (!fout.is_open())
     {
@@ -896,19 +1215,36 @@ void soa3_monitor_window()
 
     for (uint32_t n = 0; n < N_Vehicles; n++)
     {
-        // ── Ground-truth label ────────────────────────────────────────────────
-        bool is_attacker = DPFR_malicious_nodes[n]
-                        || DPIT_malicious_nodes[n]
-                        || DPTS_malicious_nodes[n]
-                        || CPFR_malicious_nodes[n]
-                        || CPIT_malicious_nodes[n]
-                        || CPTS_malicious_nodes[n];
-
         // ── Raw counters from the simulation ─────────────────────────────────
         uint32_t rcv     = node_total_received[n];
         uint32_t fwd     = node_total_forwarded[n];
         uint32_t dp_drop = dp_drop_counter[n];
         uint32_t cp_drop = cp_drop_counter[n];
+
+        // ── Ground-truth label ────────────────────────────────────────────────
+        // Fix (supervisor-directed, 2026-08-09): a node is CP-compromised
+        // administratively the moment its controller is malicious
+        // (declare_attackers_controller() marks ALL vehicles served by that
+        // controller, per the real threat model -- a compromised controller
+        // affects its whole domain, which is correct and not itself a bug).
+        // But SOA3 is a TRAFFIC-based classifier: it can only ever learn
+        // from a measurable signal, and a node with administrative CP
+        // status but cp_drop_counter==0 (e.g. CP-TS targeting a flow this
+        // node never carries) is indistinguishable from a genuinely benign
+        // node in every feature SOA3 has access to. Labelling it "attacker"
+        // anyway starves the negative class without giving the classifier
+        // anything to learn the label from, which is what previously
+        // produced a degenerate one-class dataset (evaluate_rf_cv()
+        // returning None) whenever a single controller's compromise
+        // spanned the whole small topology. CP ground truth is therefore
+        // capped to nodes with OBSERVABLE CP impact (cp_drop>0); DP ground
+        // truth is unchanged (dp_drop is already a direct consequence of
+        // the DP attacker flags, no similar gap exists there).
+        bool is_attacker = DPFR_malicious_nodes[n]
+                        || DPIT_malicious_nodes[n]
+                        || DPTS_malicious_nodes[n]
+                        || ((CPFR_malicious_nodes[n] || CPIT_malicious_nodes[n]
+                             || CPTS_malicious_nodes[n]) && cp_drop > 0);
 
         // ── Derived features (mirror Arízaga-Silva feature categories) ───────
         double local_pdr   = (rcv > 0) ? (double)fwd / (double)rcv        : 1.0;
@@ -917,6 +1253,14 @@ void soa3_monitor_window()
         double fwd_ratio   = (rcv > 0) ? (double)fwd / (double)(rcv + 1)  : 0.0;
         uint32_t drop_total = dp_drop + cp_drop;
         uint32_t recv_gt0  = (rcv > 0) ? 1 : 0;
+
+        // Supervisor-directed model fix: expose whether the controller is
+        // compromised so the Python-side RF evaluation (soa3_rf_sweep_real.py)
+        // can suppress its predictions at evaluation time -- see
+        // evaluate_rf_cv()'s rationale note for the full explanation.
+        // Multi-controller fix (2026-08-12): per-node, not global -- this row's
+        // controller may be benign even when others are compromised.
+        bool controller_compromised_now = node_under_malicious_controller(n);
 
         // ── Write one feature row per node ────────────────────────────────────
         fout << soa3_window_number   << ","
@@ -933,7 +1277,8 @@ void soa3_monitor_window()
              << dr_cp                << ","
              << fwd_ratio            << ","
              << drop_total           << ","
-             << recv_gt0             << "\n";
+             << recv_gt0             << ","
+             << (controller_compromised_now ? 1 : 0) << "\n";
     }
 
     fout.close();
@@ -1049,10 +1394,80 @@ void flash_forward_color(uint32_t node_id)
 // ── End NetAnim color flash functions ─────────────────────────────────────────
 
 
-// ── Grey Hole: Should drop this packet? ───────────────────────────────────────
-// returns true if node is attacker and packet should be dropped
-bool should_drop_grey_hole(uint32_t node_id, uint32_t flow_id)
+// BUG FIX (supervisor-reported, 2026-08-09: SOA1/SOA3 "too high" MCC traced
+// to this): should_drop_grey_hole() used to roll an independent fresh
+// Bernoulli(drop_rate%) decision on EVERY call, including retransmission
+// retries of the SAME packet at the SAME hop (Place 1 = initial send,
+// Place 2 = ARQ retransmit, up to B_max ~= 6 attempts). A single packet
+// that survives attempt 1 (40% chance at drop_rate=60) could still be
+// re-rolled and dropped on attempt 2, 3, ... so the EFFECTIVE per-packet
+// loss compounded to 1-(1-0.6)^k -- 84% at k=2, 97.4% at k=4, 99.6% at
+// k=6 -- turning a documented "60% grey-hole drop rate" into near-total,
+// black-hole-like loss within a few retries of a 10s run. This made every
+// detector (SOA1, SOA2, SOA3, and SHIELD-GH's own) see a trivially
+// separable scenario (benign PDR=1.0, attacker PDR~=0.0) regardless of
+// detection quality, inflating MCC for all of them.
+//
+// Fixed by making exactly ONE drop decision per packet INSTANCE and
+// reusing it on every retry of that same instance. The memoization key is
+// deliberately NOT packet_id: tracing the live drop log showed packet_id
+// is a small per-flow-burst counter (1, 2, 3, ...) that RESETS/RECYCLES
+// every time a flow sends a new burst (confirmed: "flow=0 packetID=1" at
+// t=4.10, t=5.10, t=6.10 are three DIFFERENT packets on three different
+// bursts of the same flow, all sharing packetID=1). Keying on packet_id
+// alone would silently collapse genuinely distinct packets onto the same
+// cached decision -- a different, subtler version of the same bug. The
+// key instead uses the packet's true original send timestamp in
+// nanoseconds, which IS unique per packet instance and is already
+// threaded unchanged through every retransmission retry of that instance
+// (see originail_timestamp in check_delivery_and_retransmit()).
+std::map<std::tuple<uint32_t, uint32_t, int64_t>, bool> g_grey_hole_drop_decided;
+
+// Memoized Bernoulli(drop_rate%) roll: returns the SAME decision for every
+// call with the same (node_id, flow_id, original_send_time_ns) key,
+// rolling fresh only the first time that packet instance is seen at that
+// node. This is what makes drop_rate=60 mean "~60% of distinct packets"
+// instead of "~60% per attempt, compounding across retries" -- see
+// bug-fix note above.
+bool grey_hole_drop_decision(uint32_t node_id, uint32_t flow_id, int64_t original_send_time_ns)
 {
+    auto key = std::make_tuple(node_id, flow_id, original_send_time_ns);
+    auto it = g_grey_hole_drop_decided.find(key);
+    if(it != g_grey_hole_drop_decided.end())
+    {
+        return it->second;
+    }
+    // Fold g_rng_run into the seed (Task 9 fix): Simulator::Now()-derived
+    // values alone are a deterministic function of the fixed NS-3 event
+    // schedule, so without this every invocation at the same CLI config
+    // reseeds identically and produces the bit-identical trace regardless
+    // of RngSeedManager::SetRun() (confirmed: SetRun() alone did not change
+    // the result, since this path never reads ns-3's RNG stream). g_rng_run
+    // defaults to 1, so this reduces to the original seed formula and is a
+    // no-op for every existing single-run script that doesn't pass
+    // --rng_run.
+    srand((unsigned int)(original_send_time_ns + node_id * 1000
+                        + (uint64_t)g_rng_run * 7919u));
+    bool drop = (rand() % 100) < drop_rate;
+    g_grey_hole_drop_decided[key] = drop;
+    return drop;
+}
+
+// ── Grey Hole: Should drop this packet? ───────────────────────────────────────
+// returns true if node is attacker and packet should be dropped.
+// original_send_time_ns: the packet instance's original send timestamp in
+// nanoseconds, used to memoize the drop decision once per packet instance
+// and reuse it across retransmission retries of that instance (see
+// bug-fix note above). Defaults to the current simulation time (behaves
+// as "always a fresh instance", i.e. the old per-call behaviour) for any
+// caller that cannot supply it -- currently no such caller exists, both
+// call sites pass a real original send timestamp.
+bool should_drop_grey_hole(uint32_t node_id, uint32_t flow_id, int64_t original_send_time_ns = -1)
+{
+    if(original_send_time_ns < 0)
+    {
+        original_send_time_ns = Simulator::Now().GetNanoSeconds();
+    }
     // ── SHIELD-GH Isolation (proposed-method mitigation, Eq. 3.19) ───────────
     // Once DEBSC confirms the grey hole, the threshold-signed FlowMod blocks it:
     // the network no longer routes successful traffic through this node.
@@ -1092,14 +1507,10 @@ bool should_drop_grey_hole(uint32_t node_id, uint32_t flow_id)
     if(DPFR_malicious_nodes[node_id])
     {
 		dp_drop_counter[node_id]++;
-		// properly seeded random drop
-		srand((unsigned int)(Simulator::Now().GetNanoSeconds() 
-							+ node_id * 1000 
-							+ dp_drop_counter[node_id]));
-		// Use random probability instead of counter for small packet counts
-		bool drop = (rand() % 100) < drop_rate;
-        // dp_drop_counter[node_id]++;
-        // bool drop = (dp_drop_counter[node_id] % 100) < (uint32_t)drop_rate;
+		// Bug fix (see note above should_drop_grey_hole): ONE decision per
+		// (node,flow,packet), reused across retransmission retries instead
+		// of re-rolled every call.
+		bool drop = grey_hole_drop_decision(node_id, flow_id, original_send_time_ns);
         if(drop)
         {
             cout << "DP-FR DROP: node=" << node_id
@@ -1128,8 +1539,9 @@ bool should_drop_grey_hole(uint32_t node_id, uint32_t flow_id)
             return false;
         }
         dp_drop_counter[node_id]++;
-       // bool drop = (dp_drop_counter[node_id] % 100) < (uint32_t)drop_rate;
-	   bool drop = (rand() % 100) < drop_rate;
+        // Bug fix (see note above should_drop_grey_hole): ONE decision per
+        // (node,flow,packet), reused across retransmission retries.
+        bool drop = grey_hole_drop_decision(node_id, flow_id, original_send_time_ns);
         if(drop)
         {
             cout << "DP-IT DROP: node=" << node_id
@@ -1156,8 +1568,9 @@ bool should_drop_grey_hole(uint32_t node_id, uint32_t flow_id)
             return false;
         }
         dp_drop_counter[node_id]++;
-        //bool drop = (dp_drop_counter[node_id] % 100) < (uint32_t)drop_rate;
-		bool drop = (rand() % 100) < drop_rate;
+        // Bug fix (see note above should_drop_grey_hole): ONE decision per
+        // (node,flow,packet), reused across retransmission retries.
+        bool drop = grey_hole_drop_decision(node_id, flow_id, original_send_time_ns);
         if(drop)
         {
             cout << "DP-TS DROP (target): node=" << node_id
@@ -95567,7 +95980,7 @@ void reset_delays_and_packets()
 void write_csv_delay_training(uint32_t index, uint32_t mode)
 {
 	fstream fout;
-	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/delay_training_data.csv",ios::out|ios::app);
+	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/delay_training_data.csv",ios::out|ios::app);
 	fout << mode << ", "
 	     << mode*D_wl_bar[index] << ", "
 	     <<	(1-mode)*D_wi_bar[index] << ", "
@@ -95595,7 +96008,7 @@ void write_csv_delay_training(uint32_t index, uint32_t mode)
 void write_csv_delay_prediction()
 {
 	fstream fout;
-	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/delay_data_for_prediction.csv",ios::out|ios::trunc);
+	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/delay_data_for_prediction.csv",ios::out|ios::trunc);
 	for (uint32_t index=0;index<total_size;index++)
 	{
 		for(double mode=0.0;mode < 2.0;mode++)
@@ -95987,14 +96400,16 @@ bool X_nodes[total_size+2];
 				{
 					cout<<"routing loop. stopping routing"<<endl;
 				}
-				else if (next_hop < total_size)
+				// Bounded by the actual node count, not total_size (same fix
+				// as the MacRx() next_hop guard above).
+				else if (next_hop < (N_Vehicles + N_RSUs))
 				{
 					Ptr <Packet> packet_i = Create<Packet> (packet_additional_size);
 					tag_routing.SetNodeId(&nid);
 					Time ti = MicroSeconds(Simulator::Now().GetMicroSeconds());
 					tag_routing.SetTimestamp(&ti);
 					packet_i->AddPacketTag(tag_routing);
-					
+
 					if (((nid-2) > N_Vehicles) && (next_hop > N_Vehicles))
 					{
 						Ptr <Node> nu = DynamicCast <Node> (RSU_Nodes.Get(nid-2-N_Vehicles));	
@@ -113785,7 +114200,7 @@ void RSU_metadata_downlink_unicast(Ptr <SimpleUdpApplication> udp_app, Ptr <Node
 void write_csv()
 {
 	fstream fout;
-	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_data.csv",ios::out|ios::trunc);
+	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_data.csv",ios::out|ios::trunc);
 	for (uint32_t i=2; i<total_size+2 ;i++)
 	{
 		fout << total_size << ", "
@@ -113814,50 +114229,56 @@ void write_csv_status_lifetime()
 	switch(routing_algorithm)
 	{
 		case(0):
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_ECMP.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_ECMP.csv",ios::out|ios::trunc);
 			break;
 		case(1):
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_RR.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_RR.csv",ios::out|ios::trunc);
 			break;
 		case(2):
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
 			break;
 		case(3):
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
 			break;
 		case(4):
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
 			break;
 		case(5):
 			/*
 			if(experiment_number == 0)
 			{
-				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
+				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
 			}
 			if(experiment_number == 1)
 			{
-				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_RR.csv",ios::out|ios::trunc);
+				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_RR.csv",ios::out|ios::trunc);
 			}
 			if(experiment_number == 2)
 			{
-				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
+				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_QRSDN.csv",ios::out|ios::trunc);
 			}
 			if(experiment_number == 3)
 			{
-				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
+				fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
 			}
 			*/
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data_RLMR.csv",ios::out|ios::trunc);
 			break;
 			
 		default:
-			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
+			fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
 			break;
 	}
-	for (uint32_t i=0; i<total_size ;i++)
+	// Bounded by the actual node count, not the total_size array ceiling:
+	// routing_data_at_controller_inst is sized [total_size] but only indices
+	// 0..(N_Vehicles+N_RSUs-1) are ever populated. Looping to total_size
+	// dumped hundreds of zero-initialised phantom rows into the Gurobi input
+	// CSV, exploding the MILP with fake nodes.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
+	for (uint32_t i=0; i<real_node_count ;i++)
 	{
 		//cout<<"writing status "<<i<<endl;
-		fout << total_size << ", "
+		fout << real_node_count << ", "
 		     << (routing_data_at_controller_inst+i)->nodeid << ", "
 		     << (routing_data_at_controller_inst+i)->position.x << ", "
 		     << (routing_data_at_controller_inst+i)->position.y << ", "
@@ -113877,24 +114298,31 @@ void write_csv_status_lifetime()
 void write_csv_status()
 {
 	fstream fout;
-	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
-	for (uint32_t i=2; i<total_size+2 ;i++)
+	fout.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_link_lifetime_data.csv",ios::out|ios::trunc);
+	// Bounded by the actual node count, not the total_size array ceiling:
+	// only N_Vehicles+N_RSUs nodes actually exist in Vehicle_Nodes/RSU_Nodes.
+	// Looping to total_size+2 read past the real containers (garbage/zeroed
+	// rows) and fed Gurobi a huge phantom-node MILP.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
+	for (uint32_t i=2; i<real_node_count+2 ;i++)
 	{
 		Ptr <Node> node;
 		if ((i-2) < N_Vehicles)
-		{	
+		{
 			node = DynamicCast <Node> (Vehicle_Nodes.Get(i-2));
 		}
 		else
 		{
 			node = DynamicCast <Node> (RSU_Nodes.Get(i-N_Vehicles-2));
 		}
-		
+
 		Ptr<ConstantVelocityMobilityModel> mdl = DynamicCast <ConstantVelocityMobilityModel> (node->GetObject<MobilityModel>());
         	Vector position = mdl->GetPosition();
         	Vector velocity = mdl->GetVelocity();
 		//cout<<"writing status "<<i<<endl;
-		fout << total_size << ", "
+		// n column: optimization_lifetime.py reads this as the row count to
+		// expect, not the total_size array ceiling.
+		fout << real_node_count << ", "
 		     << position.x << ", "
 		     <<	position.y << ", "
 		     << velocity.x<< ", "
@@ -113914,7 +114342,7 @@ void write_csv_status()
 void read_csv()
 {
     fstream fin;
-    fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_results.csv", ios::in);
+    fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_results.csv", ios::in);
     vector<string> row;
     string line;
     string temp;
@@ -113966,6 +114394,21 @@ double optimization_percentage = 0.0;
 double average_packet_delivery_ratio = 0.0;
 double current_packet_delivery_ratio = 0.0;
 double average_packet_delivery_ratio_dsrc = 0.0;
+
+// CQ7 debug (supervisor-requested): globals + free function (NS-3's
+// Simulator::Schedule doesn't accept a capturing lambda cleanly) to print
+// PDR one window after the first isolation event.
+bool     g_cq7_captured   = false;
+double   g_cq7_pdr_before = 0.0;
+uint32_t g_cq7_node       = 0;
+double   g_cq7_t          = 0.0;
+void cq7_print_pdr_after()
+{
+    double pdr_after = 100.0 * average_packet_delivery_ratio_dsrc;
+    std::cout << "[CQ7] one window after first isolation (node=" << g_cq7_node
+              << " at t=" << g_cq7_t << "): PDR_after=" << pdr_after
+              << "% (was " << g_cq7_pdr_before << "%)" << std::endl;
+}
 double current_packet_delivery_ratio_dsrc = 0.0;
 double normalized_mobility = 0.0;
 double network_contention = 0.0;
@@ -113979,59 +114422,59 @@ void write_csv_results()
 		switch (experiment_number)
 		{
 			case (0)://entropy experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_entropy.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_entropy.csv";
 	
 				break;
 			case (1)://optimization frequency
 				if (data_transmission_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_0.02.csv";
 				}
 				if (data_transmission_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_0.05.csv";
 				}
 				if (data_transmission_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_0.10.csv";
 				}
 				if (data_transmission_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_0.25.csv";
 				}
 				if (data_transmission_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_0.50.csv";
 				}
 
 				if (data_transmission_frequency == 1.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_1.00.csv";
 				}
 
 				if (data_transmission_frequency ==2.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_2.csv";
 				}
 
 				if (data_transmission_frequency ==4.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_4.csv";
 				}
 
 				if (data_transmission_frequency ==6.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_6.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_6.csv";
 				}
 
 				if (data_transmission_frequency ==8.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_8.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_8.csv";
 				}
 
 				if (data_transmission_frequency ==10.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_frequency_10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_frequency_10.csv";
 				}
 
 				break;
@@ -114039,37 +114482,37 @@ void write_csv_results()
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_160.csv";
 						break;						
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_192.csv";
 						break;
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_nodes_256.csv";
 						break;
 				}
 				break;
@@ -114079,25 +114522,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_0.csv";
+				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -114109,37 +114552,37 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_0.csv";
 				   	  		break;
 				   		case (10):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_10.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_10.csv";
 				   	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_20.csv";
 					  		break;
 					  	case (30):
-					   		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_30.csv";
+					   		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_30.csv";
 					   		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_60.csv";
 					  		break;
 				   	  	case (70):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_70.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_70.csv";
 				   	  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_90.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -114151,46 +114594,46 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (10):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_10.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_10.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (70):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_70.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_70.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_90.csv";
 				   	  		break;
 				   	  	case (110):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_110.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_110.csv";
 				   	  		break;
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_130.csv";
 					 		break;
 					 	case (150):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_150.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_150.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_170.csv";
 					 		break;
 					 	case (190):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_190.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_190.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_210.csv";
 					 		break;
 					 	case (230):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_230.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_230.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -114210,126 +114653,126 @@ void write_csv_results()
 				switch (ratio)
 				{
 					case(200)://200 veh, 0 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_inf.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_inf.csv";
 						break;
 					case(199)://199 veh, 1 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_199.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_199.csv";
 						break;
 					case(99)://198 veh, 2 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_99.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_99.csv";
 						break;
 					case(49)://196 veh, 4 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_49.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_49.csv";
 						break;
 					case(24)://192 veh, 8 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_24.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_24.csv";
 						break;
 					case(9)://180 veh, 20 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_9.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_9.csv";
 						break;
 					case(4)://160 veh, 40 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_4.csv";
 						break;
 					case(3):// 150 veh, 50 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_3.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_3.csv";
 						break;
 					case(2): //134 veh, 66 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_2.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_2.csv";
 						break;
 					case(1): //100 veh, 100 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_1.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_1.csv";
 						break;
 					case(0): //0 veh, 200 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/centralized_heterogeneity_0.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/centralized_heterogeneity_0.csv";
 						break;
 				}
 				break;
 			case (7)://threshold experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_threshold.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_threshold.csv";
 				break;	
 			case (8)://threshold experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_threshold.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_threshold.csv";
 				break;
 			case (9)://routing frequency
 				if (routing_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_0.02.csv";
 				}
 				if (routing_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_0.05.csv";
 				}
 				if (routing_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_0.10.csv";
 				}
 				if (routing_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_0.25.csv";
 				}
 				if (routing_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_0.50.csv";
 				}
 				if (routing_frequency == 1.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_1.00.csv";
 				}
 				if (routing_frequency ==2.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_2.csv";
 				}
 
 				if (routing_frequency ==3.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_3.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_3.csv";
 				}
 		
 				if (routing_frequency == 4.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_4.csv";
 				}
 
 				if (routing_frequency ==5.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_frequency_5.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_frequency_5.csv";
 				}
 				break;
 			case (10): //number of nodes for routing
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_160.csv";
 						break;						
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_192.csv";
 						break;
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_nodes_256.csv";
 						break;
 				}
 				break;
@@ -114339,25 +114782,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_0.csv";
+				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -114369,22 +114812,22 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_0.csv";
 				  	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_20.csv";
 					  		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_40.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_60.csv";
 					  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -114396,28 +114839,28 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_90.csv";
 				   	  		break;
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_130.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_170.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized__routing_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized__routing_mobility_autobahn_210.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/centralized_routing_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/centralized_routing_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -114432,59 +114875,59 @@ void write_csv_results()
 		switch (experiment_number)
 		{
 			case (0)://entropy experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_entropy.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_entropy.csv";
 	
 				break;
 			case (1)://optimization frequency
 				if (data_transmission_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_0.02.csv";
 				}
 				if (data_transmission_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_0.05.csv";
 				}
 				if (data_transmission_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_0.10.csv";
 				}
 				if (data_transmission_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_0.25.csv";
 				}
 				if (data_transmission_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_0.50.csv";
 				}
 
 				if (data_transmission_frequency == 1.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_1.00.csv";
 				}
 
 				if (data_transmission_frequency ==2.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_2.csv";
 				}
 
 				if (data_transmission_frequency ==4.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_4.csv";
 				}
 
 				if (data_transmission_frequency ==6.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_6.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_6.csv";
 				}
 
 				if (data_transmission_frequency ==8.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_8.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_8.csv";
 				}
 
 				if (data_transmission_frequency ==10.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_frequency_10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_frequency_10.csv";
 				}
 
 				break;
@@ -114492,37 +114935,37 @@ void write_csv_results()
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_160.csv";
 						break;						
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_192.csv";
 						break;
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_nodes_256.csv";
 						break;
 				}
 				break;
@@ -114532,25 +114975,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_0.csv";
+				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -114562,22 +115005,22 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_0.csv";
 				   	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_20.csv";
 					  		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_40.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_60.csv";
 					  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -114589,27 +115032,27 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_90.csv";
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_130.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_170.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_210.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -114629,89 +115072,89 @@ void write_csv_results()
 				switch (ratio)
 				{
 					case(200)://200 veh, 0 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_inf.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_inf.csv";
 						break;
 					case(199)://199 veh, 1 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_199.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_199.csv";
 						break;
 					case(99)://198 veh, 2 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_99.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_99.csv";
 						break;
 					case(49)://196 veh, 4 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_49.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_49.csv";
 						break;
 					case(24)://192 veh, 8 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_24.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_24.csv";
 						break;
 					case(9)://180 veh, 20 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_9.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_9.csv";
 						break;
 					case(4)://160 veh, 40 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_4.csv";
 						break;
 					case(3):// 150 veh, 50 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_3.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_3.csv";
 						break;
 					case(2): //134 veh, 66 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_2.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_2.csv";
 						break;
 					case(1): //100 veh, 100 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_1.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_1.csv";
 						break;
 					case(0): //0 veh, 200 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/distributed_heterogeneity_0.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/distributed_heterogeneity_0.csv";
 						break;
 				}
 				break;
 			case (7)://link lifetime threshold experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_threshold.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_threshold.csv";
 				break;	
 			case (8)://contention threshold experiment
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_threshold.csv";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_threshold.csv";
 				break;
 			case (9)://routing frequency
 				if (routing_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_0.02.csv";
 				}
 				if (routing_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_0.05.csv";
 				}
 				if (routing_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_0.10.csv";
 				}
 				if (routing_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_0.25.csv";
 				}
 				if (routing_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_0.50.csv";
 				}
 				if (routing_frequency == 1.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_1.00.csv";
 				}
 				if (routing_frequency ==2.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_2.csv";
 				}
 
 				if (routing_frequency ==3.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_3.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_3.csv";
 				}
 		
 				if (routing_frequency == 4.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_4.csv";
 				}
 
 				if (routing_frequency ==5.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_frequency_5.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_frequency_5.csv";
 				}
 
 				break;
@@ -114719,37 +115162,37 @@ void write_csv_results()
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_160.csv";
 						break;						
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_192.csv";
 						break;
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_nodes_256.csv";
 						break;
 				}
 				break;
@@ -114759,25 +115202,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_0.csv";
+				  			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -114789,22 +115232,22 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_0.csv";
 				   	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_20.csv";
 					  		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_40.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_60.csv";
 					  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -114816,28 +115259,28 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_90.csv";
 				   	  		break;
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_130.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_170.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_210.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/distributed_routing_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/distributed_routing_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -114854,93 +115297,93 @@ void write_csv_results()
 			case (0)://entropy experiment
 				if (entropy_threshold == 0.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.000.csv";
 				}
 				if(entropy_threshold == 0.001)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.001.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.001.csv";
 				}
 				if(entropy_threshold == 0.002)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.002.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.002.csv";
 				}
 				if(entropy_threshold == 0.005)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.005.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.005.csv";
 				}
 				if(entropy_threshold == 0.010)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.010.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.010.csv";
 				}
 				if(entropy_threshold == 0.020)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.020.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.020.csv";
 				}
 				if(entropy_threshold == 0.050)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.050.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.050.csv";
 				}
 				if(entropy_threshold == 0.100)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.100.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.100.csv";
 				}
 				if(entropy_threshold == 0.200)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.200.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.200.csv";
 				}
 				if(entropy_threshold == 0.500)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_entropy_0.500.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_entropy_0.500.csv";
 				}
 				break;
 			case (1)://optimization frequency
 				if (optimization_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_0.02.csv";
 				}
 				if (optimization_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_0.05.csv";
 				}
 				if (optimization_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_0.10.csv";
 				}
 				if (optimization_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_0.25.csv";
 				}
 				if (optimization_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_0.50.csv";
 				}
 				if (optimization_frequency == 1.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_1.00.csv";
 				}
 				if (optimization_frequency ==2.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_2.csv";
 				}
 
 				if (optimization_frequency ==4.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_4.csv";
 				}
 		
 				if (optimization_frequency == 6.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_6.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_6.csv";
 				}
 
 				if (optimization_frequency ==8.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_8.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_8.csv";
 				}
 
 				if (optimization_frequency ==10.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_frequency_10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_frequency_10.csv";
 				}
 
 				break;
@@ -114948,37 +115391,37 @@ void write_csv_results()
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_160.csv";
 						break;
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_192.csv";
 						break;						
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_nodes_256.csv";
 						break;
 				}
 				break;
@@ -114988,25 +115431,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_0.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -115018,37 +115461,37 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_0.csv";
 				   	  		break;
 				   		case (10):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_10.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_10.csv";
 				   	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_20.csv";
 					  		break;
 					  	case (30):
-					   		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_30.csv";
+					   		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_30.csv";
 					   		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_60.csv";
 					  		break;
 				   	  	case (70):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_70.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_70.csv";
 				   	  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_90.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -115060,46 +115503,46 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (10):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_10.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_10.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (70):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_70.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_70.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_90.csv";
 				   	  		break;
 				   	  	case (110):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_110.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_110.csv";
 				   	  		break;
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_130.csv";
 					 		break;
 					 	case (150):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_150.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_150.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_170.csv";
 					 		break;
 					 	case (190):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_190.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_190.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_210.csv";
 					 		break;
 					 	case (230):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_230.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_230.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -115119,167 +115562,167 @@ void write_csv_results()
 				switch (ratio)
 				{
 					case(200)://200 veh, 0 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_inf.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_inf.csv";
 						break;
 					case(199)://199 veh, 1 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_199.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_199.csv";
 						break;
 					case(99)://198 veh, 2 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_99.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_99.csv";
 						break;
 					case(49)://196 veh, 4 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_49.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_49.csv";
 						break;
 					case(24)://192 veh, 8 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_24.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_24.csv";
 						break;
 					case(9)://180 veh, 20 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_9.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_9.csv";
 						break;
 					case(4)://160 veh, 40 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_4.csv";
 						break;
 					case(3):// 150 veh, 50 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_3.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_3.csv";
 						break;
 					case(2): //134 veh, 66 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_2.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_2.csv";
 						break;
 					case(1): //100 veh, 100 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_1.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_1.csv";
 						break;
 					case(0): //0 veh, 200 RSU
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/hybrid_heterogeneity_0.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/hybrid_heterogeneity_0.csv";
 						break;
 				}
 				break;
 			case (7)://link lifetime experiment
 				if (link_lifetime_threshold == 0.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_0.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_0.000.csv";
 				}
 				if(link_lifetime_threshold == 0.100)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_0.100.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_0.100.csv";
 				}
 				if(link_lifetime_threshold == 0.200)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_0.200.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_0.200.csv";
 				}
 				if(link_lifetime_threshold == 0.500)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_0.500.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_0.500.csv";
 				}
 				if(link_lifetime_threshold == 1.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_1.00.csv";
 				}
 				if(link_lifetime_threshold == 2.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_2.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_2.000.csv";
 				}
 				if(link_lifetime_threshold == 4.00)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_4.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_4.000.csv";
 				}
 				if(link_lifetime_threshold == 6.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_6.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_6.000.csv";
 				}
 				if(link_lifetime_threshold == 8.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_8.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_8.000.csv";
 				}
 				if(link_lifetime_threshold == 12.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_link_lifetime_10.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_link_lifetime_10.000.csv";
 				}
 				break;	
 			case (8)://contention experiment
 				if (contention_threshold == 0.000)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.000.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.000.csv";
 				}
 				if(contention_threshold == 0.001)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.001.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.001.csv";
 				}
 				if(contention_threshold == 0.002)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.002.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.002.csv";
 				}
 				if(contention_threshold == 0.005)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.005.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.005.csv";
 				}
 				if(contention_threshold == 0.010)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.010.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.010.csv";
 				}
 				if(contention_threshold == 0.020)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.020.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.020.csv";
 				}
 				if(contention_threshold == 0.050)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.050.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.050.csv";
 				}
 				if(contention_threshold == 0.100)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.100.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.100.csv";
 				}
 				if(contention_threshold == 0.200)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.200.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.200.csv";
 				}
 				if(contention_threshold == 0.500)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_contention_0.500.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_contention_0.500.csv";
 				}
 				break;	
 			case (9)://routing frequency
 				if (routing_frequency == 0.02)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_0.02.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_0.02.csv";
 				}
 				if (routing_frequency ==0.05)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_0.05.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_0.05.csv";
 				}
 				if (routing_frequency ==0.10)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_0.10.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_0.10.csv";
 				}
 				if (routing_frequency ==0.25)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_0.25.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_0.25.csv";
 				}
 				if (routing_frequency ==0.50)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_0.50.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_0.50.csv";
 				}
 				if (routing_frequency == 1.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_1.00.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_1.00.csv";
 				}
 				if (routing_frequency ==2.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_2.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_2.csv";
 				}
 
 				if (routing_frequency ==3.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_3.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_3.csv";
 				}
 		
 				if (routing_frequency == 4.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_4.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_4.csv";
 				}
 
 				if (routing_frequency ==5.0)
 				{
-					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_frequency_5.csv";
+					filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_frequency_5.csv";
 				}
 
 				break;
@@ -115287,37 +115730,37 @@ void write_csv_results()
 				switch(total_size)
 				{
 					case (4):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_4.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_4.csv";
 						break;
 					case (8):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_8.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_8.csv";
 						break;
 					case (16):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_16.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_16.csv";
 						break;
 					case (32):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_32.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_32.csv";
 						break;
 					case (64):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_64.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_64.csv";
 						break;
 					case (96):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_96.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_96.csv";
 						break;
 					case (128):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_128.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_128.csv";
 						break;
 					case (160):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_160.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_160.csv";
 						break;
 					case (192):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_192.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_192.csv";
 						break;						
 					case (224):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_224.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_224.csv";
 						break;
 					case (256):
-						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_nodes_256.csv";
+						filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_nodes_256.csv";
 						break;
 				}
 				break;
@@ -115327,25 +115770,25 @@ void write_csv_results()
 				  	switch(maxspeed)
 				  	{
 				  		case (0):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_0.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_0.csv";
 					  		break;
 				  		case (10):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_10.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_10.csv";
 					  		break;
 					  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_20.csv";
 					  		break;
 					  	case (30):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_30.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_30.csv";
 					  		break;
 					  	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_40.csv";
 					  		break;
 					  	case (50):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_50.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_50.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_urban_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_urban_60.csv";
 					  		break;
 					  	default:
 					  		break;
@@ -115357,22 +115800,22 @@ void write_csv_results()
 				   	switch(maxspeed)
 				   	{
 				   		case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_0.csv";
 				   	  		break;
 				   	  	case (20):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_20.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_20.csv";
 					  		break;
 					   	case (40):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_40.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_40.csv";
 					  		break;
 					  	case (60):
-					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_60.csv";
+					  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_60.csv";
 					  		break;
 				   	  	case (80):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_80.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_80.csv";
 				   	  		break;
 				   	  	case (100):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_rural_100.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_rural_100.csv";
 				   	  		break;
 				   	  	default:
 				   	  		break;
@@ -115384,28 +115827,28 @@ void write_csv_results()
 				   	  switch(maxspeed)
 				   	  {
 				   	  	case (0):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_0.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_0.csv";
 				   	  		break;
 				   	  	case (30):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_30.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_30.csv";
 				   	  		break;
 				   	  	case (50):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_50.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_50.csv";
 				   	  		break;
 				   	  	case (90):
-				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_90.csv";
+				   	  		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_90.csv";
 				   	  		break;
 					 	case (130):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_130.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_130.csv";
 					 		break;
 					 	case (170):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_170.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_170.csv";
 					 		break;
 					 	case (210):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_210.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_210.csv";
 					 		break;
 					 	case (250):
-					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results_routing/hybrid_routing_mobility_autobahn_250.csv";
+					 		filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results_routing/hybrid_routing_mobility_autobahn_250.csv";
 					 		break;
 					 	default:
 					 		break;
@@ -115497,16 +115940,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/ECMP_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/ECMP_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/ECMP_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/ECMP_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/ECMP_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/ECMP_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/ECMP_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/ECMP_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115516,16 +115959,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RR_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RR_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RR_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RR_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RR_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RR_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RR_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RR_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115535,16 +115978,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/QR_SDN_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/QR_SDN_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/QR_SDN_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/QR_SDN_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/QR_SDN_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/QR_SDN_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/QR_SDN_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/QR_SDN_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115554,16 +115997,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RLMR_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RLMR_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RLMR_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RLMR_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RLMR_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RLMR_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/RLMR_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/RLMR_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115573,16 +116016,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/proposed_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/proposed_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/proposed_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/proposed_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/proposed_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/proposed_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/proposed_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/proposed_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115593,16 +116036,16 @@ void write_csv_results_routing()
 					switch(qf)
 					{
 						case(0):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/DCMR_qos_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/DCMR_qos_0.csv";
 							break;
 						case(1):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/DCMR_qos_1.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/DCMR_qos_1.csv";
 							break;
 						case(2):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/DCMR_qos_2.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/DCMR_qos_2.csv";
 							break;
 						case(3):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/qos/DCMR_qos_3.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/qos/DCMR_qos_3.csv";
 							break;
 						default:
 							break;
@@ -115620,19 +116063,19 @@ void write_csv_results_routing()
 					switch(lambda)
 					{
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/ECMP_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/ECMP_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/ECMP_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/ECMP_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/ECMP_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/ECMP_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/ECMP_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/ECMP_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/ECMP_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/ECMP_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115642,19 +116085,19 @@ void write_csv_results_routing()
 					switch(lambda)
 					{
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RR_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RR_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RR_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RR_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RR_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RR_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RR_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RR_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RR_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RR_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115664,19 +116107,19 @@ void write_csv_results_routing()
 					switch(lambda)
 					{
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/QRSDN_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/QRSDN_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/QRSDN_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/QRSDN_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/QRSDN_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/QRSDN_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/QRSDN_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/QRSDN_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/QRSDN_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/QRSDN_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115686,19 +116129,19 @@ void write_csv_results_routing()
 					switch(lambda)
 					{
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RLMR_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RLMR_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RLMR_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RLMR_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RLMR_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RLMR_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RLMR_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RLMR_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/RLMR_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/RLMR_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115709,19 +116152,19 @@ void write_csv_results_routing()
 					{
 						
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/Proposed_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/Proposed_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/Proposed_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/Proposed_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/Proposed_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/Proposed_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/Proposed_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/Proposed_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/Proposed_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/Proposed_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115731,19 +116174,19 @@ void write_csv_results_routing()
 					switch(lambda)
 					{
 						case(10):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/DCMR_flowsize_10.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/DCMR_flowsize_10.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/DCMR_flowsize_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/DCMR_flowsize_20.csv";
 							break;
 						case(30):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/DCMR_flowsize_30.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/DCMR_flowsize_30.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/DCMR_flowsize_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/DCMR_flowsize_40.csv";
 							break;
 						case(47):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/flowsize/DCMR_flowsize_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/flowsize/DCMR_flowsize_50.csv";
 							break;
 						default:
 							break;
@@ -115761,28 +116204,28 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(8):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_0.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_20.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_120.csv";
 							break;
 						case(140):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/ECMP_mobility_140.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/ECMP_mobility_140.csv";
 							break;
 						default:
 							break;
@@ -115792,28 +116235,28 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(8):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_0.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_20.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_120.csv";
 							break;
 						case(140):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RR_mobility_140.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RR_mobility_140.csv";
 							break;
 						default:
 							break;
@@ -115823,28 +116266,28 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(8):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_0.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_20.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_120.csv";
 							break;
 						case(140):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/QRSDN_mobility_140.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/QRSDN_mobility_140.csv";
 							break;
 						default:
 							break;
@@ -115854,28 +116297,28 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(8):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_0.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_20.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_120.csv";
 							break;
 						case(140):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/RLMR_mobility_140.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/RLMR_mobility_140.csv";
 							break;
 						default:
 							break;
@@ -115885,28 +116328,28 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(8):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_0.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_0.csv";
 							break;
 						case(20):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_20.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_20.csv";
 							break;
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_120.csv";
 							break;
 						case(140):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/Proposed_mobility_140.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/Proposed_mobility_140.csv";
 							break;
 						default:
 							break;
@@ -115916,19 +116359,19 @@ void write_csv_results_routing()
 					switch(maxspeed)
 					{
 						case(40):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/DCMR_mobility_40.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/DCMR_mobility_40.csv";
 							break;
 						case(60):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/DCMR_mobility_60.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/DCMR_mobility_60.csv";
 							break;
 						case(80):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/DCMR_mobility_80.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/DCMR_mobility_80.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/DCMR_mobility_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/DCMR_mobility_100.csv";
 							break;
 						case(120):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/mobility/DCMR_mobility_120.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/mobility/DCMR_mobility_120.csv";
 							break;
 						default:
 							break;
@@ -115945,22 +116388,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/ECMP_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/ECMP_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -115970,22 +116413,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RR_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RR_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -115995,22 +116438,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/QRSDN_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/QRSDN_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -116020,22 +116463,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/RLMR_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/RLMR_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -116045,22 +116488,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/Proposed_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/Proposed_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -116070,22 +116513,22 @@ void write_csv_results_routing()
 					switch(total_size)
 					{
 						case(150):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_150.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_150.csv";
 							break;
 						case(125):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_125.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_125.csv";
 							break;
 						case(100):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_100.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_100.csv";
 							break;
 						case(75):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_75.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_75.csv";
 							break;
 						case(50):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_50.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_50.csv";
 							break;
 						case(25):
-							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/nodesize/DCMR_nodes_25.csv";
+							filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/nodesize/DCMR_nodes_25.csv";
 							break;
 						default:
 							break;
@@ -116163,7 +116606,9 @@ void printPath(uint32_t vertexIndex)
 // array and shortest paths
 void printSolution(int startVertex)
 {
-    uint32_t nVertices = total_size;
+    // Bounded by the actual node count, not total_size: dijkstra() below only
+    // populates shortestDistances[]/parents[] for indices < real_node_count.
+    uint32_t nVertices = N_Vehicles + N_RSUs;
     cout << "Vertex\t Distance\tPath";
  
     for (uint32_t vertexIndex = 0; vertexIndex < nVertices; vertexIndex++) 
@@ -116307,23 +116752,29 @@ vector<double> calculate_distance_to_each_node(uint32_t source_node)
 		x.push_back(dis);
 	}
 	*/
+	// Bounded by the actual node count, not total_size: Vehicle_Nodes/
+	// RSU_Nodes only contain N_Vehicles/N_RSUs real nodes.
+	// NodeContainer::Get() has no bounds check, so indexing past the real
+	// count is undefined behaviour (confirmed crash: "Attempted to
+	// dereference zero pointer" during N=20 testing).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	Ptr <Node> reference_node;
 	Ptr <Node> other_node;
 	if ((source_node-2) < N_Vehicles)
-	{	
+	{
 		reference_node = DynamicCast <Node> (Vehicle_Nodes.Get(source_node-2));
 	}
 	else
 	{
 		reference_node = DynamicCast <Node> (RSU_Nodes.Get(source_node-N_Vehicles-2));
 	}
-	
+
 	Ptr<ConstantVelocityMobilityModel> mdl1 = DynamicCast <ConstantVelocityMobilityModel> (reference_node->GetObject<MobilityModel>());
         Vector posi_reference = mdl1->GetPosition();
-        for (uint32_t index = 2; index < (total_size + 2); index++)
+        for (uint32_t index = 2; index < (real_node_count + 2); index++)
 	{
 		if ((index-2) < N_Vehicles)
-		{	
+		{
 			other_node = DynamicCast <Node> (Vehicle_Nodes.Get(index-2));
 		}
 		else
@@ -116331,20 +116782,22 @@ vector<double> calculate_distance_to_each_node(uint32_t source_node)
 			other_node = DynamicCast <Node> (RSU_Nodes.Get(index-N_Vehicles-2));
 		}
 		Ptr<ConstantVelocityMobilityModel> mdl2 = DynamicCast <ConstantVelocityMobilityModel> (other_node->GetObject<MobilityModel>());
-        	Vector posi_other = mdl2->GetPosition();	
+        	Vector posi_other = mdl2->GetPosition();
 		double dis = get_length(posi_reference, posi_other);
 		x.push_back(dis);
 	}
-       
+
 	return x;
 }
 
 void generate_adjacency_matrix()
 {
-	
-	for(uint32_t i=0;i<total_size;i++)
+	// Bounded by the actual node count, not total_size (see
+	// calculate_distance_to_each_node() above for why).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
+	for(uint32_t i=0;i<real_node_count;i++)
 	{
-		node_distance[i] = calculate_distance_to_each_node(i+2);	
+		node_distance[i] = calculate_distance_to_each_node(i+2);
 	}
 	
 	/*
@@ -116361,7 +116814,7 @@ void generate_adjacency_matrix()
 	*/
 	
 	vector<vector<double>> new_adjacencyMatrix;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	//for(uint32_t i=0;i<9;i++)
 	{
 		new_adjacencyMatrix.push_back(node_distance[i]);
@@ -116428,9 +116881,16 @@ double average(double x, double y)
 
 void update_stable(uint32_t flow_id, uint32_t current_hop)
 {
+	// Bounded by the actual node count, not total_size: linklifetimeMatrix_dsrc
+	// is now sized real_node_count x real_node_count (see
+	// convert_link_lifetimes_dsrc()), so looping to total_size relied on the
+	// defensive "i >= ...size()) continue" guard below to skip phantom
+	// indices -- correct but wasteful at N=200. Bounding directly avoids the
+	// wasted iterations; the guard is left in place as a safety net.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	if(current_hop >= linklifetimeMatrix_dsrc.size()) return;  // my change
 	proposed_algo2_output_inst[flow_id].met[current_hop] = true;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	{
 		if(i >= linklifetimeMatrix_dsrc[current_hop].size()) continue; /// my change
 		if(linklifetimeMatrix_dsrc[current_hop][i] >link_lifetime_threshold)
@@ -116443,18 +116903,27 @@ void update_stable(uint32_t flow_id, uint32_t current_hop)
 			
 			else
 			{
-				if((proposed_algo2_output_inst[flow_id].met[i] = false)||(proposed_algo2_output_inst[flow_id].Y[i] >= ((proposed_algo2_output_inst[flow_id].Y[current_hop] + 1))))
+				// BUG FIX: this was `met[i] = false` (assignment, always
+				// false) instead of `met[i] == false` (comparison). The
+				// assignment silently reset the visited flag and made the
+				// "already visited" branch of the || always evaluate false,
+				// so the DFS never pruned already-explored nodes -- pure
+				// exponential blowup (confirmed: 76,726,331 recursive path
+				// counts for a single flow at N=200). Fixing the comparison
+				// restores the intended memoization: only recurse into node
+				// i if it's unvisited OR this path reaches it in fewer hops.
+				if((proposed_algo2_output_inst[flow_id].met[i] == false)||(proposed_algo2_output_inst[flow_id].Y[i] >= ((proposed_algo2_output_inst[flow_id].Y[current_hop] + 1))))
 				{
 					proposed_algo2_output_inst[flow_id].Y[i] = proposed_algo2_output_inst[flow_id].Y[current_hop] + 1;
 					proposed_algo2_output_inst[flow_id].conn[i] = 1;
 					proposed_algo2_output_inst[flow_id].U[i] = minimum(linklifetimeMatrix_dsrc[current_hop][i], proposed_algo2_output_inst[flow_id].U[current_hop]);
 					update_stable(flow_id, i);
-					
-					
+
+
 					//cout<<"Flow ID "<<flow_id<<"Stable routing: updated values at node "<<i<<"stability "<<proposed_algo2_output_inst[flow_id].U[i]<<"connectivity "<< proposed_algo2_output_inst[flow_id].conn[i]<<"number of hops "<< proposed_algo2_output_inst[flow_id].Y[i]<<endl;
 
 				}
-			
+
 			}
 		
 		}
@@ -116463,9 +116932,12 @@ void update_stable(uint32_t flow_id, uint32_t current_hop)
 
 void run_stable_path_finding(uint32_t flow_id)
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// update_stable() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	uint32_t source = (demanding_flow_struct_controller_inst+flow_id)->source;
 	uint32_t destination =	(demanding_flow_struct_controller_inst+flow_id)->destination;
-	for(uint32_t i=0; i<total_size; i++)
+	for(uint32_t i=0; i<real_node_count; i++)
 	{
 		proposed_algo2_output_inst[flow_id].met[i] = false;
 		proposed_algo2_output_inst[flow_id].Y[i] = 1000;
@@ -116490,12 +116962,15 @@ void run_stable_path_finding(uint32_t flow_id)
 // the real live topology, not a static assumption.
 bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id)
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// update_stable() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	uint32_t source      = (demanding_flow_struct_controller_inst+flow_id)->source;
 	uint32_t destination  = (demanding_flow_struct_controller_inst+flow_id)->destination;
 	if (excluded_node == source || excluded_node == destination)
 		return false; // removing the endpoint itself can never leave a route
 
-	std::vector<bool> visited(total_size, false);
+	std::vector<bool> visited(real_node_count, false);
 	std::queue<uint32_t> q;
 	visited[source] = true;
 	q.push(source);
@@ -116504,7 +116979,7 @@ bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id)
 		uint32_t u = q.front(); q.pop();
 		if (u == destination) return true;
 		if (u >= linklifetimeMatrix_dsrc.size()) continue;
-		for (uint32_t v = 0; v < total_size; v++)
+		for (uint32_t v = 0; v < real_node_count; v++)
 		{
 			if (v == excluded_node || visited[v]) continue;
 			if (v >= linklifetimeMatrix_dsrc[u].size()) continue;
@@ -116518,11 +116993,60 @@ bool ALT_ROUTE_EXISTS(uint32_t excluded_node, uint32_t flow_id)
 	return visited[destination];
 }
 
+// Checks every flow (2*flows), not just flow 0 -- see forward-declaration
+// comment above.
+//
+// BUG (found while chasing why full isolation, once actually reachable,
+// tanked PDR to 0%): an earlier version of this function returned true on
+// the FIRST flow with an alternate route (OR-semantics) -- but isolation is
+// a NODE-level action, not a per-flow one: should_drop_grey_hole() blocks
+// EVERY flow through an isolated node, not just the one flow that happened
+// to have a redundant path. So a node that is the sole path for flow 0 but
+// has an alternate for flow 2 was still being fully isolated, converting
+// flow 0's partial attack loss into a total loss -- exactly the failure
+// mode the route-availability gate exists to prevent (main.tex DEBSC
+// subsection). Correct semantics: only report an alternate route if EVERY
+// flow that currently routes through this node has one; if the node isn't
+// on the path for a given flow at all, that flow doesn't constrain the
+// decision (source/destination of a flow are still short-circuited to
+// false by ALT_ROUTE_EXISTS itself).
+bool ALT_ROUTE_EXISTS_ANY_FLOW(uint32_t excluded_node)
+{
+	// BUG FIX (found testing Action 1's redundant-path topology): a node
+	// that is itself a flow's SOURCE or DESTINATION was being required to
+	// have "an alternate route excluding itself" for that flow -- a
+	// contradiction ALT_ROUTE_EXISTS() always answers false to (it
+	// short-circuits: excluded_node==source||destination -> false), since
+	// "route to the destination, without the destination" is meaningless.
+	// That's not a real redundancy requirement: isolating a flow's own
+	// source just stops that node's own traffic (no rerouting needed,
+	// nothing to strand); the redundancy question only makes sense for a
+	// node acting as an INTERMEDIATE RELAY on someone else's flow. Endpoint
+	// membership is no longer treated as a blocking constraint here.
+	for (uint32_t fid = 0; fid < (uint32_t)(2*flows); fid++)
+	{
+		uint32_t source      = (demanding_flow_struct_controller_inst+fid)->source;
+		uint32_t destination  = (demanding_flow_struct_controller_inst+fid)->destination;
+		if (excluded_node == source || excluded_node == destination)
+			continue; // endpoint of this flow -- not a relay constraint
+		bool relays_this_flow = (proposed_algo2_output_inst[fid].conn[excluded_node] == 1);
+		if (!relays_this_flow) continue;
+		if (!ALT_ROUTE_EXISTS(excluded_node, fid))
+			return false; // this flow would be stranded -- withhold isolation
+	}
+	// Not a blocking relay for any flow (or only ever an endpoint) --
+	// isolating it strands nothing.
+	return true;
+}
+
 void update_unstable(uint32_t flow_id, uint32_t current_hop)
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// update_stable() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	if(current_hop >= linklifetimeMatrix_dsrc.size()) return; //  my change
 	distance_algo2_output_inst[flow_id].met[current_hop] = true;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	{
 		if(i >= linklifetimeMatrix_dsrc[current_hop].size()) continue; // my change
 		if(linklifetimeMatrix_dsrc[current_hop][i] >0.0)
@@ -116536,7 +117060,9 @@ void update_unstable(uint32_t flow_id, uint32_t current_hop)
 			else
 			{
 				double value = distance_algo2_output_inst[flow_id].D[current_hop] + adjacencyMatrix[current_hop][i];
-				if((distance_algo2_output_inst[flow_id].met[i] = false)||(distance_algo2_output_inst[flow_id].D[i] > value))
+				// BUG FIX: same assignment-vs-comparison bug as update_stable()
+				// above (met[i] = false -> met[i] == false).
+				if((distance_algo2_output_inst[flow_id].met[i] == false)||(distance_algo2_output_inst[flow_id].D[i] > value))
 				{
 					distance_algo2_output_inst[flow_id].Y[i] = distance_algo2_output_inst[flow_id].Y[current_hop] + 1;
 					distance_algo2_output_inst[flow_id].D[i] = value;
@@ -116553,9 +117079,12 @@ void update_unstable(uint32_t flow_id, uint32_t current_hop)
 
 void run_distance_path_finding(uint32_t flow_id)
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// update_stable() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	uint32_t source = (demanding_flow_struct_controller_inst+flow_id)->source;
 	uint32_t destination =	(demanding_flow_struct_controller_inst+flow_id)->destination;
-	for(uint32_t i=0; i<total_size; i++)
+	for(uint32_t i=0; i<real_node_count; i++)
 	{
 		distance_algo2_output_inst[flow_id].met[i] = false;
 		distance_algo2_output_inst[flow_id].Y[i] = 1000;
@@ -116599,34 +117128,28 @@ void filter_flows()
 	  scheduled_flows = 0;
 	  uint32_t flow_counter = 0;
 	  if(routing_algorithm == 4)
-	  {	
+	  {
 		for(uint32_t flow_id=0;flow_id<2*flows;flow_id++)
 		{
-			if (routing_test == true)
-    			{
-    				if(flow_id ==1)
-    				{
-    					(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
-    				}
-    				else
-    				{
-    					flow_counter++;
-    					scheduled_flows++;
-    				}
-    			}
-    			else
-    			{
-			  	if(proposed_algo2_output_inst[flow_id].paths == 0)
-			  	{
-			  		(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
-			  		(demanding_flow_struct_nodes_inst+flow_id)->f_size = 0;
-			  	}
-			  	
-			  	else
-			  	{
-			  		flow_counter++;
-			  		scheduled_flows++;
-			  	}
+			// Fix 2 (supervisor-requested): flow_id==1 used to be
+			// unconditionally zeroed whenever routing_test==true,
+			// regardless of whether it actually had a viable path --
+			// halving the detection surface by design, not by any real
+			// connectivity constraint. Now flow 1 gets the same
+			// real-connectivity check every other flow already uses
+			// (paths==0), in BOTH routing_test modes.
+			std::cout << "[FLOW3-DEBUG] filter_flows flow_id=" << flow_id
+			          << " paths=" << proposed_algo2_output_inst[flow_id].paths
+			          << " t=" << Simulator::Now().GetSeconds() << std::endl;
+			if(proposed_algo2_output_inst[flow_id].paths == 0)
+			{
+				(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
+				(demanding_flow_struct_nodes_inst+flow_id)->f_size = 0;
+			}
+			else
+			{
+				flow_counter++;
+				scheduled_flows++;
 			}
 		}
 		cout<<"Number of connected flows "<<flow_counter<<"at timestamp "<<Now().GetSeconds()<<endl;
@@ -116636,33 +117159,19 @@ void filter_flows()
 
 	  	for(uint32_t flow_id=0;flow_id<2*flows;flow_id++)
 		{
-		  	
-		  	if (routing_test == true)
-    			{
-    				if(flow_id ==1)
-    				{
-    					(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
-    				}
-    				else
-    				{
-    					flow_counter++;
-    					scheduled_flows++;
-    				}
-    			}
-    			else
-    			{
-			  	if(distance_algo2_output_inst[flow_id].paths == 0)
-			  	{
-			  		(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
-			  		(demanding_flow_struct_nodes_inst+flow_id)->f_size = 0;
-			  	}
-			  	
-			  	else
-			  	{
-			  		flow_counter++;
-			  		scheduled_flows++;
-			  	}
-		  	}
+			// Fix 2 (supervisor-requested): same fix as the
+			// routing_algorithm==4 branch above -- flow 1 no longer
+			// unconditionally zeroed under routing_test==true.
+			if(distance_algo2_output_inst[flow_id].paths == 0)
+			{
+				(demanding_flow_struct_controller_inst+flow_id)->f_size = 0;
+				(demanding_flow_struct_nodes_inst+flow_id)->f_size = 0;
+			}
+			else
+			{
+				flow_counter++;
+				scheduled_flows++;
+			}
 		}
 		cout<<"Number of connected flows "<<flow_counter<<endl;
 	  }
@@ -117240,6 +117749,75 @@ void print_shield_gh_detection_metrics()
     cout << "================================================" << endl;
 }
 
+// ── CUMULATIVE SHIELD-GH detection metrics (node-level M1a/M1b/M2) ───────────
+// DQ1 fix: unlike print_shield_gh_detection_metrics() above (which prints the
+// CURRENT window's snapshot and is called once per window), this sums every
+// window's per-node classification via sg_cum_TP/TN/FP/FN and must be called
+// exactly once, after the simulation's event loop has finished, to report the
+// true run-wide MCC.
+void print_shield_gh_cumulative_detection_metrics()
+{
+    double TP = (double)sg_cum_TP, TN = (double)sg_cum_TN;
+    double FP = (double)sg_cum_FP, FN = (double)sg_cum_FN;
+    double total = TP + TN + FP + FN;
+    if (total < 1.0) return;
+
+    double accuracy = 100.0 * (TP + TN) / total;
+    double fpr      = (FP + TN > 0) ? 100.0 * FP / (FP + TN) : 0.0;
+    double denom = std::sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN));
+    double mcc   = (denom > 0.0) ? ((TP*TN - FP*FN) / denom) : 0.0;
+
+    cout << "=== SHIELD-GH CUMULATIVE DETECTION METRICS (all windows) ===" << endl;
+    cout << "  Cum TP=" << (uint64_t)TP << " TN=" << (uint64_t)TN
+         << " FP=" << (uint64_t)FP << " FN=" << (uint64_t)FN
+         << " (n_evals=" << (uint64_t)total << ")" << endl;
+    cout << "  CUM M1a Detection Accuracy: " << accuracy << "%" << endl;
+    cout << "  CUM M1b MCC: " << mcc << endl;
+    cout << "  CUM M2  False Positive Rate: " << fpr << "%" << endl;
+
+    // ── Controller-plane detection (multi-controller, 2026-08-12) ───────────
+    // Separate from the node-level matrix above: this scores whether LW-CP-Det
+    // correctly classified each CONTROLLER. Reported explicitly because with
+    // M>1 controllers and only a subset malicious, a benign controller CAN be
+    // falsely flagged -- so this is a real detection result, not a foregone
+    // conclusion as it was under the old single-always-malicious-controller model.
+    {
+        double cTP = sg_cp_TP, cTN = sg_cp_TN, cFP = sg_cp_FP, cFN = sg_cp_FN;
+        double ctot = cTP + cTN + cFP + cFN;
+        double cden = sqrt((cTP+cFP)*(cTP+cFN)*(cTN+cFP)*(cTN+cFN));
+        double cmcc = (cden > 0.0) ? ((cTP*cTN - cFP*cFN) / cden) : 0.0;
+        cout << "  --- Controller-plane (LW-CP-Det, M=" << N_Controllers
+             << " controllers) ---" << endl;
+        cout << "  CP TP=" << (uint64_t)cTP << " TN=" << (uint64_t)cTN
+             << " FP=" << (uint64_t)cFP << " FN=" << (uint64_t)cFN
+             << " (n_evals=" << (uint64_t)ctot << ")" << endl;
+        cout << "  CP MCC: " << cmcc << endl;
+    }
+    cout << "================================================================" << endl;
+}
+
+// NQ6 debug (supervisor-requested): per-attacker-node cumulative TP/FN, so
+// two configurations (e.g. DA4 vs DA6) can be diffed node-by-node to see
+// which specific nodes flip classification, rather than only comparing the
+// aggregate confusion matrix. Called once, alongside the cumulative print.
+void print_shield_gh_per_node_cumulative()
+{
+    // RQ5/RQ8 extension (supervisor-requested): print ALL nodes 0-19 with
+    // the FULL confusion-matrix cell (TP/TN/FP/FN), not just attacker-node
+    // TP/FN, so DA1/DA2/DA3 can be diffed per-node on every cell to confirm
+    // or refute a byte-identical match.
+    cout << "=== SHIELD-GH PER-NODE CUMULATIVE CONFUSION MATRIX (all nodes) ===" << endl;
+    for (uint32_t n = 0; n < N_Vehicles; n++) {
+        uint32_t tp = g_sg_node_cum_tp.count(n) ? g_sg_node_cum_tp[n] : 0;
+        uint32_t tn = g_sg_node_cum_tn.count(n) ? g_sg_node_cum_tn[n] : 0;
+        uint32_t fp = g_sg_node_cum_fp.count(n) ? g_sg_node_cum_fp[n] : 0;
+        uint32_t fn = g_sg_node_cum_fn.count(n) ? g_sg_node_cum_fn[n] : 0;
+        cout << "  [RQ5/RQ8] node=" << n << " cum_TP=" << tp << " cum_TN=" << tn
+             << " cum_FP=" << fp << " cum_FN=" << fn << endl;
+    }
+    cout << "================================================================" << endl;
+}
+
 // M1a: Detection Accuracy
 void calculate_detection_accuracy()
 {
@@ -117315,10 +117893,23 @@ void calculate_mitigation_response_time()
 
 // Fix — reset counters each evaluation period. Add a reset function and schedule it:
 // ── Reset per-node PDR counters each evaluation window ───────────────────────
+// CQ6/CQ8 debug (supervisor-requested): node_total_received[]/forwarded[]
+// are per-window counters, reset every cycle by reset_per_node_pdr_counters()
+// below -- an end-of-run read of them alone only shows the LAST window, not
+// a true run total. Shadow cumulative counters, never reset, so CQ6/CQ8 can
+// report genuine run-wide totals and per-window snapshots.
+uint64_t cq_cum_received[NODE_STATE_CEILING]  = {0};
+uint64_t cq_cum_forwarded[NODE_STATE_CEILING] = {0};
+uint32_t cq_window_index = 0;
+
 void reset_per_node_pdr_counters()
 {
     for(uint32_t i = 0; i < total_size; i++)
     {
+        // CQ6/CQ8: accumulate this window's counts before they are zeroed.
+        cq_cum_received[i]  += node_total_received[i];
+        cq_cum_forwarded[i] += node_total_forwarded[i];
+
         node_total_received[i]   = 0;
         node_total_forwarded[i]  = 0;
         node_relay_received[i]   = 0;  // add this
@@ -117327,6 +117918,16 @@ void reset_per_node_pdr_counters()
         {
             node_flow_received[i][f]  = 0;
             node_flow_forwarded[i][f] = 0;
+        }
+    }
+    // CQ8: print the requested snapshot for nodes 7-11 at windows 1,5,10,15,20.
+    cq_window_index++;
+    if (cq_window_index == 1 || cq_window_index == 5 || cq_window_index == 10
+     || cq_window_index == 15 || cq_window_index == 20) {
+        for (uint32_t n = 7; n <= 11; n++) {
+            std::cout << "[CQ8] window=" << cq_window_index << " node=" << n
+                      << " cum_received=" << cq_cum_received[n]
+                      << " cum_forwarded=" << cq_cum_forwarded[n] << std::endl;
         }
     }
 }
@@ -117426,12 +118027,79 @@ void print_per_node_pdr()
     cout << "====================" << endl;
 }
 
+// PDQ3 (supervisor-requested): per-flow PDR, printed directly per flow id
+// rather than filtered through a source node's loop iteration -- so a flow
+// with 0% PDR the entire run is immediately visible instead of needing to be
+// picked out of the per-node table.
+void print_per_flow_pdr()
+{
+    cout << "=== PDQ3 Per-Flow PDR ===" << endl;
+    for (uint32_t fid = 0; fid < (uint32_t)(2*flows); fid++)
+    {
+        uint32_t f_size = (demanding_flow_struct_nodes_inst+fid)->f_size;
+        uint32_t source = (demanding_flow_struct_nodes_inst+fid)->source;
+        uint32_t dest   = (delta_at_nodes_inst+fid)->destination_f;
+        uint32_t sent = 0, delivered = 0;
+        for (uint32_t i = 1; i < f_size+1; i++)
+        {
+            bool was_sent = (routing_packet_initial_timestamp[fid][i] > 0.0);
+            bool was_delivered = (routing_packet_final_timestamp[fid][i]
+                                 > routing_packet_initial_timestamp[fid][i]);
+            if (was_sent) sent++;
+            if (was_sent && was_delivered) delivered++;
+        }
+        double pdr = (sent > 0) ? 100.0 * delivered / sent : 0.0;
+        cout << "  [PDQ3] flow=" << fid << " source=" << source
+             << " dest=" << dest << " sent=" << sent
+             << " delivered=" << delivered << " PDR=" << pdr << "%" << endl;
+    }
+    cout << "====================" << endl;
+}
+
 // @da end
 
 // @dilukshan start (updated)
 
 void calculate_performance_evaluation_metrics()
 {
+	// PDQ4 (supervisor-requested): link lifetime of flow 0's actual selected
+	// path, every window -- to see whether lifetime decays toward zero
+	// between Gurobi re-solves (the model only re-solves periodically, but
+	// packets keep flowing on whatever path was last selected in between).
+	{
+		// PDQ4 CORRECTION (found while investigating the first attempt):
+		// proposed_routing_tables[].rows[].path[] is populated only by
+		// update_proposed_route(), called only from dijkstra_stable(), which
+		// is called only from calculate_dijkstra_stable_solution() -- which
+		// is declared but NEVER invoked anywhere in this file. That whole
+		// table stays at its initialize_all_routing_tables() sentinel value
+		// ("large") for the entire run; querying it (first attempt) always
+		// returned "no path". Real per-window next-hop selection instead
+		// comes from a separate subflow-allocation structure
+		// (initiate_all_flows()'s `index_innermost` tuple), not traced here.
+		// What IS live and actually read by the real transmission path
+		// (check_and_transmit()'s neighborhood-busy check, ~line 123109) is
+		// linklifetimeMatrix_dsrc itself -- populated every Gurobi re-solve
+		// by convert_link_lifetimes_dsrc() (confirmed called). Report THAT
+		// directly: flow 0 source's real lifetime to each of its neighbors.
+		double t_now = Simulator::Now().GetSeconds();
+		uint32_t f0_source = (demanding_flow_struct_nodes_inst+0)->source;
+		uint32_t f0_dest    = (delta_at_nodes_inst+0)->destination_f;
+		double direct_ll = (f0_source < linklifetimeMatrix_dsrc.size()
+		                 && f0_dest   < linklifetimeMatrix_dsrc[f0_source].size())
+		                 ? linklifetimeMatrix_dsrc[f0_source][f0_dest] : -1.0;
+		std::ostringstream neigh;
+		if (f0_source < linklifetimeMatrix_dsrc.size())
+			for (uint32_t j = 0; j < linklifetimeMatrix_dsrc[f0_source].size(); j++)
+				if (linklifetimeMatrix_dsrc[f0_source][j] > 0.0)
+					neigh << j << "(ll=" << linklifetimeMatrix_dsrc[f0_source][j] << ") ";
+		std::cout << "[PDQ4] t=" << t_now << " flow0_source=" << f0_source
+		          << " flow0_dest=" << f0_dest
+		          << " direct_source_to_dest_lifetime=" << direct_ll
+		          << " | source's_live_neighbor_lifetimes: " << neigh.str()
+		          << std::endl;
+	}
+
 	// state of art (start)
 	// ── Malik monitor (reads counters before they are reset) ─────────────────
     if(use_malik_detection)
@@ -117488,8 +118156,12 @@ void calculate_performance_evaluation_metrics()
 
 void calculate_average_latency()
 {
+	// Bounded/divided by the actual node count, not total_size: packet_delay[]
+	// is only populated for real node ids, so summing/dividing over total_size
+	// diluted this metric by ~total_size/real_node_count.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double total_latency = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (packet_final_timestamp[i] > packet_initial_timestamp[i])
 		{
@@ -117498,26 +118170,29 @@ void calculate_average_latency()
 		//cout<<"packet "<<i<<"final timestamp "<<packet_final_timestamp[i]<<"initial timestamp: "<<packet_initial_timestamp[i]<<endl;
 		total_latency = total_latency + packet_delay[i];
 	}
-	current_latency = total_latency/(total_size);
-	double previous_cumulative_latency = average_latency*(data_gathering_cycle_number - 1)*total_size;
+	current_latency = total_latency/(real_node_count);
+	double previous_cumulative_latency = average_latency*(data_gathering_cycle_number - 1)*real_node_count;
 	double current_cumulative_latency = previous_cumulative_latency + total_latency;
-	average_latency = (current_cumulative_latency)/((data_gathering_cycle_number)*(total_size));
+	average_latency = (current_cumulative_latency)/((data_gathering_cycle_number)*(real_node_count));
 	cout<<"average_latency "<<1000*average_latency<<" ms"<<endl;
-	
+
 }
 
 void calculate_packet_delivery_ratio()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double delivered_packets = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (packet_final_timestamp[i] > packet_initial_timestamp[i])
 		{
 			delivered_packets = delivered_packets + 1;
 		}
 	}
-	
-	current_packet_delivery_ratio = delivered_packets/(total_size);
+
+	current_packet_delivery_ratio = delivered_packets/(real_node_count);
 	if (architecture == 2)
 	{
 		double previous_cumulative_ratio = average_packet_delivery_ratio*(data_gathering_cycle_number - 2);
@@ -117538,37 +118213,43 @@ void calculate_packet_delivery_ratio()
 
 void calculate_packet_delivery_ratio_dsrc()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double delivered_packets = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (dsrc_packet_final_timestamp[i] > dsrc_packet_initial_timestamp[i])
 		{
 			delivered_packets = delivered_packets + 1;
 		}
 	}
-	
-	current_packet_delivery_ratio_dsrc = delivered_packets/(total_size);
+
+	current_packet_delivery_ratio_dsrc = delivered_packets/(real_node_count);
 	cout<<"current packet delivery ratio is "<<100*current_packet_delivery_ratio_dsrc<<endl;
 	double previous_cumulative_ratio = average_packet_delivery_ratio_dsrc*(data_gathering_cycle_number - 1);
 	double current_cumulative_ratio = previous_cumulative_ratio + current_packet_delivery_ratio_dsrc;
 	average_packet_delivery_ratio_dsrc = (current_cumulative_ratio)/(data_gathering_cycle_number);
 	cout<<"packet delivery ratio is "<<100*average_packet_delivery_ratio_dsrc<<endl;
-	
+
 }
 
 
 void calculate_packet_delivery_ratio_dsrc_hybrid()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double delivered_packets = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (dsrc_packet_final_timestamp[i] > dsrc_packet_initial_timestamp[i])
 		{
 			delivered_packets = delivered_packets + 1;
 		}
 	}
-	
-	current_packet_delivery_ratio_dsrc = delivered_packets/(total_size);
+
+	current_packet_delivery_ratio_dsrc = delivered_packets/(real_node_count);
 	cout<<"current packet delivery ratio is "<<100*current_packet_delivery_ratio_dsrc<<endl;
 	double previous_cumulative_ratio = average_packet_delivery_ratio_dsrc*(data_gathering_cycle_number - 2);
 	double current_cumulative_ratio = previous_cumulative_ratio + current_packet_delivery_ratio_dsrc;
@@ -117579,8 +118260,11 @@ void calculate_packet_delivery_ratio_dsrc_hybrid()
 
 void calculate_average_latency_hybrid()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double total_latency = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (dsrc_packet_final_timestamp[i] > dsrc_packet_initial_timestamp[i])
 		{
@@ -117594,18 +118278,21 @@ void calculate_average_latency_hybrid()
 		total_latency = total_latency + packet_delay_dsrc[i];
 	}
 	total_latency = total_latency;
-	current_latency_dsrc = total_latency/(total_size);
-	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*total_size;
+	current_latency_dsrc = total_latency/(real_node_count);
+	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*real_node_count;
 	double current_cumulative_latency = previous_cumulative_latency + total_latency;
-	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(total_size));
-	cout<<"average_latency "<<1000*average_latency_dsrc<<" ms"<<endl;	
+	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(real_node_count));
+	cout<<"average_latency "<<1000*average_latency_dsrc<<" ms"<<endl;
 }
 
 
 void calculate_average_latency_dsrc()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double total_latency = 0.0;
-	for (uint32_t i=2; i<total_size+2;i++)
+	for (uint32_t i=2; i<real_node_count+2;i++)
 	{
 		if (dsrc_packet_final_timestamp[i] > dsrc_packet_initial_timestamp[i])
 		{
@@ -117615,36 +118302,42 @@ void calculate_average_latency_dsrc()
 		total_latency = total_latency + packet_delay_dsrc[i];
 	}
 	total_latency = total_latency;
-	current_latency_dsrc = total_latency/(total_size);
-	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*total_size;
+	current_latency_dsrc = total_latency/(real_node_count);
+	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*real_node_count;
 	double current_cumulative_latency = previous_cumulative_latency + total_latency;
-	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(total_size));
-	cout<<"average_latency "<<1000*average_latency_dsrc<<" ms"<<endl;	
+	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(real_node_count));
+	cout<<"average_latency "<<1000*average_latency_dsrc<<" ms"<<endl;
 }
 
 
 void calculate_aodv_packet_delivery_ratio()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double delivered_packets = 0.0;
-	for (uint32_t i=2; i< (total_size+2); i++)
+	for (uint32_t i=2; i< (real_node_count+2); i++)
 	{
 		if (aodv_final_timestamp[i] > aodv_initial_timestamp[i])
 		{
 			delivered_packets = delivered_packets + 1;
 		}
 	}
-	current_packet_delivery_ratio_dsrc = delivered_packets/(total_size);
+	current_packet_delivery_ratio_dsrc = delivered_packets/(real_node_count);
 	cout<<"current packet delivery ratio is "<<100*current_packet_delivery_ratio_dsrc<<endl;
 	double previous_cumulative_ratio = average_packet_delivery_ratio_dsrc*(data_gathering_cycle_number - 1);
 	double current_cumulative_ratio = previous_cumulative_ratio + current_packet_delivery_ratio_dsrc;
 	average_packet_delivery_ratio_dsrc = (current_cumulative_ratio)/(data_gathering_cycle_number);
-	cout<<"average packet delivery ratio is "<<100*average_packet_delivery_ratio_dsrc<<endl;	
+	cout<<"average packet delivery ratio is "<<100*average_packet_delivery_ratio_dsrc<<endl;
 }
 
 void calculate_aodv_latency()
 {
+	// Bounded/divided by the actual node count, not total_size (same
+	// dilution fix as calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double total_latency = 0.0;
-	for (uint32_t i=2;i<(total_size+2);i++)
+	for (uint32_t i=2;i<(real_node_count+2);i++)
 	{
 		if (aodv_final_timestamp[i] > aodv_initial_timestamp[i])
 		{
@@ -117654,13 +118347,13 @@ void calculate_aodv_latency()
 		{
 			packet_delay[i] = 0.010;//maximum latency when packet not delivered
 		}
-		total_latency = total_latency + packet_delay[i];	
+		total_latency = total_latency + packet_delay[i];
 	}
 	//cout<<"packet "<<i<<"final timestamp "<<packet_final_timestamp[i]<<"initial timestamp: "<<packet_initial_timestamp[i]<<endl;
-	current_latency_dsrc = total_latency/(total_size);
-	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*(total_size);
+	current_latency_dsrc = total_latency/(real_node_count);
+	double previous_cumulative_latency = average_latency_dsrc*(data_gathering_cycle_number - 1)*(real_node_count);
 	double current_cumulative_latency = previous_cumulative_latency + total_latency;
-	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(total_size));
+	average_latency_dsrc = (current_cumulative_latency)/((data_gathering_cycle_number)*(real_node_count));
 	cout<<"average_latency "<<1000*average_latency_dsrc<<" ms"<<"current latency is "<<current_latency_dsrc*1000<<" ms"<<endl;
 }
 
@@ -117720,16 +118413,19 @@ void calculate_average_channel_utilization()
 
 void calculate_average_cost_with_solution()
 {
+	// Divided by the actual node count, not total_size (same dilution fix as
+	// calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double ethernet_cost = 1.0;
 	double dsrc_cost =2.0;
 	double lte_cost = 40.0;
 	//calculate total cost in kilo bytes
 	double current_total_cost = ((ethernet_cost*ethernet_total_packet_size) + (dsrc_cost*dsrc_total_packet_size) + (lte_cost*lte_total_packet_size) + (lte_cost*2*N_Vehicles) + (ethernet_cost*2*N_RSUs))/1024.0;
-	current_cost = current_total_cost/(total_size);
+	current_cost = current_total_cost/(real_node_count);
 	cout<<"current average cost is "<<current_cost<<endl;
-	double previous_cumulative_total_cost = (total_size)*(data_gathering_cycle_number - 1.0)*(average_cost);
+	double previous_cumulative_total_cost = (real_node_count)*(data_gathering_cycle_number - 1.0)*(average_cost);
 	double current_cumulative_total_cost = previous_cumulative_total_cost + current_total_cost;
-	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(total_size));
+	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(real_node_count));
 	cout<<"average cost per node is "<< average_cost<<endl;
 	ethernet_total_packet_size = 0;
 	dsrc_total_packet_size = 0;
@@ -117738,16 +118434,19 @@ void calculate_average_cost_with_solution()
 
 void calculate_average_cost_without_solution()
 {
+	// Divided by the actual node count, not total_size (same dilution fix as
+	// calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double ethernet_cost = 1.0;
 	double dsrc_cost =2.0;
 	double lte_cost = 40.0;
 	//calculate total cost in kilo bytes
 	double current_total_cost = ((ethernet_cost*ethernet_total_packet_size) + (dsrc_cost*dsrc_total_packet_size) + (lte_cost*lte_total_packet_size))/1024.0;
-	current_cost = current_total_cost/(total_size);
+	current_cost = current_total_cost/(real_node_count);
 	cout<<"current average cost is "<<current_cost<<endl;
-	double previous_cumulative_total_cost = (total_size)*(data_gathering_cycle_number - 1.0)*(average_cost);
+	double previous_cumulative_total_cost = (real_node_count)*(data_gathering_cycle_number - 1.0)*(average_cost);
 	double current_cumulative_total_cost = previous_cumulative_total_cost + current_total_cost;
-	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(total_size));
+	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(real_node_count));
 	cout<<"average cost per node is "<< average_cost<<endl;
 	ethernet_total_packet_size = 0;
 	dsrc_total_packet_size = 0;
@@ -117757,14 +118456,17 @@ void calculate_average_cost_without_solution()
 
 void calculate_average_cost_without_solution_dsrc()
 {
+	// Divided by the actual node count, not total_size (same dilution fix as
+	// calculate_average_latency() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	double dsrc_cost =2.0;
 	//calculate total cost in kilo bytes
 	double current_total_cost =  (dsrc_cost*dsrc_total_packet_size)*10/1024.0;
-	current_cost = current_total_cost/(total_size);
+	current_cost = current_total_cost/(real_node_count);
 	cout<<"current average cost is "<<current_cost<<endl;
-	double previous_cumulative_total_cost = (total_size)*(data_gathering_cycle_number - 1.0)*(average_cost);
+	double previous_cumulative_total_cost = (real_node_count)*(data_gathering_cycle_number - 1.0)*(average_cost);
 	double current_cumulative_total_cost = previous_cumulative_total_cost + current_total_cost;
-	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(total_size));
+	average_cost = (current_cumulative_total_cost)/((data_gathering_cycle_number)*(real_node_count));
 	cout<<"average cost per node is "<< average_cost<<endl;
 	ethernet_total_packet_size = 0;
 	dsrc_total_packet_size = 0;
@@ -117835,7 +118537,7 @@ void transmit_delta_values()
 void optimize_subsequent()
 {
 	//calculate entropy of the network and compare with threshold.
-	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization.py";
+	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization.py";
     	std::string command = "/home/sdvn_ssh/gurobi-venv/bin/python3 ";
     	command += filename;
     	system(command.c_str());
@@ -117848,44 +118550,44 @@ void optimize_link_lifetime()
 	switch(routing_algorithm)
 	{
 		case(0):
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_ECMP.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_ECMP.py";
 			break;
 		case(1):
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_RR.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_RR.py";
 			break;
 		case(2):
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_QRSDN.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_QRSDN.py";
 			break;
 		case(3):
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_RLMR.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_RLMR.py";
 			break;
 		case(4):
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime.py";
 			break;
 		case(5):
 			/*
 			if(experiment_number == 0)
 			{
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_QRSDN.py";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_QRSDN.py";
 			}
 			if(experiment_number == 1)
 			{
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_RR.py";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_RR.py";
 			}
 			if(experiment_number == 2)
 			{
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_QRSDN.py";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_QRSDN.py";
 			}
 			if(experiment_number == 3)
 			{
-				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_RLMR.py";
+				filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_RLMR.py";
 			}
 			*/
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime_RLMR.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime_RLMR.py";
 			
 			break;
 		default:
-			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization_lifetime.py";
+			filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization_lifetime.py";
 			break;
 		
 	}
@@ -117896,7 +118598,7 @@ void optimize_link_lifetime()
 
 void optimize_first_time()
 {
-	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/optimization.py";
+	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/optimization.py";
     	std::string command = "/home/sdvn_ssh/gurobi-venv/bin/python3 ";
     	command += filename;
     	system(command.c_str());
@@ -117912,20 +118614,27 @@ double delay_vector[2*total_size];
 
 void convert_link_lifetimes_dsrc()
 {
-	for(uint32_t i=0;i<total_size;i++)
+	// Bounded/strided by the actual node count, not total_size:
+	// link_lifetime_vector[] was written flat by read_lifetime_from_csv()
+	// with real_node_count^2 entries (rows 0..real_node_count-1 densely
+	// packed), so reading it back with a total_size-wide stride put every
+	// row after row 0 at the wrong offset — the root cause of
+	// routing_algorithm=4 breaking as soon as total_size != real node count.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
+	for(uint32_t i=0;i<real_node_count;i++)
 	{
 		vector<double> x_dsrc;
-		for (uint32_t j = 0;j < (total_size);j++)
+		for (uint32_t j = 0;j < (real_node_count);j++)
 		{
-			x_dsrc.push_back(link_lifetime_vector[(i*total_size)+j]);
+			x_dsrc.push_back(link_lifetime_vector[(i*real_node_count)+j]);
 
 		}
-		
-		link_lifetime_dsrc[i] = x_dsrc;	
+
+		link_lifetime_dsrc[i] = x_dsrc;
 	}
-		
+
 	vector<vector<double>> new_adjacencyMatrix_dsrc;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	//for(uint32_t i=0;i<9;i++)
 	{
 		new_adjacencyMatrix_dsrc.push_back(link_lifetime_dsrc[i]);
@@ -117953,13 +118662,16 @@ void convert_link_lifetimes_dsrc()
 
 void convert_link_lifetimes()
 {
-	for(uint32_t i=0;i<total_size;i++)
+	// Bounded/strided by the actual node count, not total_size (same fix as
+	// convert_link_lifetimes_dsrc() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
+	for(uint32_t i=0;i<real_node_count;i++)
 	{
 		vector<double> x_dsrc;
 		vector<double> x_ethernet;
-		for (uint32_t j = 0;j < (total_size);j++)
+		for (uint32_t j = 0;j < (real_node_count);j++)
 		{
-			x_dsrc.push_back(link_lifetime_vector[(i*total_size)+j]);
+			x_dsrc.push_back(link_lifetime_vector[(i*real_node_count)+j]);
 			if(i<N_Vehicles)
 			{
 				x_ethernet.push_back(0.0);
@@ -117983,14 +118695,14 @@ void convert_link_lifetimes()
 				}
 			}
 		}
-		
-		link_lifetime_dsrc[i] = x_dsrc;	
+
+		link_lifetime_dsrc[i] = x_dsrc;
 		link_lifetime_ethernet[i] = x_ethernet;
 	}
-		
+
 	vector<vector<double>> new_adjacencyMatrix_dsrc;
 	vector<vector<double>> new_adjacencyMatrix_ethernet;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	//for(uint32_t i=0;i<9;i++)
 	{
 		new_adjacencyMatrix_dsrc.push_back(link_lifetime_dsrc[i]);
@@ -117999,22 +118711,22 @@ void convert_link_lifetimes()
 	linklifetimeMatrix_dsrc = new_adjacencyMatrix_dsrc;
 	linklifetimeMatrix_ethernet = new_adjacencyMatrix_ethernet;
 	cout<<"link lifetime matrix converted"<<endl;
-	
-	
-	for (uint32_t i=0;i<total_size;i++)
+
+
+	for (uint32_t i=0;i<real_node_count;i++)
 	//for (uint32_t i=0;i<9;i++)
 	{
-		
-		for (uint32_t j=0;j<total_size;j++)
+
+		for (uint32_t j=0;j<real_node_count;j++)
 		//for (uint32_t j=0;j<9;j++)
 		{
 			cout<<"DSRC Link lifetime from source node"<<(i)<<"to node "<<(j)<<"is "<<linklifetimeMatrix_dsrc[i][j]<<endl;
 			cout<<"Ethernet Link lifetime from source node"<<(i)<<"to node "<<(j)<<"is "<<linklifetimeMatrix_ethernet[i][j]<<endl;
 		}
-		
-		
+
+
 	}
-			
+
 	//cout<<"adjacency matrix size"<<adjacencyMatrix.size()<<endl;
 }
 
@@ -118025,44 +118737,44 @@ void read_lifetime_from_csv()
     switch(routing_algorithm)
     {
     	case(0):
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_ECMP.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_ECMP.csv", ios::in);
     		break;
     	case(1):
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_RR.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_RR.csv", ios::in);
     		break;
     	case(2):
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
     		break;
     	case(3):
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_RLMR.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_RLMR.csv", ios::in);
     		break;
     	case(4):
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution.csv", ios::in);
     		break;	
     	case(5):
     		/*
     		if(experiment_number == 0)
     		{
-    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
+    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
     		}
     		if(experiment_number == 1)
     		{
-    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_RR.csv", ios::in);
+    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_RR.csv", ios::in);
     		}
     		if(experiment_number == 2)
     		{
-    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
+    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_QRSDN.csv", ios::in);
     		}
     		if(experiment_number == 3)
     		{
-    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_RLMR.csv", ios::in);
+    			fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_RLMR.csv", ios::in);
     		}
     		*/
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution_RLMR.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution_RLMR.csv", ios::in);
     		break;	
     		
     	default:
-    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/link_lifetime_solution.csv", ios::in);
+    		fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/link_lifetime_solution.csv", ios::in);
     		break;
     }
     
@@ -118106,6 +118818,9 @@ void read_lifetime_from_csv()
 
 void run_ECMP()
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// run_proposed_RL() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	cout<<"Running ECMP started at "<<Now().GetSeconds()<<endl;
 	for(uint32_t fid=0;fid<2*flows;fid++)
 	{
@@ -118114,9 +118829,9 @@ void run_ECMP()
 		//uint32_t f_destination = (demanding_flow_struct_controller_inst+fid)->destination;
 		if((demanding_flow_struct_controller_inst+fid)->f_size == 0)
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -118125,10 +118840,10 @@ void run_ECMP()
 		}
 		else
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
 				uint32_t next_hops_count = 0;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if ((distance_algo2_output_inst[fid].D[nid] < distance_algo2_output_inst[fid].D[cid])&&(distance_algo2_output_inst[fid].conn[nid]==1)&& (distance_algo2_output_inst[fid].conn[cid]==1)&&(linklifetimeMatrix_dsrc[cid][nid]>0.0))
 					{
@@ -118136,7 +118851,7 @@ void run_ECMP()
 					}
 				}
 				
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if ((distance_algo2_output_inst[fid].D[nid] < distance_algo2_output_inst[fid].D[cid])&&(distance_algo2_output_inst[fid].conn[nid]==1)&& (distance_algo2_output_inst[fid].conn[cid]==1)&&(linklifetimeMatrix_dsrc[cid][nid]>0.0))
 					{
@@ -118156,7 +118871,7 @@ void run_ECMP()
 					else
 					{
 						double summation = 0;
-						for(int i=0;i<total_size;i++)
+						for(int i=0;i<real_node_count;i++)
 						{
 							summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 						}
@@ -118195,11 +118910,15 @@ double compute_packet_delay_DCMR(uint32_t fid, uint32_t nid, uint32_t packet_siz
 
 void run_DCMR()
 {
+	// Loop bounds fixed to actual node count, not total_size (same fix as
+	// run_proposed_RL() above); array declarations stay sized [total_size]
+	// (safe ceiling, only indices <real_node_count are ever populated/read).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	cout<<"Running DCMR started at "<<Now().GetSeconds()<<endl;
 	double RBW[total_size];
 	double congestion_level[total_size];
 	
-	for(uint32_t i=0; i<total_size;i++)
+	for(uint32_t i=0; i<real_node_count;i++)
 	{
 		RBW[i] = 1.0;
 		congestion_level[i] = 0.0001;
@@ -118213,9 +118932,9 @@ void run_DCMR()
 		
 		if((demanding_flow_struct_controller_inst+fid)->f_size == 0)
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -118226,9 +118945,9 @@ void run_DCMR()
 		{	
 			//uint32_t cid = f_source;
 			//while(cid != f_destination)
-			for(uint32_t cid=0;cid<total_size;cid++)
+			for(uint32_t cid=0;cid<real_node_count;cid++)
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -118238,14 +118957,14 @@ void run_DCMR()
 				double congestion_level_local[total_size];
 				double PUF_local[total_size];
 				int32_t cost_local[total_size];
-				for(uint32_t i=0; i<total_size;i++)
+				for(uint32_t i=0; i<real_node_count;i++)
 				{
 					RBW_local[i] = 1.0;
 					congestion_level_local[i] = 0.0001;
 					PUF_local[i] = 0.0;
 					cost_local[i] = 100000;
 				}
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					double packet_delay = compute_packet_delay_DCMR(fid, nid, f_psize);
 					if ((distance_algo2_output_inst[fid].D[nid] < distance_algo2_output_inst[fid].D[cid])&&(distance_algo2_output_inst[fid].conn[nid]==1)&& (distance_algo2_output_inst[fid].conn[cid]==1)&&(linklifetimeMatrix_dsrc[cid][nid]>0.0)&&(packet_delay < latency_max))
@@ -118275,7 +118994,7 @@ void run_DCMR()
 				
 				uint32_t least_cost_hop = cid;
 				int32_t least_cost = 100000;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if(cost_local[nid] < least_cost)
 					{
@@ -118292,7 +119011,7 @@ void run_DCMR()
 				
 				uint32_t second_least_cost_hop = cid;
 				int32_t second_least_cost = 100000;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if((cost_local[nid] < second_least_cost)&&(cost_local[nid] > least_cost))
 					{
@@ -118306,7 +119025,7 @@ void run_DCMR()
 				RBW[second_least_cost_hop] = RBW_local[second_least_cost_hop];
 				congestion_level[second_least_cost_hop] = congestion_level_local[second_least_cost_hop];
 				
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if(second_least_cost_hop == cid)
 					{
@@ -118336,9 +119055,9 @@ void run_DCMR()
 					}
 				}
 			}
-			for(uint32_t cid=0;cid<total_size;cid++)
+			for(uint32_t cid=0;cid<real_node_count;cid++)
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if(cid == f_source)
 					{
@@ -118347,7 +119066,7 @@ void run_DCMR()
 					else
 					{
 						double summation = 0;
-						for(int i=0;i<total_size;i++)
+						for(int i=0;i<real_node_count;i++)
 						{
 							summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 						}
@@ -118368,6 +119087,9 @@ uint32_t RL_iterations = uint32_t(1050);
 
 void run_QRSDN()
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// run_proposed_RL() above).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	cout<<"Running QRSDN started at "<<Now().GetSeconds()<<endl;
 	for(uint32_t fid=0;fid<2*flows;fid++)
 	{
@@ -118377,9 +119099,9 @@ void run_QRSDN()
 		
 		if((demanding_flow_struct_controller_inst+fid)->f_size == 0)
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -118390,10 +119112,10 @@ void run_QRSDN()
 		else
 		{
 			//cout<<"Running RL in fid "<<fid<<endl;
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
 				//Initialize Q values with lifetime
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if ((cid==f_destination) || (nid==f_source))
 					{
@@ -118413,10 +119135,10 @@ void run_QRSDN()
 			}
 			//cout<<"Q-values initialized"<<endl;
 			
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				//convert to acyclic graph
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					(Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid] = distance_algo2_output_inst[fid].Y[cid];
@@ -118446,18 +119168,18 @@ void run_QRSDN()
 			}
 			//cout<<"Converted to acyclic graph"<<endl;
 			//Initialize delta, load values
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				//count actions
 				uint32_t actions=0;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 					{
 						actions++;
 					}
 				}//Intialize delta, load values
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
@@ -118470,7 +119192,7 @@ void run_QRSDN()
 						else
 						{
 							double summation = 0.0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118490,7 +119212,7 @@ void run_QRSDN()
 					uint32_t actions=0;
 					list<uint32_t> action_set;
 					
-					for(uint32_t nid=0;nid<total_size;nid++)	
+					for(uint32_t nid=0;nid<real_node_count;nid++)	
 					{
 						if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 						{
@@ -118507,7 +119229,7 @@ void run_QRSDN()
 					 	(Omega_at_controller_inst+fid)->Omega_fi_inst[cid].Omega_values[nid]	= distance_algo2_output_inst[fid].conn[nid];
 					 	
 					 	double y_summation = 0.0;
-					 	for(int j=0;j<total_size;j++)
+					 	for(int j=0;j<real_node_count;j++)
 					 	{
 					 		y_summation = y_summation + (((delta_at_controller_inst+fid)->delta_fi_inst[nid].delta_values[j])*((Y_at_controller_inst+fid)->Y_fi_inst[nid].Y_values[j]));
 					 	}
@@ -118517,7 +119239,7 @@ void run_QRSDN()
 						//Compute delta_values
 						double q_summation = 0.0;
 						double q_max = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -118549,7 +119271,7 @@ void run_QRSDN()
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118568,7 +119290,7 @@ void run_QRSDN()
 						//Compute delta_values
 						double q_summation_again = 0.0;
 						double q_max_again = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -118600,7 +119322,7 @@ void run_QRSDN()
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118612,7 +119334,7 @@ void run_QRSDN()
 						uint32_t local_actions=0;
 						list<uint32_t> local_action_set;
 						
-						for(uint32_t j=0;j<total_size;j++)	
+						for(uint32_t j=0;j<real_node_count;j++)	
 						{
 							if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j] > 0.0)
 							{
@@ -118631,6 +119353,10 @@ void run_QRSDN()
 
 void run_RLMR()
 {
+	// Loop bounds fixed to actual node count, not total_size (same fix as
+	// run_proposed_RL() above); array declarations stay sized [total_size]
+	// (safe ceiling).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	cout<<"Running RLMR started at "<<Now().GetSeconds()<<endl;
 	for(uint32_t fid=0;fid<2*flows;fid++)
 	{
@@ -118642,9 +119368,9 @@ void run_RLMR()
 		
 		if((demanding_flow_struct_controller_inst+fid)->f_size == 0)
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -118655,10 +119381,10 @@ void run_RLMR()
 		else
 		{
 			//cout<<"Running RL in fid "<<fid<<endl;
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
 				//Initialize Q values with lifetime
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if ((cid==f_destination) || (nid==f_source))
 					{
@@ -118678,10 +119404,10 @@ void run_RLMR()
 			}
 			//cout<<"Q-values initialized"<<endl;
 			
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				//convert to acyclic graph
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					(Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid] = distance_algo2_output_inst[fid].Y[cid];
@@ -118711,18 +119437,18 @@ void run_RLMR()
 			}
 			//cout<<"Converted to acyclic graph"<<endl;
 			//Initialize delta, load values
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				//count actions
 				uint32_t actions=0;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 					{
 						actions++;
 					}
 				}//Intialize delta, load values
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
@@ -118735,7 +119461,7 @@ void run_RLMR()
 						else
 						{
 							double summation = 0.0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118755,7 +119481,7 @@ void run_RLMR()
 					uint32_t actions=0;
 					list<uint32_t> action_set;
 					
-					for(uint32_t nid=0;nid<total_size;nid++)	
+					for(uint32_t nid=0;nid<real_node_count;nid++)	
 					{
 						if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 						{
@@ -118781,7 +119507,7 @@ void run_RLMR()
 					 	}
 					 	
 					 	double y_summation = 0.0;
-					 	for(int j=0;j<total_size;j++)
+					 	for(int j=0;j<real_node_count;j++)
 					 	{
 					 		y_summation = y_summation + (((delta_at_controller_inst+fid)->delta_fi_inst[nid].delta_values[j])*((Y_at_controller_inst+fid)->Y_fi_inst[nid].Y_values[j]));
 					 	}
@@ -118791,7 +119517,7 @@ void run_RLMR()
 						//Compute delta_values
 						double q_summation = 0.0;
 						double q_max = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -118824,7 +119550,7 @@ void run_RLMR()
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118843,7 +119569,7 @@ void run_RLMR()
 						//Compute delta_values
 						double q_summation_again = 0.0;
 						double q_max_again = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -118874,7 +119600,7 @@ void run_RLMR()
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -118886,7 +119612,7 @@ void run_RLMR()
 						uint32_t local_actions=0;
 						list<uint32_t> local_action_set;
 						
-						for(uint32_t j=0;j<total_size;j++)	
+						for(uint32_t j=0;j<real_node_count;j++)	
 						{
 							if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j] > 0.0)
 							{
@@ -118965,7 +119691,10 @@ double compute_individual_link_delay(uint32_t next_hop, uint32_t CW, uint32_t fl
 
 double compute_path_delay(uint32_t fid, uint32_t cid, uint32_t nid, double link_load, uint32_t flow_size, uint32_t packet_size, uint32_t destination)
 {
-
+	// Bounded by the actual node count, not total_size (same fix as
+	// run_proposed_RL() above) -- otherwise this sums delay contributions
+	// from up to 200 phantom nodes into every real path-latency calculation.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	uint32_t zeta;
 	if (flows == 1)
 	{
@@ -118984,16 +119713,16 @@ double compute_path_delay(uint32_t fid, uint32_t cid, uint32_t nid, double link_
 	}
 	
 	double link_lat_summation = 0.0;
-	for(uint32_t i =0;i<total_size; i++)
+	for(uint32_t i =0;i<real_node_count; i++)
 	{
 		if (((delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid]) >= ((delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[i]))
 		{
 			link_lat_summation = link_lat_summation + ((t_at_controller_inst+fid)->t_fi_inst[cid].t_values[i])/2.0;
 		}
 	}
-	
+
 	double y_summation = 0.0;
-	for(uint32_t i =0;i<total_size; i++)
+	for(uint32_t i =0;i<real_node_count; i++)
 	{
 		y_summation = y_summation + (((delta_at_controller_inst+fid)->delta_fi_inst[nid].delta_values[i])*((Y_at_controller_inst+fid)->Y_fi_inst[nid].Y_values[i]));
 	}
@@ -119018,8 +119747,18 @@ double Yf_bar[2*flows][total_size];
 double epsilon_0_initial = 0.9;
 void run_proposed_RL()
 {
+ // Bounded by the actual node count, not total_size everywhere in this
+ // function: this IS routing_algorithm=4, the SDVN routing algorithm this
+ // project's contribution rests on. All Q/delta/L/Y/U/T/Theta/Omega matrices
+ // are indexed by real node id only (only real_node_count of total_size
+ // slots are ever populated), so looping to total_size read/wrote phantom
+ // entries and — since linklifetimeMatrix_dsrc is now a real_node_count x
+ // real_node_count vector<vector<double>> (see convert_link_lifetimes_dsrc())
+ // — indexing it with cid/nid up to total_size-1 is an out-of-bounds vector
+ // access (undefined behaviour), not just a wrong number.
+ uint32_t real_node_count = N_Vehicles + N_RSUs;
  // my change start (temp)
- 
+
  cout << "DEBUG matrix values:" << endl;
 for(uint32_t a=0; a<linklifetimeMatrix_dsrc.size(); a++)
     for(uint32_t b=0; b<linklifetimeMatrix_dsrc[a].size(); b++)
@@ -119050,9 +119789,9 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 		
 		if((demanding_flow_struct_controller_inst+fid)->f_size == 0)
 		{
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					(delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[nid] = 0.0;
 					(L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] = 0.0;
@@ -119064,10 +119803,10 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 		else
 		{
 			//cout<<"Running RL in fid "<<fid<<endl;
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{
 				//Initialize Q values with lifetime
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if ((cid==f_destination) || (nid==f_source))
 					{
@@ -119090,10 +119829,10 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 			//cout<<"Q-values initialized"<<endl;
 			
 			//find cardinality
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				uint32_t summation = 0;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					double lt = unit_step(linklifetimeMatrix_dsrc[cid][nid]-link_lifetime_threshold, 0);
 					double product = (proposed_algo2_output_inst[fid].conn[nid])*lt;
@@ -119105,9 +119844,9 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 			
 			
 			//convert to directed acyclic graph
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					(Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid] = proposed_algo2_output_inst[fid].Y[cid];
@@ -119174,18 +119913,18 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 			
 			
 			//Initialize delta, load, and latency values
-			for(uint32_t cid=0;cid<total_size;cid++)	
+			for(uint32_t cid=0;cid<real_node_count;cid++)	
 			{	
 				//count actions
 				uint32_t actions=0;
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 					{
 						actions++;
 					}
 				}//Intialize delta, load values, latency values
-				for(uint32_t nid=0;nid<total_size;nid++)	
+				for(uint32_t nid=0;nid<real_node_count;nid++)	
 				{
 					
 					
@@ -119199,7 +119938,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						else
 						{
 							double summation = 0.0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -119237,9 +119976,9 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 					//compute Lf_bar
 					double load_sum = 0.0;
 					uint32_t load_count = 0;
-					for(uint32_t i=0;i<total_size;i++)	
+					for(uint32_t i=0;i<real_node_count;i++)	
 					{
-						for(uint32_t j=0;j<total_size;j++)	
+						for(uint32_t j=0;j<real_node_count;j++)	
 						{
 							load_sum = load_sum + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[j];
 							if((L_at_controller_inst+fid)->L_fi_inst[i].L_values[j] > 0.0)
@@ -119259,7 +119998,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						Lf_bar[fid] = 0.0;
 					}
 					
-					for(uint32_t nid=0;nid<total_size;nid++)	
+					for(uint32_t nid=0;nid<real_node_count;nid++)	
 					{
 						if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[nid] > 0.0)
 						{
@@ -119310,7 +120049,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 					 	//cout<<"flow id "<<fid<<"current hop "<<cid<<" next hop "<<nid<<" Omega value "<<(Omega_at_controller_inst+fid)->Omega_fi_inst[cid].Omega_values[nid]<<" Theta value is "<<(Theta_at_controller_inst+fid)->Theta_fi_inst[cid].Theta_values[nid]<<endl;
 					 	
 					 	double y_summation = 0.0;
-					 	for(int j=0;j<total_size;j++)
+					 	for(int j=0;j<real_node_count;j++)
 					 	{
 					 		y_summation = y_summation + (((delta_at_controller_inst+fid)->delta_fi_inst[nid].delta_values[j])*((Y_at_controller_inst+fid)->Y_fi_inst[nid].Y_values[j]));
 					 	}
@@ -119320,7 +120059,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						//compute Yf_bar
 						double Y_sum = 0.0;
 						uint32_t Y_count = 0;
-						for(uint32_t j=0;j<total_size;j++)	
+						for(uint32_t j=0;j<real_node_count;j++)	
 						{
 							Y_sum = Y_sum + (((delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[j])*((Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[j]));
 							if((delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[j] > 0.0)
@@ -119344,7 +120083,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						if(nid != f_destination)
 						{
 						double u_summation = 0.0;
-						 	for(int j=0;j<total_size;j++)
+						 	for(int j=0;j<real_node_count;j++)
 						 	{
 						 		u_summation = u_summation + (((delta_at_controller_inst+fid)->delta_fi_inst[nid].delta_values[j])*((U_at_controller_inst+fid)->U_fi_inst[nid].U_values[j]));
 						 	}
@@ -119355,7 +120094,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						//Compute delta_values
 						double q_summation = 0.0;
 						double q_max = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -119387,7 +120126,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -119436,7 +120175,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						double mu2t = 2.0;
 						uint32_t tucount =0;
 						double tusum = 0.0;
-						for(uint32_t i=0;i<total_size;i++)
+						for(uint32_t i=0;i<real_node_count;i++)
 						{
 							if((delta_at_controller_inst+fid)->delta_fi_inst[cid].delta_values[i] > 0.0)
 							{
@@ -119484,7 +120223,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						
 						double term2 = mu2*(1.0-(overall_quality)-(packet_delivery)-(packet_latency))*(Theta_at_controller_inst+fid)->Theta_fi_inst[cid].Theta_values[nid];
 						//double term3 = mu3*(-1.0*((3.0-f_qos)/(3.0))*((L_at_controller_inst+fid)->L_fi_inst[cid].L_values[nid] - Lf_bar[fid])*(Theta_at_controller_inst+fid)->Theta_fi_inst[cid].Theta_values[nid]);
-						double term3 = mu3*((-1.0)*(((abs((Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid] - Yf_bar[fid][cid]))/(total_size))*((Theta_at_controller_inst+fid)->Theta_fi_inst[cid].Theta_values[nid])));
+						double term3 = mu3*((-1.0)*(((abs((Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid] - Yf_bar[fid][cid]))/(real_node_count))*((Theta_at_controller_inst+fid)->Theta_fi_inst[cid].Theta_values[nid])));
 						(W_at_controller_inst+fid)->W_fi_inst[cid].W_values[nid] = term1 + term2 + term3;
 						//cout<<"Yf_bar is "<<Yf_bar[fid][cid]<<"Y is "<<(Y_at_controller_inst+fid)->Y_fi_inst[cid].Y_values[nid]<<" connections from source "<<actions<<endl;
 						//cout<<"Jitter reward is "<<term3<<endl;
@@ -119498,7 +120237,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						//Compute delta_values
 						double q_summation_again = 0.0;
 						double q_max_again = 0.0;
-						for(int j=0;j<total_size;j++)
+						for(int j=0;j<real_node_count;j++)
 					 	{
 					 		if(((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j])> 0.0)
 					 		{
@@ -119529,7 +120268,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						else
 						{
 							double summation = 0;
-							for(int i=0;i<total_size;i++)
+							for(int i=0;i<real_node_count;i++)
 							{
 								summation = summation + (L_at_controller_inst+fid)->L_fi_inst[i].L_values[cid];
 							}
@@ -119543,7 +120282,7 @@ cout << "DEBUG matrix size: " << linklifetimeMatrix_dsrc.size() << endl;
 						uint32_t local_actions=0;
 						list<uint32_t> local_action_set;
 						
-						for(uint32_t j=0;j<total_size;j++)	
+						for(uint32_t j=0;j<real_node_count;j++)	
 						{
 							if((Q_at_controller_inst+fid)->Q_fi_inst[cid].Q_values[j] > 0.0)
 							{
@@ -119643,7 +120382,7 @@ void  run_optimization_subsequent()
 void predict_DNN_link_lifetime()
 {
 	cout<<"predicting link lifetimes"<<endl;
-	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/DNN_link_stability.py";
+	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/DNN_link_stability.py";
     	std::string command = "/home/sdvn_ssh/gurobi-venv/bin/python3 ";
     	command += filename;
     	system(command.c_str());
@@ -119652,7 +120391,7 @@ void predict_DNN_link_lifetime()
 void predict_DNN_delay()
 {
 	cout<<"predicting delay"<<endl;
-	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/DNN_delay.py";
+	std::string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/DNN_delay.py";
     	std::string command = "/home/sdvn_ssh/gurobi-venv/bin/python3 ";
     	command += filename;
     	system(command.c_str());
@@ -119675,12 +120414,20 @@ void  run_DNN_delay()
 
 void convert_delay()
 {
+	// Bounded by the actual node count, not total_size (same fix as
+	// convert_link_lifetimes[_dsrc]() above). NOTE: this function is on the
+	// DNN/hybrid-architecture delay path (send_hybrid_packets() ->
+	// generate_delay_matrix()), not the routing_algorithm=4 path our
+	// diagnostics exercise (that path uses run_stable_path_finding(), not
+	// delay matrices) -- fixed for consistency since it shares the identical
+	// bug pattern, not because it's on the critical MCC path today.
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	cout<<"converting delay"<<endl;
-	for(uint32_t i=0;i<(2*total_size);i=i+2)
+	for(uint32_t i=0;i<(2*real_node_count);i=i+2)
 	{
 		vector<double> x_dsrc;
 		vector<double> x_ethernet;
-		for (uint32_t j = 0;j < total_size;j++)
+		for (uint32_t j = 0;j < real_node_count;j++)
 		{
 			double dij_dsrc;
 			double dij_ethernet;
@@ -119699,13 +120446,13 @@ void convert_delay()
 			x_dsrc.push_back(dij_dsrc);
 			x_ethernet.push_back(dij_ethernet);
 		}
-		delay_dsrc[i/2] = x_dsrc;	
+		delay_dsrc[i/2] = x_dsrc;
 		delay_ethernet[i/2] = x_ethernet;
 	}
-	
+
 	vector<vector<double>> new_adjacencyMatrix_dsrc;
 	vector<vector<double>> new_adjacencyMatrix_ethernet;
-	for(uint32_t i=0;i<total_size;i++)
+	for(uint32_t i=0;i<real_node_count;i++)
 	//for(uint32_t i=0;i<9;i++)
 	{
 		new_adjacencyMatrix_dsrc.push_back(delay_dsrc[i]);
@@ -119714,20 +120461,20 @@ void convert_delay()
 	delayMatrix_dsrc = new_adjacencyMatrix_dsrc;
 	delayMatrix_ethernet = new_adjacencyMatrix_ethernet;
 	cout<<"delay matrix converted"<<endl;
-	
-	
-	for (uint32_t i=0;i<total_size;i++)
+
+
+	for (uint32_t i=0;i<real_node_count;i++)
 	//for (uint32_t i=0;i<9;i++)
 	{
-		
-		for (uint32_t j=0;j<total_size;j++)
+
+		for (uint32_t j=0;j<real_node_count;j++)
 		//for (uint32_t j=0;j<9;j++)
 		{
 			cout<<"DSRC delay from source node"<<(i)<<"to node "<<(j)<<"is "<<delayMatrix_dsrc[i][j]<<endl;
 			cout<<"Ethernet delay from source node"<<(i)<<"to node "<<(j)<<"is "<<delayMatrix_ethernet[i][j]<<endl;
 		}
-		
-		
+
+
 	}
 	
 	
@@ -119742,7 +120489,7 @@ void read_delay_from_csv()
 {
     fstream fin;
     cout<<"reading delay from csv"<<endl;
-    fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/delay_solution.csv", ios::in);
+    fin.open("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/delay_solution.csv", ios::in);
     vector<string> row;
     string line;
     string temp;
@@ -119810,7 +120557,7 @@ void calculate_dijkstra_stable_solution(uint32_t destination)
 void write_distance_metrics()
 {
 	fstream fout;
-	string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/results/maximum_distance_results.csv";
+	string filename = "/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/results/maximum_distance_results.csv";
 	fout.open(filename,ios::out|ios::app);
 	
 	fout << Simulator::Now().GetSeconds();
@@ -119980,6 +120727,12 @@ struct custom_struct
 
 void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pending_packets, bool busy, struct custom_struct arguments)
 {
+	// Bounded by the actual node count, not total_size: linklifetimeMatrix_dsrc
+	// is a real_node_count x real_node_count vector<vector<double>> (see
+	// convert_link_lifetimes_dsrc()), so indexing it up to total_size-1 was
+	// an out-of-bounds vector access (confirmed segfault pattern, same as
+	// check_and_transmit()).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	uint32_t zeta = 1;
 	double tg = compute_individual_link_delay(0, arguments.CW, 1, flow_packet_size, 1, zeta);
 	for(uint32_t f=0;f<2*flows;f++)
@@ -120005,7 +120758,7 @@ void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pe
 			}
 		}
 		//update other node status
-		for(uint32_t i=0;i<total_size;i++)
+		for(uint32_t i=0;i<real_node_count;i++)
 		{
 			if((linklifetimeMatrix_dsrc[nodeid][i]) > 0.0)
 			{
@@ -120014,7 +120767,7 @@ void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pe
 					txop_inst[f].busy[arguments.channel][i] = busy;
 					txop_inst[f].last_set_timestamp[arguments.channel][i] = Seconds(Now().GetSeconds());
 					//cout<<"Set node "<<i<<"as busy at "<<Now().GetSeconds()<<endl;
-					for(uint32_t j=0;j<total_size;j++)
+					for(uint32_t j=0;j<real_node_count;j++)
 					{
 						if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 						{
@@ -120037,7 +120790,7 @@ void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pe
 						//cout<<"Node "<<i<<"remains busy "<<Now().GetSeconds()<<endl;
 					}
 					
-					for(uint32_t j=0;j<total_size;j++)
+					for(uint32_t j=0;j<real_node_count;j++)
 					{
 						if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 						{
@@ -120065,7 +120818,7 @@ void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pe
 					txop_inst[f].busy[arguments.channel][i] = busy;
 					txop_inst[f].last_set_timestamp[arguments.channel][i] = Seconds(Now().GetSeconds());
 					//cout<<"Set node "<<i<<"as busy at "<<Now().GetSeconds()<<endl;
-					for(uint32_t j=0;j<total_size;j++)
+					for(uint32_t j=0;j<real_node_count;j++)
 					{
 						if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 						{
@@ -120088,7 +120841,7 @@ void updateTxop(uint32_t fid, uint32_t nodeid, uint32_t receiver_id, uint32_t pe
 						//cout<<"Node "<<i<<"remains busy "<<Now().GetSeconds()<<endl;
 					}
 					
-					for(uint32_t j=0;j<total_size;j++)
+					for(uint32_t j=0;j<real_node_count;j++)
 					{
 						if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 						{
@@ -120213,13 +120966,16 @@ void check_delivery_and_retransmit(uint32_t flow_id, uint32_t packet_id, uint32_
 			else
 			{
 				
+				// Bounded by the actual node count, not total_size (same fix
+				// as updateTxop()/check_and_transmit() above).
+				uint32_t real_node_count = N_Vehicles + N_RSUs;
 				bool neighborhood_busy = false;
-				for(uint32_t i=0;i<total_size;i++)
+				for(uint32_t i=0;i<real_node_count;i++)
 				{
 					if((linklifetimeMatrix_dsrc[current_hop][i]) > 0.0)
 					{
-						neighborhood_busy = neighborhood_busy | txop_inst[flow_id].busy[arguments.channel][i];	
-						for(uint32_t j=0;j<total_size;j++)
+						neighborhood_busy = neighborhood_busy | txop_inst[flow_id].busy[arguments.channel][i];
+						for(uint32_t j=0;j<real_node_count;j++)
 						{
 							if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 							{
@@ -120304,7 +121060,7 @@ void check_delivery_and_retransmit(uint32_t flow_id, uint32_t packet_id, uint32_
 						// implement attacks with if condition (again) 2
 
 						// ── Grey Hole Attack: Data Plane (Place 2 - retransmit) ──────────────────────
-                                                if(should_drop_grey_hole(current_hop, flow_id))
+                                                if(should_drop_grey_hole(current_hop, flow_id, originail_timestamp.GetNanoSeconds()))
                                                 {
                                                     cout << "ATTACK PLACE 2: retransmit DROPPED node=" << current_hop
                                                         << " flow=" << flow_id
@@ -120324,6 +121080,18 @@ void check_delivery_and_retransmit(uint32_t flow_id, uint32_t packet_id, uint32_
                                                     {
                                                         node_total_forwarded[current_hop]++;
                                                         if(flow_id < 2*flows) node_flow_forwarded[current_hop][flow_id]++;
+                                                        // Fix 1 (ZKP cumulative commitment): run-wide forwarded count.
+                                                        if (current_hop < N_Vehicles) g_sg_zkp_cum_forwarded[current_hop]++;
+                                                        // CQ6 debug (supervisor-requested): confirm this increment site
+                                                        // is actually reached at runtime -- print the first 5 hits.
+                                                        static uint32_t cq6_site_a_hits = 0;
+                                                        if (cq6_site_a_hits < 5) {
+                                                            cq6_site_a_hits++;
+                                                            std::cout << "[CQ6-SITE-A] hit#" << cq6_site_a_hits
+                                                                      << " node=" << current_hop << " flow=" << flow_id
+                                                                      << " new_total=" << node_total_forwarded[current_hop]
+                                                                      << " t=" << Simulator::Now().GetSeconds() << std::endl;
+                                                        }
                                                     }
                                                     Simulator::Schedule (Seconds(0.0), &WifiNetDevice::Send, wdi, packet_i, dest_address, protocolwave);
                                                 }
@@ -120451,6 +121219,14 @@ void MacRx (std::string context, Ptr <const Packet> pkt)
                         {
                             node_total_received[current_hop]++;
                             if(fid < 2*flows) node_flow_received[current_hop][fid]++;
+                            // Fix 1 (ZKP cumulative commitment, supervisor-
+                            // requested): increment the RUN-WIDE received
+                            // count here, at receipt time, before any drop
+                            // decision -- this is what the ZKP commitment
+                            // now uses instead of the per-window (reset
+                            // every ~1s) node_total_received[].
+                            if (current_hop < N_Vehicles)
+                                g_sg_zkp_cum_received[current_hop]++;
                         }
 			
 			//cout<<"Received at hop "<<current_hop<<"packet id "<<packet_ID<<"flow ID"<<fid<<"at time "<<Now().GetSeconds()<<endl;
@@ -120477,11 +121253,14 @@ void MacRx (std::string context, Ptr <const Packet> pkt)
 					cout<<"Flow ID "<<fid<<"received "<<" Packet ID: "<<packet_ID<<"Totally received "<<destination_counter[fid]<<"packets at destination "<<destination<<" at "<<Now().GetSeconds()<<endl;
 
 					// @dilukshan start — credit relay nodes for successful delivery
+					// Bounded by the actual node count, not total_size: avoids
+					// scanning up to 200 phantom relay ids per packet delivery.
 					uint32_t flow_source = (demanding_flow_struct_nodes_inst+fid)->source;
-					for(uint32_t relay = 0; relay < total_size; relay++)
+					uint32_t relay_node_count = N_Vehicles + N_RSUs;
+					for(uint32_t relay = 0; relay < relay_node_count; relay++)
 					{
 					    // relay node = not source, not destination, received this packet to forward
-					    if(relay != flow_source && relay != destination && relay < total_size)
+					    if(relay != flow_source && relay != destination)
 					    {
 					        if(node_relay_received[relay] > 0)
 					            node_relay_forwarded[relay]++;
@@ -120541,24 +121320,33 @@ void MacRx (std::string context, Ptr <const Packet> pkt)
 					//bool queued = false;
 					while (sent == false)
 					{
+						// Bounded by the actual node count, not total_size:
+						// index_middle iterates all_sorted_delta_next_hop_flow_size,
+						// which is now built with real_node_count entries (see
+						// initialize_flow_counters()) -- advancing past that
+						// with total_size and dereferencing was the confirmed
+						// segfault (hop=32767 garbage in
+						// check_delivery_and_retransmit()).
+						uint32_t real_node_count = N_Vehicles + N_RSUs;
 						if (routing_algorithm == 1)
 						{
 							list<uint32_t> indices;
-							for(uint32_t j =0;j<total_size;j++)
+							for(uint32_t j =0;j<real_node_count;j++)
 							{
+								if(j >= index_middle->size()) break;
 								auto index_innermost = index_middle->begin();
 								//cout<<subflow_start_time<<total_packet_counter<<total_packets<<endl;
 								advance(index_innermost,j);
-								double sub_flow_load; 
+								double sub_flow_load;
 								uint32_t nid;
 								uint32_t sub_flow_packets;
 								tie(sub_flow_load, nid, sub_flow_packets) = *index_innermost;
-								//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;		
+								//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;
 								//uint32_t sub_flow_counter = 0;
 								//cout<<sub_flow_counter<<endl;
-								
+
 								if(sub_flow_load !=0.0)
-								{	
+								{
 									indices.push_back(j);
 								}
 							}
@@ -120606,22 +121394,23 @@ void MacRx (std::string context, Ptr <const Packet> pkt)
 						}
 						else
 						{
-							for(uint32_t j =0;j<total_size;j++)
+							for(uint32_t j =0;j<real_node_count;j++)
 							{
+								if(j >= index_middle->size()) break;
 								//cout<<"value of j is "<<j<<endl;
 								auto index_innermost = index_middle->begin();
 								//cout<<subflow_start_time<<total_packet_counter<<total_packets<<endl;
 								advance(index_innermost,j);
-								double sub_flow_load; 
+								double sub_flow_load;
 								uint32_t nid;
 								uint32_t sub_flow_packets;
 								tie(sub_flow_load, nid, sub_flow_packets) = *index_innermost;
-								//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;		
+								//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;
 								uint32_t sub_flow_counter = 0;
 								//cout<<sub_flow_counter<<endl;
-									
-								if((sub_flow_packets>0) | (j==(total_size-1)))
-								{	
+
+								if((sub_flow_packets>0) | (j==(real_node_count-1)))
+								{
 									//cout<<"sub flow packet size is "<<sub_flow_packets<<endl;
 									//Ptr <NetDevice> destination_nd = wifidevices.Get(nid);
 									//Address addr = destination_nd->GetAddress();
@@ -120738,17 +121527,22 @@ void MacRx (std::string context, Ptr <const Packet> pkt)
 				{
 					cout<<"routing loop. stopping routing"<<endl;
 				}
-				else if (next_hop < total_size)
+				// Bounded by the actual node count, not total_size: this
+				// guards unchecked RSU_Nodes.Get()/Vehicle_Nodes.Get() calls
+				// below (NS-3 NodeContainer::Get() has no bounds check), so
+				// total_size let an invalid next_hop in
+				// [real_node_count, total_size) through.
+				else if (next_hop < (N_Vehicles + N_RSUs))
 				{
 					Ptr <Packet> packet_i = Create<Packet> (packet_additional_size);
 					tag_routing.SetNodeId(&destination_node_id);
 					Time ti = MicroSeconds(Simulator::Now().GetMicroSeconds());
 					tag_routing.SetTimestamp(&ti);
 					packet_i->AddPacketTag(tag_routing);
-					
+
 					if (((destination_node_id-2) > N_Vehicles) && (next_hop > N_Vehicles))
 					{
-						Ptr <Node> nu = DynamicCast <Node> (RSU_Nodes.Get(destination_node_id-2-N_Vehicles));	
+						Ptr <Node> nu = DynamicCast <Node> (RSU_Nodes.Get(destination_node_id-2-N_Vehicles));
 				  		Ptr <SimpleUdpApplication> udp_app = DynamicCast <SimpleUdpApplication> (RSU_apps.Get(destination_node_id-2-N_Vehicles));
 				  		cout<<"Ethernet data Unicasting from node "<<destination_node_id - 2<<endl;
 						Simulator::Schedule(Seconds(0),RSU_routing_dataunicast_alone, udp_app, nu, RSU_Nodes.Get(next_hop-N_Vehicles),packet_i);
@@ -122198,7 +122992,9 @@ void hybrid_data_unicast(Ptr <NetDevice> source_nd, Ptr <Node> source_node, uint
 	uint32_t next_hop = find_next_hop(node_index,destination,node_index);
 	cout<<endl<<"next hop from routing table is "<< next_hop <<endl;
 	dsrc_packet_initial_timestamp[nid] = Simulator::Now().GetSeconds();
-	if (next_hop < total_size)
+	// Bounded by the actual node count, not total_size (same fix as the
+	// MacRx() next_hop guard above).
+	if (next_hop < (N_Vehicles + N_RSUs))
 	{
 		CustomDataUnicastTag_Routing tag;
 		//uint32_t nid = uint32_t(ni->GetId());
@@ -122325,7 +123121,7 @@ void routing_dsrc_data_unicast(Ptr <NetDevice> source_nd, Ptr <Node> source_node
 
 	// implement attacks with if condition (this is the palce that packet send initially)
 	// ── Grey Hole Attack: Data Plane (Place 1 - initial send) ────────────────────
-        if(should_drop_grey_hole(source, flow_id))
+        if(should_drop_grey_hole(source, flow_id, Simulator::Now().GetNanoSeconds()))
         {
             cout << "ATTACK PLACE 1: packet DROPPED node=" << source
                 << " flow=" << flow_id
@@ -122333,6 +123129,9 @@ void routing_dsrc_data_unicast(Ptr <NetDevice> source_nd, Ptr <Node> source_node
                 << " t=" << Simulator::Now().GetSeconds() << endl;
             // count received but not forwarded
             if(source < total_size) node_total_received[source]++;
+            // Fix 1 (ZKP cumulative commitment): received but dropped --
+            // this is exactly the gap the ZKP proof must now catch.
+            if (source < N_Vehicles) g_sg_zkp_cum_received[source]++;
             return; // packet dropped — do not send
         }
         else
@@ -122346,6 +123145,23 @@ void routing_dsrc_data_unicast(Ptr <NetDevice> source_nd, Ptr <Node> source_node
             {
                 node_total_received[source]++;
                 node_total_forwarded[source]++;
+                // Fix 1 (ZKP cumulative commitment): this site also counts
+                // as both a receipt and a forward for this source node.
+                if (source < N_Vehicles) {
+                    g_sg_zkp_cum_received[source]++;
+                    g_sg_zkp_cum_forwarded[source]++;
+                }
+                // CQ6 debug (supervisor-requested): confirm this second
+                // increment site is also actually reached at runtime.
+                static uint32_t cq6_site_b_hits = 0;
+                if (cq6_site_b_hits < 5) {
+                    cq6_site_b_hits++;
+                    std::cout << "[CQ6-SITE-B] hit#" << cq6_site_b_hits
+                              << " node=" << source << " flow=" << flow_id
+                              << " new_total_fwd=" << node_total_forwarded[source]
+                              << " new_total_rcv=" << node_total_received[source]
+                              << " t=" << Simulator::Now().GetSeconds() << std::endl;
+                }
             }
             Simulator::Schedule (Seconds(0) , &WifiNetDevice::Send, wdi, packet_i, dest_address, protocolwave);
         }
@@ -122362,7 +123178,9 @@ void centralized_dsrc_data_unicast(Ptr <NetDevice> source_nd, Ptr <Node> source_
 	//uint32_t next_hop = routing_tables[node_index].rows[destination].next_hop;
 	uint32_t next_hop = find_next_hop(node_index,destination,node_index);
 	cout<<endl<<"next hop from routing table is "<< next_hop <<endl;
-	if (next_hop < total_size)
+	// Bounded by the actual node count, not total_size (same fix as the
+	// MacRx() next_hop guard above).
+	if (next_hop < (N_Vehicles + N_RSUs))
 	{
 		Ptr <NetDevice> destination_nd = wifidevices.Get(next_hop);
 		Address addr = destination_nd->GetAddress();
@@ -122568,14 +123386,24 @@ void send_centralized_packets(uint32_t destination)
 
 void initialize_flow_counters()
 {
+	// Bounded by the actual node count, not total_size: delta_values[] is
+	// only populated for real node ids by run_proposed_RL(). Building the
+	// per-node sorted (delta, next_hop, packets) list with total_size
+	// phantom zero-entries mixed in, then sorting it, meant the "last sorted
+	// element gets the rounding deficiency" step (below) could land on a
+	// phantom entry instead of the one real non-zero next-hop -- silently
+	// zeroing every real sub-flow's packet count (confirmed: baseline showed
+	// a real "sub flow load is 1 ... packets 3" entry that a total_size-sized
+	// sort buries once total_size != real_node_count).
+	uint32_t real_node_count = N_Vehicles + N_RSUs;
 	vector<vector<vector<tuple<double,uint32_t,uint32_t>>>> all_sorted_delta_next_hop_flow_size_local;
 
 	for (uint32_t fid=0;fid<2*flows;fid++)
-  	{    
+  	{
 		//(delta_at_nodes_inst+i)->flow_id = flow_ids[i];
 		uint32_t f_size = (demanding_flow_struct_nodes_inst+fid)->f_size;
 		//Initialize transmission opportunity
-		for(uint32_t i=0;i<total_size;i++)
+		for(uint32_t i=0;i<real_node_count;i++)
 		{
 			for(uint32_t j=0;j<f_size+1;j++)
 			{
@@ -122589,10 +123417,10 @@ void initialize_flow_counters()
 				s_flow_counter[fid][i][j] = 0;
 			}
 		}
-		
-		
-		
-		for(uint32_t j =0;j<total_size;j++)
+
+
+
+		for(uint32_t j =0;j<real_node_count;j++)
 		{
 			for(uint32_t c= 170;c<185;c++)
 			{
@@ -122600,17 +123428,17 @@ void initialize_flow_counters()
 				txop_inst[fid].pending_packets[c][j] = 0;
 				txop_inst[fid].last_set_timestamp[c][j] = Seconds(Now().GetSeconds());
 			}
-			
+
 		}
-		
+
 		for(uint32_t i=1;i<Flow_size+1;i++)
 		{
 			routing_packet_final_timestamp[fid][i] = Now().GetSeconds();
 			routing_packet_initial_timestamp[fid][i] = Now().GetSeconds();
 			packet_delay_routing[fid][i] = 0;
 		}
-		
-		for(uint32_t i =0;i<total_size;i++)
+
+		for(uint32_t i =0;i<real_node_count;i++)
 		{
 			for(uint32_t j=1;j<Flow_size+1;j++)
 			{
@@ -122618,31 +123446,31 @@ void initialize_flow_counters()
 				routing_packet_general_initial_timestamp [fid][i][j] = Now().GetSeconds();
 			}
 		}
-		
+
 		vector<vector<tuple<double,uint32_t,uint32_t>>> middle_sorted_delta_next_hop_flow_size_local;
-		for(uint32_t i=0;i<total_size;i++)
+		for(uint32_t i=0;i<real_node_count;i++)
 		{
 			uint32_t main_flow_packets = ceil(f_size*((load_at_nodes+fid)->load_f[i]));
 			vector<tuple<double,uint32_t,uint32_t>> innermost_sorted_delta_next_hop_flow_size;
-			for(uint32_t j=0;j<total_size;j++)
+			for(uint32_t j=0;j<real_node_count;j++)
 			{
 				uint32_t sub_flow_packets = ((delta_at_nodes_inst+fid)->delta_fi_inst[i].delta_values[j])*main_flow_packets;
 				innermost_sorted_delta_next_hop_flow_size.emplace_back((delta_at_nodes_inst+fid)->delta_fi_inst[i].delta_values[j], j, sub_flow_packets);
-				
+
 			}
-			
+
 			sort(innermost_sorted_delta_next_hop_flow_size.begin(), innermost_sorted_delta_next_hop_flow_size.end());
 			uint32_t total_count =0;
-			for(uint32_t j =0;j<total_size;j++)
+			for(uint32_t j =0;j<real_node_count;j++)
 			{
 				auto index_innermost = innermost_sorted_delta_next_hop_flow_size.begin();
 				//cout<<subflow_start_time<<total_packet_counter<<total_packets<<endl;
 				advance(index_innermost,j);
-				double sub_flow_load; 
+				double sub_flow_load;
 				uint32_t nid;
 				uint32_t sub_flow_packets;
 				tie(sub_flow_load, nid, sub_flow_packets) = *index_innermost;
-				if(j < (total_size-1))
+				if(j < (real_node_count-1))
 				{
 					uint32_t checker = j%2;
 					//cout<<"checker is "<<checker<<endl;
@@ -122656,20 +123484,20 @@ void initialize_flow_counters()
 						get<2>(*index_innermost) = ceil(get<2>(*index_innermost));
 						total_count = total_count + ceil(get<2>(*index_innermost));
 					}
-					
-				
+
+
 				}
-				else if (j == (total_size-1))
+				else if (j == (real_node_count-1))
 				{
 					uint32_t original_value = ceil(get<2>(*index_innermost));
 					total_count = total_count + original_value;
 					uint32_t deficiency = main_flow_packets - total_count;
-					get<2>(*index_innermost) = original_value + deficiency;	
+					get<2>(*index_innermost) = original_value + deficiency;
 				}
 			}
-			
+
 			//cout<<"Inner most list size "<<innermost_sorted_delta_next_hop_flow_size.size()<<endl;
-			middle_sorted_delta_next_hop_flow_size_local.emplace_back(innermost_sorted_delta_next_hop_flow_size);	
+			middle_sorted_delta_next_hop_flow_size_local.emplace_back(innermost_sorted_delta_next_hop_flow_size);
 		}
 		//cout<<"Middle list size "<<middle_sorted_delta_next_hop_flow_size_local.size()<<endl;
 		all_sorted_delta_next_hop_flow_size_local.emplace_back(middle_sorted_delta_next_hop_flow_size_local);
@@ -122726,13 +123554,20 @@ void check_and_transmit(uint32_t fid, uint32_t source, uint32_t total_packets, u
 			}
 			else
 			{
+				// Bounded by the actual node count, not total_size:
+				// linklifetimeMatrix_dsrc is a real_node_count x
+				// real_node_count vector<vector<double>> (see
+				// convert_link_lifetimes_dsrc()), so indexing it with i/j up
+				// to total_size-1 is an out-of-bounds vector access
+				// (confirmed segfault).
+				uint32_t real_node_count = N_Vehicles + N_RSUs;
 				bool neighborhood_busy = false;
-				for(uint32_t i=0;i<total_size;i++)
+				for(uint32_t i=0;i<real_node_count;i++)
 				{
 					if((linklifetimeMatrix_dsrc[source][i]) > 0.0)
 					{
 						neighborhood_busy = neighborhood_busy | txop_inst[fid].busy[arguments.channel][i];
-						for(uint32_t j=0;j<total_size;j++)
+						for(uint32_t j=0;j<real_node_count;j++)
 						{
 							if((linklifetimeMatrix_dsrc[i][j]) > 0.0)
 							{
@@ -122741,7 +123576,7 @@ void check_and_transmit(uint32_t fid, uint32_t source, uint32_t total_packets, u
 						}
 					}
 				}
-				
+
 				//if (txop_inst[fid].busy[nid] == true)
 				if (neighborhood_busy == true)
 				{
@@ -122816,7 +123651,18 @@ void initiate_all_flows()
 		uint32_t p_size = (demanding_flow_struct_nodes_inst+fid)->p_size;
 		double total_load = (load_at_nodes+fid)->load_f[source];
 		uint32_t total_packets = ceil(total_load*f_size);
-		
+
+		// CQ1 debug (supervisor-requested): the intended packet count this
+		// flow will actually attempt to send this cycle, and its inputs
+		// (f_size = configured flow_size constant, total_load = computed
+		// per-flow load fraction). data_transmission_period is the cycle
+		// interval (this function is scheduled once per period).
+		std::cout << "[CQ1] flow=" << fid << " t=" << Simulator::Now().GetSeconds()
+		          << " f_size=" << f_size << " total_load=" << total_load
+		          << " total_packets_this_cycle=" << total_packets
+		          << " data_transmission_period=" << data_transmission_period
+		          << std::endl;
+
 		uint32_t zeta;
 		if (flows == 1)
 		{
@@ -122849,7 +123695,8 @@ void initiate_all_flows()
 		advance(index_middle,source);	
 		
 		uint32_t total_subflows =0;
-		for(uint32_t j =0;j<total_size;j++)
+		uint32_t real_node_count = N_Vehicles + N_RSUs;
+		for(uint32_t j =0;j<real_node_count;j++)
 		{
 			if(j >= index_middle->size()) break; // my change
 			auto index_innermost = index_middle->begin();
@@ -122875,16 +123722,20 @@ void initiate_all_flows()
 		struct custom_struct size_channel;
 		size_channel.p_size = p_size;
 		size_channel.channel = 178;
-		for(uint32_t j =0;j<total_size;j++)
+		for(uint32_t j =0;j<real_node_count;j++)
 		{
+			if(j >= index_middle->size()) break; // bounded like the loop above -- the
+			// original total_size bound here had no guard at all and advanced/
+			// dereferenced a past-end iterator once total_size != real node count
+			// (segfault: "advance(index_innermost,j)" past index_middle->end()).
 			auto index_innermost = index_middle->begin();
 			//cout<<subflow_start_time<<total_packet_counter<<total_packets<<endl;
 			advance(index_innermost,j);
-			double sub_flow_load; 
+			double sub_flow_load;
 			uint32_t nid;
 			uint32_t sub_flow_packets;
 			tie(sub_flow_load, nid, sub_flow_packets) = *index_innermost;
-			//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;		
+			//cout<<"sub flow load is "<<sub_flow_load<<" next hop "<<nid<<"packets "<<sub_flow_packets<<endl;
 			uint32_t sub_flow_counter = 0;
 			//cout<<sub_flow_counter<<endl;
 			
@@ -140088,9 +140939,24 @@ int main(int argc, char *argv[])
     cmd.AddValue ("qf", "qf", qf);
     cmd.AddValue ("enable_cp_attack", "1=enable controller-plane attack (Algorithm 2 / S4-S6 demo)", enable_cp_attack);
     cmd.AddValue ("cp_attack_number", "4=CP-FR, 5=CP-IT, 6=CP-TS", cp_attack_number);
+    cmd.AddValue ("N_Controllers", "M = number of registered SDN controllers (report's Multi-Controller Flat Architecture); vehicles are assigned round-robin and round(cp_attack_percentage/100*M) controllers (min 1) are malicious", N_Controllers);
+    cmd.AddValue ("cp_attack_percentage", "percentage of the M controllers that are malicious", cp_attack_percentage);
     cmd.AddValue ("enable_shield_gh", "1=SHIELD-GH detection/isolation ON (default), 0=OFF for NetAnim attack video", enable_shield_gh);
+    cmd.AddValue ("enable_signatures", "1=S1-S6 signature evaluation ON (default), 0=OFF (ablation DA5)", enable_signatures);
+    cmd.AddValue ("enable_matd", "1=MATD mobility-aware trust decay ON (default), 0=raw PDR, no correction (ablation DA1/DA3)", enable_matd);
+    cmd.AddValue ("enable_zkp_gate", "1=DEBSC dual gate (statistical AND ZKP) ON (default), 0=statistical gate alone (ablation DA1/DA2)", enable_zkp_gate);
     cmd.AddValue ("detection_mode", "SHIELD-GH detection mode: 'lightweight' (rule-based S1-S6 + HMAC + threshold FlowMod, default) or 'full' (adds LLM+FL fusion)", sg_detection_mode);
     cmd.AddValue ("enable_full_mode_ai", "1=Task 8 full-mode AI: NS-3 calls shield_gh_ml/ns3_infer.py (LLM+FL fusion, Eq. 3.29) each window; fused verdict drives the MCC PEM (off by default)", enable_full_mode_ai);
+    cmd.AddValue ("sg_ai_mu1", "Fix 5: fusion weight mu1 (rule signature) override for the DA6 grid search; unset=ns3_infer.py default", sg_ai_mu1);
+    cmd.AddValue ("sg_ai_mu3", "Fix 5: fusion weight mu3 (reputation deficit) override; supervisor fixed this at 0.15", sg_ai_mu3);
+    // Task 8.5 sensitivity-analysis grid-search surface (main.tex tab:gh_sensitivity)
+    cmd.AddValue ("sg_W",       "LW-DP-Det observation window W, slots {5,10,20}", sg_W);
+    cmd.AddValue ("sg_tau_f",   "S1 PDR threshold tau_f {0.50,0.60,0.70}", sg_tau_f);
+    cmd.AddValue ("sg_eps_f",   "S1 variance bound epsilon_f {0.10,0.20,0.30}", sg_eps_f);
+    cmd.AddValue ("sg_tau_it",  "S2 per-slot threshold tau_it {0.60,0.70,0.80}", sg_tau_it);
+    cmd.AddValue ("sg_gamma_it","S2 autocorrelation gamma_it {1.10,1.30,1.50}", sg_gamma_it);
+    cmd.AddValue ("sg_tau_ts",  "S3 KL-divergence threshold tau_ts {0.30,0.50,0.70}", sg_tau_ts);
+    cmd.AddValue ("sg_theta_R", "DEBSC reputation isolation threshold theta_R {0.30,0.40,0.50}", sg_theta_R);
     cmd.AddValue ("live_blockchain", "1=NS-3 invokes the REAL debsc Fabric chaincode during the sim (needs test-network up)", sg_live_blockchain);
     cmd.AddValue ("enable_crypto_hook", "1=NS-3 runs the REAL PQC crypto (Kyber/Dilithium/PQC-LKH) on each isolated node during the sim (Task 05)", sg_crypto_hook);
     cmd.AddValue ("video_mode", "1=cap packets per flow for a clear NetAnim attack video", video_mode);
@@ -140106,7 +140972,23 @@ int main(int argc, char *argv[])
     cmd.AddValue ("use_vcbc_detection", "1=enable SOA2 SCBC/VCBC in-sim monitor + CSV feed", use_vcbc_detection);
     cmd.AddValue ("use_soa3_detection", "1=enable SOA3 Random-Forest IDS in-sim feature feed + CSV", use_soa3_detection);
     cmd.AddValue ("N_Vehicles", "number of vehicles (routing_test default 4; raise for attacker-% sweep, max total_size)", N_Vehicles);
+    cmd.AddValue ("num_vehicles", "alias for --N_Vehicles (same variable)", N_Vehicles);
+    // Task 9 fix (supervisor-flagged, 2026-08-09): with no explicit RNG run
+    // number, ns-3's default RngSeedManager state is the same on every
+    // invocation, so a fixed CLI config always replays the IDENTICAL event
+    // trace (confirmed: 5 repeated real runs of the same SOA1 sweep point
+    // produced bit-identical CSVs and MCC to 3 decimal places). That means
+    // a single "real NS-3 run" is one fixed deterministic sample, not a
+    // validated result -- a method can score MCC=1.0 simply because this
+    // one arbitrary trace happens to be easy for it, with no way to tell
+    // that apart from genuine detection quality. --rng_run lets a sweep
+    // driver vary the trace across repeated trials (multi-seed evaluation)
+    // while defaulting to run=1 (ns-3's own default) so every existing
+    // script/reported result that does NOT pass this flag is completely
+    // unaffected -- opt-in only, no change to prior tasks' numbers.
+    cmd.AddValue ("rng_run", "ns-3 RngSeedManager run number; vary this across repeated invocations for genuine multi-seed evaluation (default 1 = ns-3's own default, i.e. unchanged prior behaviour)", g_rng_run);
     cmd.Parse (argc, argv);
+    RngSeedManager::SetRun(g_rng_run);
     // Apply the dual-mode detection selector to the shield_gh pipeline.
     sg_set_mode(sg_detection_mode);
     std::cout << "[SHIELD-GH] Detection mode = "
@@ -140116,9 +140998,11 @@ int main(int argc, char *argv[])
     if (routing_test == true)
     {
      	// N_Vehicles defaults to 4 (global) but may be overridden via
-     	// --N_Vehicles for the attacker-% sweep. Clamp to array ceiling.
+     	// --N_Vehicles/--num_vehicles (e.g. for N=200 experiment runs).
+     	// Clamp only guards the real array ceiling (total_size=205, minus
+     	// N_RSUs), not an artificial small-N limit.
      	if (N_Vehicles == 0) N_Vehicles = 4;
-     	if (N_Vehicles > (uint32_t)total_size) N_Vehicles = total_size;
+     	if (N_Vehicles > (uint32_t)total_size - N_RSUs) N_Vehicles = total_size - N_RSUs;
      	N_RSUs = 1;
      	//flows = 1;
     }
@@ -141509,23 +142393,89 @@ int main(int argc, char *argv[])
 					
 					uint32_t destination;
 					uint32_t source;
-					
+
 					if (routing_test == true)
     					{
-    						if(i==0)
+    						// Round-robin source/destination pairs across all
+    						// N_Vehicles nodes instead of hardcoding every flow
+    						// to the fixed pair (0,3). The old code set flow 0
+    						// to source=0/dest=3 and EVERY other flow (i=1,2,3)
+    						// to source=3/dest=0 -- so regardless of N_Vehicles,
+    						// only nodes 0 and 3 (and whatever lay on the path
+    						// between them) ever carried traffic, leaving most
+    						// nodes structurally unreachable by any flow
+    						// (confirmed: Q-new8/Q-new9, only 2 of 20 nodes ever
+    						// saw traffic at N=20, unchanged from t=30s to
+    						// t=61s).
+    						//
+    						// First attempt paired node k with k+N_Vehicles/2
+    						// (e.g. 0<->10 at N=20) to spread flows across the
+    						// whole range, but that produced ZERO stable paths
+    						// for every flow (confirmed even with 0 attackers --
+    						// a pure topology/range issue, not an attack
+    						// effect): at this node density/mobility, pairs
+    						// that far apart are simply out of multi-hop range
+    						// under link_lifetime_threshold. The original
+    						// hardcoded pair (0,3) worked because those two
+    						// specific nodes happened to be close enough in the
+    						// generated topology. Use the same short hop
+    						// distance (3) that's known to work, offset per
+    						// flow, so flows still spread across all N nodes as
+    						// sources but stay within a distance that the
+    						// topology can actually route.
+    						//
+    						// Supervisor Action 1 (route-availability gate always
+    						// withholds isolation -- 92/92 in every DA run): traced
+    						// to the underlying topology, not a code bug. This
+    						// mobility scenario's connectivity graph (confirmed
+    						// deterministic/reproducible across runs at N=20) is a
+    						// pure CHAIN for the first ~1/3 of node ids (each node
+    						// connects only to its immediate neighbour, e.g.
+    						// 0-1-2-3-4-5-6) with genuinely zero redundancy --
+    						// exactly where hop_distance=3 round-robin was placing
+    						// every flow. The remaining ~2/3 of node ids form a
+    						// real 2-row MESH (row A: k-(k+1)-(k+2)...; row B
+    						// offset by +half_row; cross-links k<->k+half_row),
+    						// where excluding any single interior node still
+    						// leaves an alternate route via the cross-links and
+    						// the other row -- verified directly (e.g. removing
+    						// node 8 still lets 7 reach 9 via 7-14-15-16-9).
+    						// Bias flow placement into that meshed region instead
+    						// of always starting at node 0, so a genuine fraction
+    						// of flows land where a redundant path structurally
+    						// exists (topology change per the supervisor's
+    						// instruction -- not an algorithm change).
+    						const uint32_t hop_distance = 3;
+    						// N_Vehicles/3 landed exactly ON the chain/mesh
+    						// boundary (confirmed: flow 0 = 6->9 got ZERO
+    						// stable paths in a real B1 baseline run -- node 6
+    						// is still chain-only, the mesh actually starts at
+    						// node 7 in this topology). +1 to clear it.
+    						// Fix F (supervisor-requested): probed mesh_start=4,5,6
+    						// directly -- confirmed 0 stable paths for all three
+    						// (real BFS-based reachability check, not the old
+    						// off-by-one bug re-appearing). The chain/mesh boundary
+    						// genuinely is at node 7 in this mobility scenario; see
+    						// answers_ZQ_TQ_PQ.md-adjacent round for the probe
+    						// evidence. Reverted to the verified-working value.
+    						uint32_t mesh_start = N_Vehicles / 3 + 1; // skip the chain-only zone
+    						uint32_t mesh_span   = N_Vehicles - mesh_start;
+    						if (mesh_span >= 2)
     						{
-    							destination = 3; // 11 my change
-    							source = 0;
+    							source = mesh_start + (i % mesh_span);
+    							destination = mesh_start + ((source - mesh_start + hop_distance) % mesh_span);
     						}
     						else
     						{
-    							source = 3; // 11 my change
-    							destination = 0;
+    							source = i % N_Vehicles;
+    							destination = (source + hop_distance) % N_Vehicles;
     						}
+    						if (destination == source)
+    							destination = (source + 1) % N_Vehicles;
     					}
     					else
     					{
-    					
+
 						srand(t*i);
 				  		destination = rand()%total_size;
 				  		srand(1.15*t*i);
@@ -142006,7 +142956,7 @@ int main(int argc, char *argv[])
   Config::ConnectFailSafe("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/ns3::RegularWifiMac/DcaTxop/Queue/Enqueue",MakeCallback (&Enqueue));
   //Config::ConnectFailSafe("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/ns3::RegularWifiMac/DcaTxop/Queue/Dequeue",MakeCallback (&Dequeue)); 
   
-  AnimationInterface anim("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/routing.xml");  
+  AnimationInterface anim("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/routing.xml");  
   g_anim = &anim;  // store global pointer
 
   if (N_RSUs > 0)
@@ -142058,7 +143008,7 @@ int main(int argc, char *argv[])
 	    anim.UpdateNodeSize(node_management->GetId(),40.0,40.0);
     }
  
-  //AnimationInterface anim("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/routing.xml"); 
+  //AnimationInterface anim("/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/routing.xml"); 
   
   /*
   for (uint32_t i=0; i<Custom_Nodes.GetN() ; i++)
@@ -142124,6 +143074,16 @@ int main(int argc, char *argv[])
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
   sg_live_finalize();   // deterministic final on-chain isolation (live blockchain)
+  print_shield_gh_cumulative_detection_metrics();  // DQ1: true run-wide MCC
+  print_shield_gh_per_node_cumulative();           // NQ6: per-node TP/FN
+  print_per_flow_pdr();                            // PDQ3: per-flow PDR
+  // CQ6: true run-total node_total_forwarded[] (accumulated in the shadow
+  // counters, since the real array is reset every window).
+  reset_per_node_pdr_counters(); // flush the final window into cq_cum_*
+  cout << "=== CQ6 node_total_forwarded run totals ===" << endl;
+  for (uint32_t n = 0; n < N_Vehicles; n++)
+      cout << "  [CQ6] node=" << n << " cum_forwarded=" << cq_cum_forwarded[n]
+           << " cum_received=" << cq_cum_received[n] << endl;
   Simulator::Destroy();
   
  

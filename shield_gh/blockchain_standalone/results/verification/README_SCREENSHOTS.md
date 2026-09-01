@@ -17,7 +17,7 @@ chaincode deployed (see Task 2). Stop it afterwards with:
 Eq. 3.30 ZKP) is functionally correct against dummy data. No Fabric needed.
 
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone
 export PATH=$PATH:/usr/local/go/bin
 bash run_tests.sh
 ```
@@ -35,13 +35,13 @@ cd ~/fabric-samples/test-network
 # 1) base 2-org network + channel
 ./network.sh up createChannel -c mychannel
 ./network.sh deployCC -ccn debsc \
-  -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/chaincode-debsc \
+  -ccp /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/chaincode-debsc \
   -ccl go -c mychannel
 # 2) add the THIRD org/peer and join it to the channel
 cd addOrg3 && ./addOrg3.sh up -c mychannel && cd ..
 # 3) install + approve debsc on org3 (so org3 can endorse) — see
 #    results/verification/setup_org3_debsc.sh for the exact commands
-bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/results/verification/setup_org3_debsc.sh
+bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/results/verification/setup_org3_debsc.sh
 
 docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -iE "NAMES|peer0|orderer"
 ```
@@ -58,7 +58,7 @@ SHIELD-GH detects a grey-hole it fires `EvaluateIsolation` (Eq. 3.19) on-chain
 in real time.
 
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 LD_LIBRARY_PATH=build/lib:build ./build/scratch/routing \
   --enable_shield_gh=1 --attack_number=1 --drop_rate=60 --live_blockchain=1 --simTime=25
 ```
@@ -100,18 +100,18 @@ DROPS the least-trusted — genuine selection, not the static "always all peers"
 
 ```bash
 grep -oE 'endorsers=\[[^]]*\]' \
-  /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/results/live_invoke.log \
+  /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/results/live_invoke.log \
   | sort | uniq -c
 ```
 Screenshot: different top-2 pairs across `{org1,org2,org3}` (e.g. `[org3,org1]`,
 `[org2,org3]`) — the chosen endorser pair follows live trust; org3 is a real
 participant. Optional manual demo showing all three rotate:
 ```bash
-BR=/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/debsc_invoke.sh
+BR=/home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/debsc_invoke.sh
 SG_ENDORSER_RANK=org1,org2,org3 SG_ENDORSER_K=2 bash $BR invoke CommitForwardingRecord '["nodeX","50","100"]'
 SG_ENDORSER_RANK=org3,org1,org2 SG_ENDORSER_K=2 bash $BR invoke CommitForwardingRecord '["nodeX","50","100"]'
 SG_ENDORSER_RANK=org2,org3,org1 SG_ENDORSER_K=2 bash $BR invoke CommitForwardingRecord '["nodeX","50","100"]'
-tail -3 /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/results/live_invoke.log
+tail -3 /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/results/live_invoke.log
 # -> endorsers=[org1,org2] / [org3,org1] / [org2,org3]  all status:200
 ```
 Implementation: `debsc_invoke.sh` (SG_ENDORSER_RANK / SG_ENDORSER_K, 3-peer map) +
@@ -135,14 +135,14 @@ RSUs. The k_min=10 hard floor guarantees a real BFT quorum even for smaller pool
 
 **One-shot demo (register 64 RSUs + select + bypass modes):**
 ```bash
-bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/show_to_supervisor.sh
+bash /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/show_to_supervisor.sh
 ```
 Screenshot section [4]: two txs each select 17 different endorsers (Ω(t)),
 `f_max=16`, all proofs verify. Log: `taskE_vrf_64rsu_scale.log`
 
 **5a — unit tests (all 5 steps):**
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone
 export PATH=$PATH:/usr/local/go/bin && bash run_tests.sh
 ```
 Screenshot the 7 `TestSelectEndorsers_*`/`TestVRFVerify_*` PASS lines +
@@ -163,7 +163,7 @@ EMERGENCY (pool empty → single highest-trust endorser + audit).
 
 **5d — NS-3 drives it live:**
 ```bash
-cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35
+cd /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62
 LD_LIBRARY_PATH=build/lib:build ./build/scratch/routing \
   --enable_shield_gh=1 --attack_number=1 --drop_rate=60 --live_blockchain=1 --simTime=25
 ```

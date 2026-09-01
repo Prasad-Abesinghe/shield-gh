@@ -1,0 +1,53 @@
+
+[sg_W] Observation window (slots) -- grid [5, 10, 20] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  W=5      -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.2s)
+  W=10     -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+  W=20     -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.3s)
+
+[sg_tau_f] S1 PDR threshold -- grid [0.5, 0.6, 0.7] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  tau_f=0.5    -> MCC=+0.9300  TP=24 TN=26 FP=0 FN=2  ACC=96.2%  FPR=0.0%  (22.5s)
+  tau_f=0.6    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.4s)
+  tau_f=0.7    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+
+[sg_eps_f] S1 variance bound -- grid [0.1, 0.2, 0.3] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  epsilon_f=0.1    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+  epsilon_f=0.2    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+  epsilon_f=0.3    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+
+[sg_tau_it] S2 per-slot threshold -- grid [0.6, 0.7, 0.8] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  tau_it=0.6    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.6s)
+  tau_it=0.7    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.8s)
+  tau_it=0.8    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.7s)
+
+[sg_gamma_it] S2 autocorrelation -- grid [1.1, 1.3, 1.5] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  gamma_it=1.1    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.9s)
+  gamma_it=1.3    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.4s)
+  gamma_it=1.5    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.6s)
+
+[sg_tau_ts] S3 KL-divergence threshold -- grid [0.3, 0.5, 0.7] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  tau_ts=0.3    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.4s)
+  tau_ts=0.5    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.8s)
+  tau_ts=0.7    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.1s)
+
+[sg_theta_R] DEBSC reputation isolation threshold -- grid [0.3, 0.4, 0.5] (others at default: {'sg_W': 10, 'sg_tau_f': 0.75, 'sg_eps_f': 0.2, 'sg_tau_it': 0.7, 'sg_gamma_it': 1.3, 'sg_tau_ts': 0.5, 'sg_theta_R': 0.6})
+  theta_R=0.3    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.3s)
+  theta_R=0.4    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.5s)
+  theta_R=0.5    -> MCC=+1.0000  TP=26 TN=26 FP=0 FN=0  ACC=100.0%  FPR=0.0%  (22.5s)
+
+[sweep] CSV -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/sensitivity_analysis/gh_param_sweep_results.csv
+
+==============================================================================
+ BEST VALUE PER PARAMETER (highest CUM M1b MCC, 15s single-point run)
+==============================================================================
+  W          (Observation window (slots)      ): default=10  best=10  MCC=+1.0000  [unchanged]
+  tau_f      (S1 PDR threshold                ): default=0.75  best=0.6  MCC=+1.0000  [CHANGED]
+  epsilon_f  (S1 variance bound               ): default=0.2  best=0.2  MCC=+1.0000  [unchanged]
+  tau_it     (S2 per-slot threshold           ): default=0.7  best=0.7  MCC=+1.0000  [unchanged]
+  gamma_it   (S2 autocorrelation              ): default=1.3  best=1.3  MCC=+1.0000  [unchanged]
+  tau_ts     (S3 KL-divergence threshold      ): default=0.5  best=0.5  MCC=+1.0000  [unchanged]
+  theta_R    (DEBSC reputation isolation threshold): default=0.6  best=0.4  MCC=+1.0000  [CHANGED]
+
+[sweep] optimal parameters -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/sensitivity_analysis/optimal_params.json
+[sweep] figure -> /home/sdvn_ssh/ns-allinone-3.35/ns-3.35/62/scratch/sensitivity_analysis/fig7_gh_param_sweep.png
+
+[sweep] DONE. Next: python3 apply_optimal_params.py to write these as the new routing.cc defaults.

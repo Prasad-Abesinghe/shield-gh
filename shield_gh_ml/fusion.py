@@ -27,9 +27,35 @@ from llm_scorer import LLMScorer
 
 @dataclass
 class FusionWeights:
-    mu1: float = 0.34   # rule-based signature
-    mu2: float = 0.33   # LLM semantic score
-    mu3: float = 0.33   # blockchain reputation deficit
+    # Fix 5 (supervisor, prior round): grid search on the live DA6 setup
+    # (v=140, N_Vehicles=20, attack_percentage=40, all fixes 1-4 applied)
+    # over mu3=0.15 fixed, mu1 in {0.55, 0.65, 0.75} (mu2 = 1-mu1-mu3). All
+    # three mu1 values produced IDENTICAL results (Cum TP=213 TN=308 FP=28
+    # FN=11, MCC=0.86) at theta_det=0.5 -- the grid search was flat because
+    # every FP/TP window's S_total term (binary, in {0,1}) alone was enough
+    # to clear theta_det=0.5 regardless of mu1 in that range, so moving mu1
+    # never flipped a verdict; theta_det itself, not mu1, was the untuned
+    # variable.
+    #
+    # Fix 1 (supervisor, prior round -- REVERTED this round, see Fix A below):
+    # raised mu2 (LLM weight) and theta_det so the LLM's Q_i and the
+    # reputation deficit term actually participate in borderline verdicts
+    # instead of being drowned out by a saturated S_total term. This worked
+    # for node 19's late-window FP, but the supervisor determined it was the
+    # wrong fix: with S_total's weight effectively squeezed and theta_det
+    # raised to 0.65, DA5 (signatures-off ablation) collapsed to MCC=0.00 by
+    # mathematical construction (max score without signatures = mu2+mu3 =
+    # 0.50 < theta_det=0.65, can never fire), and DA2/DA4 dropped from 0.96
+    # to 0.89 as a side effect on unrelated nodes.
+    #
+    # Fix A (supervisor, this round): revert to the original weights below.
+    # Node 19's specific FP is now handled by a targeted Q_i veto in
+    # shield_gh_integration.h (Fix B) instead of a global threshold change,
+    # so this revert should restore DA2/DA4 back to their pre-Fix-1 ~0.96
+    # MCC without breaking DA5.
+    mu1: float = 0.65   # rule-based signature
+    mu2: float = 0.20   # LLM semantic score
+    mu3: float = 0.15   # blockchain reputation deficit
 
     def __post_init__(self):
         s = self.mu1 + self.mu2 + self.mu3
@@ -46,7 +72,7 @@ class Evidence:
 
 class FusionEngine:
     def __init__(self, scorer: LLMScorer, weights: FusionWeights = None,
-                 theta_det: float = 0.5):
+                 theta_det: float = 0.50):
         self.scorer = scorer
         self.w = weights or FusionWeights()
         self.theta_det = theta_det

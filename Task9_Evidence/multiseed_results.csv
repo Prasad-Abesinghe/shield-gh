@@ -1,0 +1,27 @@
+method,seed,mcc
+SHIELD-GH (proposed),1,0.9400
+SHIELD-GH (proposed),2,0.5800
+SHIELD-GH (proposed),3,0.9400
+SHIELD-GH (proposed),4,0.9400
+SHIELD-GH (proposed),5,0.8800
+SOA1 (Malik DPGHA),1,1.0000
+SOA1 (Malik DPGHA),2,1.0000
+SOA1 (Malik DPGHA),3,1.0000
+SOA1 (Malik DPGHA),4,1.0000
+SOA1 (Malik DPGHA),5,1.0000
+SOA2 (SCBC/VCBC),1,1.0000
+SOA2 (SCBC/VCBC),2,0.5773
+SOA2 (SCBC/VCBC),3,0.5773
+SOA2 (SCBC/VCBC),4,1.0000
+SOA2 (SCBC/VCBC),5,1.0000
+SOA3 (Random Forest),1,0.8915
+SOA3 (Random Forest),2,0.9452
+SOA3 (Random Forest),3,0.9452
+SOA3 (Random Forest),4,0.8915
+SOA3 (Random Forest),5,0.9452
+
+method,mean_mcc,std_mcc,min_mcc,max_mcc
+SHIELD-GH (proposed),0.8560,0.1399,0.5800,0.9400
+SOA1 (Malik DPGHA),1.0000,0.0000,1.0000,1.0000
+SOA2 (SCBC/VCBC),0.8309,0.2071,0.5773,1.0000
+SOA3 (Random Forest),0.9237,0.0263,0.8915,0.9452

@@ -168,7 +168,7 @@ scratch/
 
 ### 5.1 Build
 ```bash
-cd ~/ns-allinone-3.35/ns-3.35
+cd ~/ns-allinone-3.35/ns-3.35/62
 ./waf build --targets=routing
 ```
 
@@ -187,7 +187,7 @@ cd ~/ns-allinone-3.35/ns-3.35
 ### 5.3 NetAnim attack video (detection OFF, packets reduced)
 ```bash
 ./waf --run "routing ... --enable_shield_gh=0 --video_mode=1 --video_flow_packets=4 --attack_number=1"
-# Open ~/ns-allinone-3.35/ns-3.35/routing.xml in NetAnim
+# Open ~/ns-allinone-3.35/ns-3.35/62/routing.xml in NetAnim
 ```
 
 ### 5.4 Real Hyperledger Fabric blockchain
@@ -195,13 +195,13 @@ cd ~/ns-allinone-3.35/ns-3.35
 cd ~/fabric-samples/test-network
 ./network.sh up createChannel -c mychannel
 ./network.sh deployCC -ccn debsc -ccp <abs path>/shield_gh/blockchain_standalone/chaincode-debsc -ccl go -c mychannel
-bash ~/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/debsc_demo.sh
+bash ~/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/debsc_demo.sh
 ./network.sh down   # when finished
 ```
 
 ### 5.5 Smart contract verification
 ```bash
-bash ~/ns-allinone-3.35/ns-3.35/scratch/shield_gh/blockchain_standalone/run_tests.sh
+bash ~/ns-allinone-3.35/ns-3.35/62/scratch/shield_gh/blockchain_standalone/run_tests.sh
 ```
 
 ---

@@ -1,0 +1,16 @@
+E1 summary -- 180 rows loaded
+
+Detection quality (M1 = MCC), attacker rows p>0 only:
+  SHIELD-GH (full)             cells= 30/30 mean MCC=0.657 min=-0.190 max=0.930
+  SHIELD-GH (lightweight)      cells= 30/30 mean MCC=0.692 min=-0.030 max=0.910
+  B1: Malik (2023)             cells= 30/30 mean MCC=0.600 min=-0.110 max=0.770
+  B2: VCBC (2024)              cells= 30/30 mean MCC=0.661 min=0.000 max=0.900
+  B3: FL-BERT/RF (2024)        cells= 30/30 mean MCC=0.677 min=-0.100 max=0.910
+
+False-positive check (p=0%, no attackers present):
+  higher accuracy = fewer legitimate nodes wrongly flagged
+  SHIELD-GH (full)             accuracy mean=93.01% min=92.50% max=93.39%
+  SHIELD-GH (lightweight)      accuracy mean=96.25% min=96.25% max=96.25%
+  B1: Malik (2023)             accuracy mean=96.55% min=96.25% max=96.61%
+  B2: VCBC (2024)              accuracy mean=93.90% min=93.75% max=94.64%
+  B3: FL-BERT/RF (2024)        accuracy mean=96.49% min=96.25% max=97.68%

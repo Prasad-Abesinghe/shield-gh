@@ -1825,7 +1825,7 @@ sudo apt-get install -y liboqs-dev  # Open Quantum Safe for Kyber/Dilithium
 pip install torch transformers flower numpy pandas matplotlib
 
 # 2. Build NS-3 with SHIELD-GH modules
-cd ns-allinone-3.35/ns-3.35
+cd ns-allinone-3.35/ns-3.35/62
 ./waf configure --enable-examples
 ./waf build
 
@@ -1867,7 +1867,7 @@ See only the SHIELD-GH evidence (filtered output)
 
 
 
-cd ~/ns-allinone-3.35/ns-3.35
+cd ~/ns-allinone-3.35/ns-3.35/62
 # DP-FR -> should show S1:1 S2:0
 ./waf --run "routing --N_Vehicles=20 --simTime=15 --architecture=0 --routing_algorithm=4 --maxspeed=80 --attack_number=1" 2>&1 | grep "LW-DP-Det" | head -4
 

@@ -46,11 +46,26 @@ import os
 import sys
 import time
 
+# BUG FIX (found via strace during DA5/DA6 diagnostics): this script is
+# invoked via system() once per live NS-3 evaluation window. NumPy's BLAS
+# backend auto-spawns one thread per CPU core (32 here) on first use; under
+# repeated rapid invocation from a forked subprocess context, those 32-thread
+# pools intermittently deadlocked on futex (confirmed directly: strace showed
+# exactly 32 threads all blocked in futex when the hang occurred). The model
+# here is tiny (512-dim hashed features, ~2800 training rows) and gains
+# nothing from multi-threaded BLAS -- must be set before numpy is imported
+# anywhere (thread count is fixed at BLAS library init).
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
 # make sibling modules importable when called with an absolute path from C++
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from llm_scorer import LLMScorer, CLASSES          # noqa: E402
 from fusion import FusionEngine, FusionWeights, Evidence  # noqa: E402
+import numpy as np  # noqa: E402 -- Fix E: FL global weight norm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TRAIN_JSONL = os.path.join(HERE, "selection", "dataset.jsonl")
@@ -152,27 +167,139 @@ def build_scorer(genuine: bool) -> LLMScorer:
     scorer = LLMScorer(force_fallback=not genuine)
     texts, labels = load_training_set()
     if texts:
-        # fallback backend is fast; genuine is clamped to 3 epochs internally
-        scorer.fit(texts, labels, epochs=200 if not genuine else 3)
+        # WORKAROUND (found during DA5/DA6 diagnostics): this script retrains
+        # a fresh model from scratch on EVERY invocation (once per live
+        # NS-3 evaluation window, ~once/sec of simulated time). At the
+        # previous fallback epoch count (200) a single call took 2+ minutes
+        # of wall-clock, making any live full-mode-AI run hang indefinitely
+        # -- despite the "fallback is fast" comment this replaces, that was
+        # never actually true at 200 epochs. Dropped to 3 epochs (matching
+        # "genuine" mode) purely to unblock DA5/DA6; this does not fix the
+        # underlying inefficiency (retraining per-window instead of caching/
+        # reusing a trained model across windows), which is a separate,
+        # larger issue flagged for follow-up. Detection-quality numbers from
+        # runs using this reduced epoch count should be read as provisional.
+        scorer.fit(texts, labels, epochs=3)
     return scorer
+
+
+FL_STATE_PATH = os.path.join(HERE, ".fl_state.pkl")
+FL_ROUND_EVERY_N_WINDOWS = 10  # Fix E (supervisor-requested): trigger run_round()
+                                # every 10 detection windows, not every window --
+                                # FedAvg across all vehicles every ~1s is neither
+                                # realistic nor affordable.
+
+
+def _load_fl_state():
+    """Fix E: persistent FL state across invocations (this script is still
+    invoked once per system() call -- the FederatedAggregator + per-vehicle
+    VehicleClient objects are pickled to disk between calls so they survive
+    across windows, instead of being rebuilt from scratch every time)."""
+    import pickle
+    if os.path.exists(FL_STATE_PATH):
+        with open(FL_STATE_PATH, "rb") as f:
+            return pickle.load(f)
+    return dict(clients={}, aggregator=None, window_count=0)
+
+
+def _save_fl_state(state):
+    import pickle
+    with open(FL_STATE_PATH, "wb") as f:
+        pickle.dump(state, f)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", dest="out", required=True)
-    ap.add_argument("--theta", type=float, default=0.5)
+    # Fix 1 (supervisor, prior round) raised this 0.5 -> 0.65. Fix A
+    # (supervisor, this round) reverts it: theta_det=0.65 combined with the
+    # squeezed mu1 made DA5 (signatures-off) mathematically incapable of ever
+    # firing and dragged DA2/DA4 down too. Node 19's FP is now handled by a
+    # targeted Q_i veto (Fix B, shield_gh_integration.h) instead of a global
+    # threshold change. Still CLI-overridable.
+    ap.add_argument("--theta", type=float, default=0.50)
+    ap.add_argument("--mu1", type=float, default=None,
+                    help="Fix 5 (supervisor): override rule-signature fusion "
+                         "weight (default: FusionWeights defaults if unset). "
+                         "mu2 is derived as 1-mu1-mu3 when either is passed.")
+    ap.add_argument("--mu3", type=float, default=None,
+                    help="Fix 5: override reputation-deficit fusion weight "
+                         "(supervisor fixed this at 0.15 for the grid search).")
     ap.add_argument("--genuine", action="store_true",
                     help="force genuine Qwen2.5-7B (GPU); default fallback CPU")
+    ap.add_argument("--fresh_state", action="store_true",
+                    help="Fix 4 (supervisor): delete any persisted .fl_state.pkl "
+                         "before loading, so this invocation starts a genuine "
+                         "FL round 1 instead of inheriting round/client state "
+                         "left over from a PRIOR, separate DA run that shared "
+                         "the same physical state file (confirmed contamination: "
+                         "DA6 previously started from DA5's leftover round-2 "
+                         "state). The NS-3 side passes this only on the first "
+                         "evaluation window of a run (g_sg_window==0), so state "
+                         "still persists correctly ACROSS windows within one run.")
     args = ap.parse_args()
 
+    if args.fresh_state and os.path.exists(FL_STATE_PATH):
+        os.remove(FL_STATE_PATH)
+        print(f"[SHIELD-GH ns3_infer] --fresh_state: removed stale {FL_STATE_PATH}",
+              file=sys.stderr)
+
     t_load = time.time()
-    scorer = build_scorer(args.genuine)
-    engine = FusionEngine(scorer, FusionWeights(), theta_det=args.theta)
-    load_ms = (time.time() - t_load) * 1000.0
 
     with open(args.inp) as f:
         records = [json.loads(l) for l in f if l.strip()]
+
+    # ── Fix E: FL wiring ──────────────────────────────────────────────────
+    # Each node's live window becomes one training example for that node's
+    # VehicleClient (text = tokenised window, label = coarse ground-truth
+    # class from is_attacker/rule -- the only labels genuinely available at
+    # live inference time, unlike the offline seven-class synthetic set).
+    from federated import VehicleClient, FederatedAggregator, BlockchainCommitStore
+    state = _load_fl_state()
+    for rec in records:
+        node = int(rec.get("node", -1))
+        text = tokenise_window(rec)
+        is_attacker = bool(rec.get("is_attacker", 0)) or bool(rec.get("rule", 0))
+        label = 1 if is_attacker else 0  # coarse BENIGN(0) vs ATTACK(1)
+        if node not in state["clients"]:
+            state["clients"][node] = VehicleClient(vehicle_id=node, texts=[], labels=[])
+        state["clients"][node].texts.append(text)
+        state["clients"][node].labels.append(label)
+
+    state["window_count"] += 1
+    fl_round_ran = False
+    if state["aggregator"] is None and len(state["clients"]) > 0:
+        state["aggregator"] = FederatedAggregator(
+            list(state["clients"].values()), BlockchainCommitStore())
+    if (state["aggregator"] is not None
+            and state["window_count"] % FL_ROUND_EVERY_N_WINDOWS == 0):
+        state["aggregator"].run_round(epochs=3)  # 3 epochs, matches the
+                                                   # live-mode fallback cost
+                                                   # fixed earlier this session
+        fl_round_ran = True
+
+    if state["aggregator"] is not None and state["aggregator"].round > 0:
+        scorer = state["aggregator"].global_scorer()
+        backend_name = f"FL-global(round={state['aggregator'].round})"
+    else:
+        # No FL round has run yet (first FL_ROUND_EVERY_N_WINDOWS-1 windows)
+        # -- fall back to the pre-existing offline-trained scorer so the
+        # pipeline still produces a real verdict from window 1, same as
+        # before this fix.
+        scorer = build_scorer(args.genuine)
+        backend_name = scorer.kind
+    _save_fl_state(state)
+
+    if args.mu1 is not None or args.mu3 is not None:
+        mu1 = args.mu1 if args.mu1 is not None else FusionWeights().mu1
+        mu3 = args.mu3 if args.mu3 is not None else FusionWeights().mu3
+        mu2 = 1.0 - mu1 - mu3
+        weights = FusionWeights(round(mu1, 6), round(mu2, 6), round(mu3, 6))
+    else:
+        weights = FusionWeights()
+    engine = FusionEngine(scorer, weights, theta_det=args.theta)
+    load_ms = (time.time() - t_load) * 1000.0
 
     verdicts = []
     t0 = time.time()
@@ -191,20 +318,30 @@ def main():
                              tier2=out["tier2_escalate"]))
     infer_ms = (time.time() - t0) * 1000.0
 
-    result = dict(backend=scorer.kind,
+    global_w_norm = None
+    if state["aggregator"] is not None:
+        global_w_norm = float(np.linalg.norm(state["aggregator"].global_w))
+
+    result = dict(backend=backend_name,
                   theta_det=args.theta,
                   weights=[engine.w.mu1, engine.w.mu2, engine.w.mu3],
                   n_nodes=len(records),
                   model_load_ms=round(load_ms, 2),
                   inference_ms=round(infer_ms, 2),
+                  fl_window_count=state["window_count"],
+                  fl_round=(state["aggregator"].round if state["aggregator"] else 0),
+                  fl_round_ran_this_call=fl_round_ran,
+                  fl_global_w_l2norm=global_w_norm,
                   verdicts=verdicts)
     with open(args.out, "w") as f:
         json.dump(result, f, indent=2)
 
     # stderr line so it shows up in the NS-3 console log (evidence)
-    print(f"[SHIELD-GH ns3_infer] backend={scorer.kind} "
+    print(f"[SHIELD-GH ns3_infer] backend={backend_name} "
           f"nodes={len(records)} infer={infer_ms:.1f}ms "
-          f"(load={load_ms:.0f}ms) -> {args.out}", file=sys.stderr)
+          f"(load={load_ms:.0f}ms) fl_window={state['window_count']} "
+          f"fl_round={state['aggregator'].round if state['aggregator'] else 0} "
+          f"fl_round_ran={fl_round_ran} -> {args.out}", file=sys.stderr)
 
 
 if __name__ == "__main__":

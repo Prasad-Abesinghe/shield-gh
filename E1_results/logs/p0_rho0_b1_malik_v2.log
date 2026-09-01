@@ -1,0 +1,890 @@
+Waf: Entering directory `/home/sdvn_ssh/ns-allinone-3.35/ns-3.35-g62build/build'
+Waf: Leaving directory `/home/sdvn_ssh/ns-allinone-3.35/ns-3.35-g62build/build'
+Build commands will be stored in build/compile_commands.json
+'build' finished successfully (0.423s)
+[SHIELD-GH] Detection mode = LIGHTWEIGHT (rule-based S1-S6 + HMAC + threshold FlowMod)
+Solution at controller cleared
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 1
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 1
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 1
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 1
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 0
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 3
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 3
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 0
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 0
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 2
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 1
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 0
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 2
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 1
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 2
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 0
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 0
+flow id 11source is 78destination is 81
+Poisson flow size is 0
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 1
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 1
+flow id 9source is 76destination is 79
+Poisson flow size is 2
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 2
+flow id 5source is 72destination is 75
+Poisson flow size is 1
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 1
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 0
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 1
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 2
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 1
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 1
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 3
+flow id 4source is 71destination is 74
+Poisson flow size is 3
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 0
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 1
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 1
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 0
+flow id 8source is 75destination is 78
+Poisson flow size is 2
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 2
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 2
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 2
+flow id 6source is 73destination is 76
+Poisson flow size is 0
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 3
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 1
+flow id 4source is 71destination is 74
+Poisson flow size is 2
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 1
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 2
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 0
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 0
+flow id 11source is 78destination is 81
+Poisson flow size is 0
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 0
+flow id 2source is 69destination is 72
+Poisson flow size is 0
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 1
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 3
+flow id 8source is 75destination is 78
+Poisson flow size is 1
+flow id 9source is 76destination is 79
+Poisson flow size is 1
+flow id 10source is 77destination is 80
+Poisson flow size is 3
+flow id 11source is 78destination is 81
+Poisson flow size is 1
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 3
+flow id 3source is 70destination is 73
+Poisson flow size is 0
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 3
+flow id 6source is 73destination is 76
+Poisson flow size is 3
+flow id 7source is 74destination is 77
+Poisson flow size is 1
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 0
+flow id 10source is 77destination is 80
+Poisson flow size is 0
+flow id 11source is 78destination is 81
+Poisson flow size is 0
+flow id 0source is 67destination is 70
+Poisson flow size is 3
+flow id 1source is 68destination is 71
+Poisson flow size is 1
+flow id 2source is 69destination is 72
+Poisson flow size is 2
+flow id 3source is 70destination is 73
+Poisson flow size is 2
+flow id 4source is 71destination is 74
+Poisson flow size is 1
+flow id 5source is 72destination is 75
+Poisson flow size is 0
+flow id 6source is 73destination is 76
+Poisson flow size is 2
+flow id 7source is 74destination is 77
+Poisson flow size is 2
+flow id 8source is 75destination is 78
+Poisson flow size is 3
+flow id 9source is 76destination is 79
+Poisson flow size is 3
+flow id 10source is 77destination is 80
+Poisson flow size is 0
+flow id 11source is 78destination is 81
+Poisson flow size is 3
+[SHIELD-GH] Initialised — 200 vehicles (lightweight mode — compile with -DUSE_LIBOQS for PQC)
+current time is 0
+Solution at nodes cleared at 1
+sent all flow data from node 200
+current time is 1
+At controller: updated flow source 67to destination 70flow size 3packet size 750QoS 1
+At controller: updated flow source 68to destination 71flow size 3packet size 750QoS 1
+At controller: updated flow source 69to destination 72flow size 3packet size 750QoS 1
+At controller: updated flow source 70to destination 73flow size 0packet size 750QoS 1
+At controller: updated flow source 71to destination 74flow size 1packet size 750QoS 1
+At controller: updated flow source 72to destination 75flow size 1packet size 750QoS 1
+At controller: updated flow source 73to destination 76flow size 0packet size 750QoS 1
+At controller: updated flow source 74to destination 77flow size 1packet size 750QoS 1
+At controller: updated flow source 75to destination 78flow size 1packet size 750QoS 1
+At controller: updated flow source 76to destination 79flow size 0packet size 750QoS 1
+At controller: updated flow source 77to destination 80flow size 1packet size 750QoS 1
+At controller: updated flow source 78to destination 81flow size 3packet size 750QoS 1
+link lifetime optimization beginning at 1.0345
+finished writing link lifetime status at1.0345
+Set parameter Username
+Academic license - for non-commercial use only - expires 2027-05-08
+
+--- STDERR ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

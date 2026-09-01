@@ -56,10 +56,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.metrics import (confusion_matrix, matthews_corrcoef)
 
+# Shared controller-suppression model (see soa_suppression.py), one level up.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import soa_suppression
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 HOME        = os.path.expanduser("~")
-NS3         = os.path.join(HOME, "ns-allinone-3.35", "ns-3.35")
-RESULTS     = os.path.join(NS3, "results")
+# Task 9 fix: waf/build only exist under ns-3.35-g62build; routing.cc writes
+# its CSVs to a hardcoded absolute path under 62/results/ regardless of cwd.
+NS3         = os.path.join(HOME, "ns-allinone-3.35", "ns-3.35-g62build")
+RESULTS     = os.path.join(HOME, "ns-allinone-3.35", "ns-3.35", "62", "results")
 FEATURES    = os.path.join(RESULTS, "soa3_rf_features.csv")
 CACHE       = os.path.join(RESULTS, "soa3_real_cache")   # per-% CSV snapshots
 OUT_CSV     = os.path.join(RESULTS, "soa3_real_sweep_results.csv")
@@ -113,11 +119,23 @@ def load_features(csv_path):
 
 
 def engineer_features(df):
-    """Same lightweight derived features as the single-run script, from REAL data."""
+    """Row-local derived features only (no train/test-crossing statistics).
+
+    Data-leakage fix (2026-08-09, supervisor-flagged): net_avg_pdr/
+    pdr_deviation used to be a per-window mean of local_pdr computed over
+    the WHOLE dataset (df.groupby("window").transform("mean")) before the
+    CV split -- with only 4-5 nodes per window, a test row's engineered
+    features were partly built from its own value and its fold-mates',
+    leaking information across the train/test boundary and inflating the
+    reported MCC. net_avg_pdr/pdr_deviation are dropped entirely rather
+    than recomputed as a train-only statistic, since with this few nodes
+    per window a "train-only window mean" would itself be a near-perfect,
+    near-deterministic proxy for which single row is missing (the
+    held-out test row), reintroducing the same leak in a subtler form.
+    total_drop_ratio/fwd_efficiency are unaffected -- they are per-row
+    ratios of that row's own real NS-3 counters, not cross-row statistics.
+    """
     df = df.copy()
-    win_avg = df.groupby("window")["local_pdr"].transform("mean")
-    df["net_avg_pdr"]      = win_avg
-    df["pdr_deviation"]    = df["local_pdr"] - win_avg
     safe_rcv               = df["pkt_received"].replace(0, 1)
     df["total_drop_ratio"] = (df["pkt_drop_dp"] + df["pkt_drop_cp"]) / safe_rcv
     df["fwd_efficiency"]   = df["pkt_forwarded"] / safe_rcv
@@ -125,19 +143,39 @@ def engineer_features(df):
 
 
 ALL_FEATURES = BASE_FEATURES + [
-    "net_avg_pdr", "pdr_deviation", "total_drop_ratio", "fwd_efficiency",
+    "total_drop_ratio", "fwd_efficiency",
 ]
 
 
-def evaluate_rf_cv(df, n_splits=5, n_repeats=6, seed0=42):
+def evaluate_rf_cv(df, n_splits=5, n_repeats=6, seed0=42, controller_compromised=False,
+                   rng_run=1, suppression_prob=None):
     """Train + evaluate the REAL Random Forest with repeated stratified k-fold CV.
 
     Returns per-fold arrays of accuracy(%), precision, recall, F1, FPR(%), MCC.
     Each fold is a genuine train/test split of the REAL simulation samples; the
     spread across the (n_splits * n_repeats) folds is what the 95% CI reports.
+
+    Supervisor-directed model fix (2026-08-09): SOA3 has no evidence channel
+    independent of the controller (its features are all vehicle-side packet
+    counters reported through the controller's monitoring fabric, unlike
+    SHIELD-GH's DEBSC which the LLM/Fusion Engine feeds directly, bypassing
+    the controller). Training stays on the honest ground-truth label `y`
+    (the classifier must learn the real pattern); controller_compromised
+    only suppresses the PREDICTION at evaluation time -- a genuine
+    detection (y_pred=1 on a real attacker) is hidden before it becomes an
+    actionable/reported result, i.e. what would have been a TP is instead
+    counted as a FN. Predictions on genuine benign nodes are unaffected.
     """
     X = df[ALL_FEATURES].values
     y = df[LABEL].astype(int).values
+
+    # Multi-controller model (2026-08-12): per-row controller status. Written
+    # per node per window by routing.cc's soa3_monitor_window(), so a row for a
+    # vehicle under a benign controller carries 0 even when other controllers
+    # are compromised. None => no suppression at all (no CP attack in this run).
+    ctrl_flags = None
+    if controller_compromised and "controller_compromised" in df.columns:
+        ctrl_flags = df["controller_compromised"].astype(int).values.astype(bool)
 
     # Stratified CV needs >=2 samples of each class; guard tiny/degenerate sets.
     n_pos, n_neg = int((y == 1).sum()), int((y == 0).sum())
@@ -148,7 +186,10 @@ def evaluate_rf_cv(df, n_splits=5, n_repeats=6, seed0=42):
     rskf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats,
                                    random_state=seed0)
 
+    prob = (soa_suppression.DEFAULT_SUPPRESSION_PROB
+            if suppression_prob is None else suppression_prob)
     acc, prec, rec, f1, fpr, mcc = [], [], [], [], [], []
+    raw_mcc = []
     fold_i = 0
     for tr_idx, te_idx in rskf.split(X, y):
         scaler = StandardScaler()
@@ -163,6 +204,23 @@ def evaluate_rf_cv(df, n_splits=5, n_repeats=6, seed0=42):
             random_state=seed0 + fold_i, n_jobs=-1)
         clf.fit(X_tr, y_tr)
         y_pred = clf.predict(X_te)
+
+        # Raw (pre-suppression) score: what the RF itself concluded.
+        raw_mcc.append(matthews_corrcoef(y_te, y_pred)
+                       if len(set(y_te)) > 1 else 0.0)
+
+        if ctrl_flags is not None:
+            # Multi-controller model (2026-08-12): suppression is decided
+            # per ROW from that row's own controller status. Rows belonging to
+            # vehicles under BENIGN controllers keep their correct prediction,
+            # so the RF's network-wide score reflects the mix of domains
+            # rather than collapsing to zero.
+            y_pred = y_pred.copy()
+            for j, row_idx in enumerate(te_idx):
+                if y_pred[j] == 1 and y_te[j] == 1 and ctrl_flags[row_idx] and \
+                        soa_suppression.is_suppressed(int(row_idx), rng_run,
+                                                      prob, "soa3"):
+                    y_pred[j] = 0
         fold_i += 1
 
         cm = confusion_matrix(y_te, y_pred, labels=[0, 1])
@@ -181,6 +239,10 @@ def evaluate_rf_cv(df, n_splits=5, n_repeats=6, seed0=42):
     return {
         "acc": np.array(acc), "prec": np.array(prec), "rec": np.array(rec),
         "f1": np.array(f1), "fpr": np.array(fpr), "mcc": np.array(mcc),
+        # Raw = pre-suppression, i.e. what the RF itself achieved. Report
+        # alongside "mcc" so a suppressed score is never mistaken for a
+        # detection failure.
+        "raw_mcc": np.array(raw_mcc),
     }
 
 
@@ -223,7 +285,13 @@ def main():
             csv_path = run_ns3(p, args.simTime, args.attack_number, args.N_Vehicles)
 
         df = engineer_features(load_features(csv_path))
-        res = evaluate_rf_cv(df, n_splits=args.splits, n_repeats=args.repeats)
+        # Supervisor-directed model fix: controller_compromised is a
+        # run-wide flag (same for every row/window in this CSV) written by
+        # routing.cc; see evaluate_rf_cv()'s rationale note.
+        ctrl_compromised = bool(int(df["controller_compromised"].iloc[-1])) \
+            if "controller_compromised" in df.columns and len(df) else False
+        res = evaluate_rf_cv(df, n_splits=args.splits, n_repeats=args.repeats,
+                              controller_compromised=ctrl_compromised)
         if res is None:
             print(f"  p={p}%: SKIP — not enough of one class for stratified CV "
                   f"(rows={len(df)}, attackers={int(df[LABEL].sum())})")
